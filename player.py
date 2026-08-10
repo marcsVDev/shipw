@@ -1,23 +1,26 @@
 import pygame
-from pygame import Surface, Vector2
+from pygame import Rect, Surface, Vector2
 
+from animatedSprite import AnimatedSprite
 from entity import Entity
-from event_bus import EventBus
 
 class Player(Entity):
     def __init__(self):
         self.image: Surface = pygame.image.load("player.png").convert_alpha()
+        self.animation = AnimatedSprite(self.image, 0.01, 48)
         self.position: Vector2 = Vector2(0, 0)
+        self.scale = 128
         self.speed = 500
         self.can_move = True
 
     def update(self, delta):
         if self.can_move: 
             self.movement(delta)
-        
+
+        self.animation.update_frame(delta)
 
     def draw(self, screen: Surface):
-        screen.blit(self.image, (self.position.x, self.position.y))
+        screen.blit(pygame.transform.scale(self.animation.get_current_frame(), (self.scale, self.scale)), (self.position.x, self.position.y))
 
     def movement(self, delta):
         keys = pygame.key.get_pressed()
