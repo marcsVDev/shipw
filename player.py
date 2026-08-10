@@ -6,12 +6,14 @@ from entity import Entity
 
 class Player(Entity):
     def __init__(self):
-        self.image: Surface = pygame.image.load("player.png").convert_alpha()
-        self.animation = AnimatedSprite(self.image, 0.01, 48)
-        self.position: Vector2 = Vector2(0, 0)
+        self.idle_image: Surface = pygame.image.load("player.png").convert_alpha()
+        self.animation = AnimatedSprite(self.idle_image, 0.15, 48)        
         self.scale = 128
+        self.position: Vector2 = Vector2((1920/2) - self.scale, (1080/2) - self.scale)
         self.speed = 500
         self.can_move = True
+
+        super().__init__()
 
     def update(self, delta):
         if self.can_move: 
@@ -20,6 +22,9 @@ class Player(Entity):
         self.animation.update_frame(delta)
 
     def draw(self, screen: Surface):
+        if not self.visible: 
+            return
+
         screen.blit(pygame.transform.scale(self.animation.get_current_frame(), (self.scale, self.scale)), (self.position.x, self.position.y))
 
     def movement(self, delta):

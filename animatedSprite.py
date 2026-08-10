@@ -7,11 +7,12 @@ class AnimatedSprite():
         self.current_rect = Rect(0, 0, size, size)
         self.frame = 0
         self.size = size
+        self.frames_count = self.spritesheet.get_width() / self.size
 
     def update_frame(self, delta):
         self.time += delta  
         if self.time > self.frame_time:            
-            if self.frame >= self.spritesheet.get_width() / self.size:
+            if self.frame >= self.frames_count:
                 self.frame = 0
 
             self.current_rect = Rect(self.frame * self.size, 0, self.size, self.size)
@@ -20,3 +21,6 @@ class AnimatedSprite():
 
     def get_current_frame(self) -> Surface:
         return self.spritesheet.subsurface(self.current_rect)
+
+    def get_frame(self, frame: int) -> Surface:
+        return self.spritesheet.subsurface(Rect(frame * self.size, 0, self.size, self.size))
