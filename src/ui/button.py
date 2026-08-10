@@ -17,14 +17,14 @@ class Button(UI):
     def update(self, delta, events):        
         mouse_pos = pygame.mouse.get_pos()
 
-        self.hovered = True if self.area.collidepoint(mouse_pos) else False
+        self.hovered = self.area.collidepoint(mouse_pos)
 
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT and self.hovered:
                     if self.press_callable is not None: self.press_callable()
                     self.pressed = True
-            if event.type == pygame.MOUSEBUTTONUP:
+            if self.pressed and event.type == pygame.MOUSEBUTTONUP:
                 if event.button == pygame.BUTTON_LEFT:
                     self.pressed = False
 

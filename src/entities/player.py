@@ -1,14 +1,13 @@
 import pygame
 from pygame import Rect, Surface, Vector2
 
-
 from game_consts import GameConsts
 from util.animatedSprite import AnimatedSprite
 from entities.entity import Entity
 
 class Player(Entity):
     def __init__(self):
-        self.idle_image: Surface = pygame.image.load(GameConsts.ASSETS_PATH + "player.png").convert_alpha()
+        self.idle_image: Surface = pygame.image.load(GameConsts.PLAYER_IMG_PATH).convert_alpha()
         self.animation = AnimatedSprite(self.idle_image, 0.15, 48)        
         self.scale = 128
         self.position: Vector2 = Vector2((1920/2) - self.scale, (1080/2) - self.scale)
