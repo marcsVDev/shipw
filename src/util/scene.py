@@ -1,5 +1,5 @@
-from entity import Entity
-from ui import UI
+from entities.entity import Entity
+from ui.ui import UI
 
 
 class Scene:

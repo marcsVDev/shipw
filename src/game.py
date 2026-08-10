@@ -1,24 +1,21 @@
-from dataclasses import dataclass
-
 import pygame
 from pygame import Vector2
 
-from button import Button
-from event_bus import EventBus
-from player import Player
-from scene import Scene
-from vscroller import VScroller
+from entities.player import Player
+from entities.vscroller import VScroller
+from game_consts import GameConsts
+from ui.button import Button
+from util.scene import Scene
 
-
-class Game:   
+class Game:
     def __init__(self):
         pygame.init()  
         self.screen = pygame.display.set_mode((1920, 1080)) 
 
         # inicializacao de imagens
 
-        back_img = pygame.transform.scale(pygame.image.load("background.jpg"), (1920, 1080))
-        btn_img = pygame.transform.scale_by(pygame.image.load("button.png"), 5)
+        back_img = pygame.transform.scale(pygame.image.load(GameConsts.ASSETS_PATH + "background.jpg"), (1920, 1080))
+        btn_img = pygame.transform.scale_by(pygame.image.load(GameConsts.ASSETS_PATH + "button.png"), 5)
 
         # inicializacao das entidades
     

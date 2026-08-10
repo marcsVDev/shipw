@@ -1,6 +1,6 @@
 from pygame import Surface
 
-from entity import Entity
+from .entity import Entity
 
 class VScroller(Entity):
     def __init__(self, image: Surface, velocity: float, running: bool):

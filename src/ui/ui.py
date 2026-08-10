@@ -1,7 +1,7 @@
 from pygame import Surface, Vector2
 import pygame
 
-from entity import Entity
+from entities.entity import Entity
 
 
 class UI(Entity):

@@ -3,8 +3,8 @@ from typing import Callable
 import pygame
 from pygame import Rect, Surface, Vector2
 
-from animatedSprite import AnimatedSprite
-from ui import UI
+from util.animatedSprite import AnimatedSprite
+from ui.ui import UI
 
 class Button(UI):
     def __init__(self, image: Surface, position: Vector2, size: int, press_callable: Callable):
