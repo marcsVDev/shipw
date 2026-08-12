@@ -7,7 +7,7 @@ class AnimatedSprite():
         self.current_rect = Rect(0, 0, size, size)
         self.frame = 0
         self.size = size
-        self.frames_count = self.spritesheet.get_width() / self.size
+        self.frames_count = self.spritesheet.get_width() // self.size
 
     def update_frame(self, delta):
         self.time += delta  

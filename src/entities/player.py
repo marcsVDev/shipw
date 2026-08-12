@@ -1,51 +1,73 @@
 import pygame
-from pygame import Rect, Surface, Vector2
+from pygame import Surface, Vector2
 
 from game_consts import GameConsts
 from util.animatedSprite import AnimatedSprite
 from entities.entity import Entity
 
 class Player(Entity):
+    SCALE = 512
+    MIDDLE_SCALE = SCALE / 2
+    SPEED = 500
+    ROTATION_WEIGHT = 5
+
     def __init__(self):
-        self.idle_image: Surface = pygame.image.load(GameConsts.PLAYER_IMG_PATH).convert_alpha()
-        self.animation = AnimatedSprite(self.idle_image, 0.15, 48)        
-        self.scale = 128
-        self.position: Vector2 = Vector2((1920/2) - self.scale, (1080/2) - self.scale)
-        self.speed = 500
-        self.can_move = True
+        self._idle_image: Surface = pygame.image.load(GameConsts.PLAYER_IMG_PATH).convert_alpha()
+        self._idle_animation = AnimatedSprite(self._idle_image, 0.15, 64)
+        self.position: Vector2 = Vector2(GameConsts.SCREEN_WIDTH / 2, GameConsts.SCREEN_HEIGHT - self.MIDDLE_SCALE)
+        self.can_move: bool = True
+        self.current_frame: Surface = self._idle_animation.get_current_frame()
+        self.rotation: float = 0
 
         super().__init__()
 
     def update(self, delta):
-        if self.can_move: 
-            self.movement(delta)
+        self._idle_animation.update_frame(delta)
+        self.current_frame = self._idle_animation.get_current_frame()   
 
-        self.animation.update_frame(delta)
+        if self.can_move: 
+            self.move_and_rotate(delta)    
+
+        self.screen_collide()
 
     def draw(self, screen: Surface):
         if not self.visible: 
             return
 
-        screen.blit(pygame.transform.scale(self.animation.get_current_frame(), (self.scale, self.scale)), (self.position.x, self.position.y))
+        image = pygame.transform.scale(
+            self.current_frame,
+            (self.SCALE, self.SCALE)
+        )
 
-    def movement(self, delta):
+        rect = image.get_rect(center=self.position)
+        screen.blit(image, rect)
+
+        # pygame.draw.circle(screen, (0xFF, 0xFF, 0xFF), rect.center, 5)
+
+    def move_and_rotate(self, delta):
         keys = pygame.key.get_pressed()
 
-        direction = Vector2(0, 0)
-
-        if keys[pygame.K_w]:
-            direction.y -= 1
-
-        if keys[pygame.K_s]:
-            direction.y += 1
+        direction = Vector2(0, 0)        
 
         if keys[pygame.K_a]:
             direction.x -= 1
+            self.rotation = pygame.math.lerp(self.rotation, 45, self.ROTATION_WEIGHT * delta)            
 
         if keys[pygame.K_d]:
             direction.x += 1
+            self.rotation = pygame.math.lerp(self.rotation, -45, self.ROTATION_WEIGHT * delta)           
 
         if direction.length_squared() > 0:
             direction = direction.normalize()
 
-        self.position += direction * self.speed * delta
+        if direction.x == 0:
+            self.rotation = pygame.math.lerp(self.rotation, 0, self.ROTATION_WEIGHT * delta)
+
+        self.current_frame = pygame.transform.rotate(self._idle_image, self.rotation)
+        self.position += direction * self.SPEED * delta
+
+    def screen_collide(self):
+        if self.position.x + self.MIDDLE_SCALE > GameConsts.SCREEN_WIDTH:
+            self.position.x = GameConsts.SCREEN_WIDTH - self.MIDDLE_SCALE
+        elif self.position.x - self.MIDDLE_SCALE < 0:
+            self.position.x = self.MIDDLE_SCALE

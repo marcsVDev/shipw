@@ -25,12 +25,10 @@ class Game:
         # inicializacao das entidades
     
         player = Player()
-        back = VScroller(back_img, 500, True)
-        btn = Button(btn_img, Vector2(0, 0), 32 * 5, None)               
+        back = VScroller(back_img, 10000, True)           
 
         # adicao na cena                  
 
-        self.main_scene.add_ui_item(btn)
         self.main_scene.add_entity(back)
         self.main_scene.add_entity(player)
 
