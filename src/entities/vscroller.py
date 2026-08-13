@@ -3,7 +3,7 @@ from pygame import Surface
 from .entity import Entity
 
 class VScroller(Entity):
-    def __init__(self, image: Surface, velocity: float, running: bool):
+    def __init__(self, image: Surface, velocity: float, running: bool = False):
         self.image = image
         self.velocity = velocity
         self.running = running        
@@ -24,4 +24,7 @@ class VScroller(Entity):
     def draw(self, screen):        
         for pos in self.positions:
             screen.blit(self.image, (0, pos))
+
+    def run(self):
+        self.running = True
     

@@ -3,9 +3,10 @@ from pygame import Vector2
 
 from entities.player import Player
 from entities.vscroller import VScroller
+from events.events import Events
 from game_consts import GameConsts
 from ui.button import Button
-from util.event_bus import EventBus
+from events.event_bus import EventBus
 from util.scene import Scene
 
 class Game:
@@ -14,6 +15,7 @@ class Game:
 
         # propriedades
         self.screen = pygame.display.set_mode((1920, 1080)) 
+        pygame.display.set_caption("Shipw")
         self.main_scene = Scene()
         self.running = True
 
@@ -25,11 +27,14 @@ class Game:
         # inicializacao das entidades
     
         player = Player()
-        back = VScroller(back_img, 10000, True)           
+        player.can_move = False
+        back = VScroller(back_img, 10000)     
+        btn = Button(btn_img, Vector2(0, 0), 32*5, self.play)      
 
         # adicao na cena                  
 
-        self.main_scene.add_entity(back)
+        self.main_scene.add_ui_item(btn)
+        self.main_scene.add_entity_blackboarded(back, "background")
         self.main_scene.add_entity(player)
 
         # main loop
@@ -54,5 +59,9 @@ class Game:
             pygame.display.flip()
 
             delta = clock.tick(60) / 1000
+
+    def play(self):
+        EventBus.emit(Events.GAME_STARTED)
+        self.main_scene.get_blackboard_entity("background", VScroller).run()        
 
 GAME = Game()
