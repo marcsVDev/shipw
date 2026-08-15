@@ -7,7 +7,7 @@ class SAT:
         normals = []
         for i in range(vertex_num):
             v1 = vertices[i]
-            v2 = vertices[i + 1 if i < vertex_num else 0]
+            v2 = vertices[(i + 1) % vertex_num]
 
             edge = v2 - v1
 

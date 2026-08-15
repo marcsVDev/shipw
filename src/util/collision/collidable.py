@@ -6,6 +6,7 @@ from util.collision.sat import SAT
 class Collidable:
     def __init__(self):
         self._collider_vertices: list[Vector2] = []
+        super().__init__()
 
     def update_vertices_from_rect(self, rect: Rect):
         self._collider_vertices = [

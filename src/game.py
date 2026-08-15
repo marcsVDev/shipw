@@ -1,6 +1,7 @@
 import pygame
 from pygame import Vector2
 
+from entities.enemy import Enemy
 from entities.player import Player
 from entities.vscroller import VScroller
 from events.events import Events
@@ -28,14 +29,16 @@ class Game:
     
         player = Player()
         player.can_move = False
+        enemy = Enemy(player)
         back = VScroller(back_img, 10000)     
         btn = Button(btn_img, Vector2(0, 0), 32*5, self.play)      
 
         # adicao na cena                  
 
         self.main_scene.add_ui_item(btn)
-        self.main_scene.add_entity_blackboarded(back, "background")
+        self.main_scene.add_entity_blackboarded(back, "background")        
         self.main_scene.add_entity(player)
+        self.main_scene.add_entity(enemy)
 
         # main loop
 
