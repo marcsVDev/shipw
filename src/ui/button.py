@@ -9,7 +9,7 @@ from ui.ui import UI
 class Button(UI):
     def __init__(self, image: Surface, position: Vector2, size: int, press_callable: Callable):
         self.press_callable = press_callable
-        self.area = Rect(0, 0, size, size)
+        self.area = Rect(position.x, position.y, size, size)
         self.button_animation = AnimatedSprite(image, 0, size)
         self.pressed = False
         super().__init__(image, position)

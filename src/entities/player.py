@@ -10,13 +10,21 @@ from util.collision.collidable import Collidable
 
 class Player(Entity, Collidable):
     SCALE = 128
-    MIDDLE_SCALE = SCALE / 2
+    MIDDLE_SCALE = SCALE // 2
+    MIDDLE_VERTICES = [
+        Vector2(-MIDDLE_SCALE, -MIDDLE_SCALE),
+        Vector2( MIDDLE_SCALE, -MIDDLE_SCALE),
+        Vector2( MIDDLE_SCALE,  MIDDLE_SCALE),
+        Vector2(-MIDDLE_SCALE,  MIDDLE_SCALE)
+    ]
+    INITIAL_POSITION = Vector2(GameConsts.SCREEN_WIDTH // 2, GameConsts.SCREEN_HEIGHT - MIDDLE_SCALE)
     SPEED = 1000
     ROTATION_WEIGHT = 8
     ANGLE = 65
+    DRAW_COLLIDER = False
 
     def __init__(self):
-        self.position: Vector2 = Vector2(GameConsts.SCREEN_WIDTH / 2, GameConsts.SCREEN_HEIGHT - self.MIDDLE_SCALE)
+        self.position: Vector2 = self.INITIAL_POSITION
         self.can_move: bool = True
 
         self._idle_image: Surface = pygame.image.load(GameConsts.PLAYER_IMG_PATH).convert_alpha()
@@ -26,6 +34,7 @@ class Player(Entity, Collidable):
         self._rect: Rect
 
         EventBus.connect(Events.GAME_STARTED, self.game_started)
+        EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
 
         super().__init__()
 
@@ -36,18 +45,21 @@ class Player(Entity, Collidable):
         if self.can_move: 
             self.move_and_rotation(delta)
 
-        self.scale()
+        self.scale(self.SCALE)
         self.rotate()        
         self.align_rect()        
 
-        self.screen_collide()
-        self.update_vertices_from_rect(self._rect)        
+        self.screen_collide()   
+        self._collider_vertices = self.get_rotated_vertices()  
 
     def draw(self, screen: Surface):
         if not self.visible:
             return        
 
-        screen.blit(self._image, self._rect)
+        if self.DRAW_COLLIDER:
+            self.draw_collider(screen) 
+
+        screen.blit(self._image, self._rect)    
 
     def move_and_rotation(self, delta):
         keys = pygame.key.get_pressed()
@@ -76,23 +88,23 @@ class Player(Entity, Collidable):
         elif self.position.x - self.MIDDLE_SCALE < 0:
             self.position.x = self.MIDDLE_SCALE
 
+    def player_collide(self, collisions):
+        pass
+
     def game_started(self):
         self.can_move = True
         print("game started")
 
-    def scale(self):
-        self._image = pygame.transform.scale(
-            self._image,
-            (self.SCALE, self.SCALE)
-        )
+    def scale(self, by):
+        self._image = pygame.transform.scale(self._image, (by, by))
 
     def rotate(self):
-        self._image = pygame.transform.rotate(
-            self._image,
-            self._rotation
-        )
+        self._image = pygame.transform.rotate(self._image, self._rotation)
 
     def align_rect(self):
-        self._rect = self._image.get_rect(
-            center=self.position
-        )
+        self._rect = self._image.get_rect(center=self.position)
+
+    def get_rotated_vertices(self) -> list[Vector2]:
+        return [self.position + vertex.rotate(-self._rotation) for vertex in self.MIDDLE_VERTICES] 
+
+    

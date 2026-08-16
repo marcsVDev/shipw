@@ -9,6 +9,6 @@ class EventBus:
         EventBus.events.setdefault(event, []).append(func)
 
     @staticmethod
-    def emit(event: str):
-        for fn in EventBus.events[event]:
-            fn()
+    def emit(event: str, *args):
+        for fn in EventBus.events.get(event, []):
+            fn(*args)

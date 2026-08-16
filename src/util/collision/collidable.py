@@ -1,9 +1,13 @@
 from pygame import Rect, Vector2
+import pygame
 
 from util.collision.sat import SAT
 
 
 class Collidable:
+    COLLIDER_COLOR = (57, 255, 20)
+    
+
     def __init__(self):
         self._collider_vertices: list[Vector2] = []
         super().__init__()
@@ -26,5 +30,6 @@ class Collidable:
             
         return True
 
-    
-
+    def draw_collider(self, screen):
+        for i in range(len(self._collider_vertices)):
+            pygame.draw.line(screen, self.COLLIDER_COLOR, self._collider_vertices[i], self._collider_vertices[(i + 1) % len(self._collider_vertices)])
