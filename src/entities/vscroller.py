@@ -18,8 +18,7 @@ class VScroller(Entity):
             if self.positions[i] > self.height:
                 self.positions[i] = min(self.positions) - self.height # coloca em cima da mais alta
 
-            self.positions[i] += self.velocity * delta                
-
+            self.positions[i] += self.velocity * delta
 
     def draw(self, screen):        
         for pos in self.positions:
