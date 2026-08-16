@@ -32,8 +32,8 @@ class Game:
         player = Player()
         player.can_move = False
         enemys = []
-        for i in range(8):
-            enemys.append(Enemy(Vector2(i*256, 0), Vector2(GameConsts.SCREEN_WIDTH-(i*268), GameConsts.SCREEN_HEIGHT)))
+        for _ in range(1):
+            enemys.append(Enemy())
 
         back = VScroller(back_img, 1000)     
         btn = Button(btn_img, Vector2(GameConsts.SCREEN_WIDTH//2, GameConsts.SCREEN_HEIGHT//2), 32*5, self.play)      

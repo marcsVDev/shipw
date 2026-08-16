@@ -1,84 +1,67 @@
-import pygame
-from pygame import Rect, Surface, Vector2
+from pygame import Vector2
 
 from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
-from entities.entity import Entity
-from events.event_bus import EventBus
-from events.events import Events
+from entities.character import Character
 from game_consts import GameConsts
-from util.collision.collidable import Collidable
 
 
-class Enemy(Entity, Collidable):    
-    SCALE = 128
-    MIDDLE_SCALE = SCALE // 2
-    MIDDLE_VERTICES = [
-        Vector2(-MIDDLE_SCALE, -MIDDLE_SCALE),
-        Vector2( MIDDLE_SCALE, -MIDDLE_SCALE),
-        Vector2( MIDDLE_SCALE,  MIDDLE_SCALE),
-        Vector2(-MIDDLE_SCALE,  MIDDLE_SCALE)
-    ]
-    DRAW_COLLIDER = False
+class Enemy(Character):    
+    INITIAL_POSITION = Vector2(0, 0)
+    ROTATION_ANGLE = 360    
+    DEFAULT_SPRITESHEET = GameConsts.PLAYER_IMG_PATH
+    FRAME_SIZE = 64
 
-    def __init__(self, _from: Vector2, _to: Vector2):
-        self.position: Vector2 = _from
-        self.can_move: bool = False
-        self.speed: float = 300
+    ROTATE = True
 
-        self._rotation = 0
-        self._target: Vector2 = _to
-        self._image: Surface = pygame.transform.scale(pygame.image.load(GameConsts.ASSETS_PATH + "foguete.png"), (self.SCALE, self.SCALE))        
-        self._rect: Rect = self._image.get_rect(
-            center=self.position
-        )
-        self._patterns: list[EnemyPattern] = [
-            MoveTo(Vector2(0, 0), Vector2(GameConsts.SCREEN_WIDTH, GameConsts.SCREEN_HEIGHT), 2),
-            MoveTo(Vector2(GameConsts.SCREEN_WIDTH, GameConsts.SCREEN_HEIGHT), Vector2(0, 0), 2)
-        ]
+    def __init__(self):
         self._current_pattern: int = 0
+        self._patterns: list[EnemyPattern] = [
+            MoveTo(
+                Vector2(-100, 100),
+                Vector2(GameConsts.SCREEN_WIDTH + 100, 300),
+                5
+            ),
 
-        EventBus.connect(Events.GAME_STARTED, self.game_started)
+            MoveTo(
+                Vector2(GameConsts.SCREEN_WIDTH + 100, 300),
+                Vector2(-100, 500),
+                5
+            ),
+
+            MoveTo(
+                Vector2(-100, 500),
+                Vector2(GameConsts.SCREEN_WIDTH + 100, 700),
+                5
+            ),
+
+            MoveTo(
+                Vector2(GameConsts.SCREEN_WIDTH + 100, 700),
+                Vector2(-100, 900),
+                5
+            ),
+        ]
 
         super().__init__()
 
     def update(self, delta):
-        self._collider_vertices = self.get_rotated_vertices()
-
         if self._patterns[self._current_pattern].finished:
             if self._current_pattern + 1 >= len(self._patterns):
                 self.visible = False # TODO apagar inimigo quando acaba patterns ??
-                return
+                return       
             
-            self._current_pattern += 1
-        
-        if self.can_move:
-            self._patterns[self._current_pattern].update(delta)
-            self.pattern_movement()
+            self._current_pattern += 1          
 
-        self.align_rect()
+        self._patterns[self._current_pattern].update(delta)
             
         return super().update(delta)
-    
-    def draw(self, screen):
-        if not self.visible: 
-            return
 
-        if self.DRAW_COLLIDER:
-            self.draw_collider()
-            
-        screen.blit(self._image, self._rect)
+    def draw(self, screen):
         return super().draw(screen)
 
-    def align_rect(self):
-        self._rect = self._image.get_rect(center = self.position)
+    def movement(self, delta):        
+        if self.ROTATE:
+            self._rotation += self.ROTATION_ANGLE * delta
 
-    def pattern_movement(self):
-        self.position = self._patterns[self._current_pattern].position
-
-    def game_started(self):
-        self.can_move = True
-
-    def get_rotated_vertices(self) -> list[Vector2]:
-        return [self.position + vertex.rotate(-self._rotation) for vertex in self.MIDDLE_VERTICES] 
+        self.position = self._patterns[self._current_pattern].position    
     

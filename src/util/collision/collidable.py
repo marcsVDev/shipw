@@ -5,8 +5,7 @@ from util.collision.sat import SAT
 
 
 class Collidable:
-    COLLIDER_COLOR = (57, 255, 20)
-    
+    COLLIDER_COLOR = (57, 255, 20)    
 
     def __init__(self):
         self._collider_vertices: list[Vector2] = []
