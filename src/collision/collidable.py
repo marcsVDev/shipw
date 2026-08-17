@@ -1,7 +1,7 @@
 from pygame import Rect, Vector2
 import pygame
 
-from util.collision.sat import SAT
+from collision.sat import SAT
 
 
 class Collidable:

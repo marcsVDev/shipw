@@ -3,13 +3,13 @@ from pygame import Vector2
 
 from entities.character import Character
 from events.events import Events
-from game_consts import GameConsts
+from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from events.event_bus import EventBus
 
 class Player(Character):    
-    INITIAL_POSITION = Vector2(GameConsts.SCREEN_WIDTH // 2, GameConsts.SCREEN_HEIGHT - Character.MIDDLE_SCALE)
+    INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - Character.MIDDLE_SCALE)
     ROTATION_ANGLE = 65
-    DEFAULT_SPRITESHEET = GameConsts.PLAYER_IMG_PATH
+    DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
     FRAME_SIZE = 64
 
     ROTATION_WEIGHT = 8
@@ -50,8 +50,8 @@ class Player(Character):
         self.position += direction * self.SPEED * delta
 
     def screen_collide(self):
-        if self.position.x + self.MIDDLE_SCALE > GameConsts.SCREEN_WIDTH:
-            self.position.x = GameConsts.SCREEN_WIDTH - self.MIDDLE_SCALE
+        if self.position.x + self.MIDDLE_SCALE > SCREEN_WIDTH:
+            self.position.x = SCREEN_WIDTH - self.MIDDLE_SCALE
         elif self.position.x - self.MIDDLE_SCALE < 0:
             self.position.x = self.MIDDLE_SCALE
 

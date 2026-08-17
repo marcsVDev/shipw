@@ -1,8 +1,8 @@
 from pygame import Surface
 
-from .entity import Entity
+from ..entity import Entity
 
-class VScroller(Entity):
+class InfiniteVerticalScroller(Entity):
     def __init__(self, image: Surface, velocity: float, running: bool = False):
         self.image = image
         self.velocity = velocity

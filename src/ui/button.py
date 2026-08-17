@@ -7,10 +7,17 @@ from util.animatedSprite import AnimatedSprite
 from ui.ui import UI
 
 class Button(UI):
-    def __init__(self, image: Surface, position: Vector2, size: int, press_callable: Callable):
+    DRAW_AREA = True
+
+    def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0)):
         self.press_callable = press_callable
-        self.area = Rect(position.x, position.y, size, size)
-        self.button_animation = AnimatedSprite(image, 0, size)
+        self.area = Rect(
+            position.x + (frame_size - area_size[0]) / 2,
+            position.y + (frame_size - area_size[1]) / 2,
+            area_size[0],
+            area_size[1]
+        )
+        self.button_animation = AnimatedSprite(image, 0, frame_size)
         self.pressed = False
         super().__init__(image, position)
 
@@ -41,3 +48,11 @@ class Button(UI):
             return
         
         screen.blit(self.image, (self.position.x, self.position.y))
+
+        if self.DRAW_AREA:
+            pygame.draw.rect(
+                screen,
+                (255, 0, 0),
+                self.area,
+                2
+            )

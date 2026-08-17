@@ -4,41 +4,40 @@ from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
 from enemys.patterns.wait import Wait
 from entities.character import Character
-from game_consts import GameConsts
-
+from game_consts import ASSETS_PATH, SCREEN_WIDTH
 
 class Enemy(Character):    
     INITIAL_POSITION = Vector2(0, 0)
     ROTATION_ANGLE = 360    
-    DEFAULT_SPRITESHEET = GameConsts.PLAYER_IMG_PATH
-    FRAME_SIZE = 64
+    DEFAULT_SPRITESHEET = ASSETS_PATH + "meteor_enemy.png"
+    FRAME_SIZE = 128
 
-    ROTATE = True
+    ROTATE = False
 
     def __init__(self):
         self._current_pattern: int = 0
         self._patterns: list[EnemyPattern] = [
             MoveTo(
                 Vector2(-100, 100),
-                Vector2(GameConsts.SCREEN_WIDTH, 300),
+                Vector2(SCREEN_WIDTH, 300),
                 5
             ),
             Wait(
-                Vector2(GameConsts.SCREEN_WIDTH, 300), 
+                Vector2(SCREEN_WIDTH, 300), 
                 5
             ),
             MoveTo(
-                Vector2(GameConsts.SCREEN_WIDTH, 300),
+                Vector2(SCREEN_WIDTH, 300),
                 Vector2(-100, 500),
                 5
             ),
             MoveTo(
                 Vector2(-100, 500),
-                Vector2(GameConsts.SCREEN_WIDTH, 700),
+                Vector2(SCREEN_WIDTH, 700),
                 5
             ),
             MoveTo(
-                Vector2(GameConsts.SCREEN_WIDTH, 700),
+                Vector2(SCREEN_WIDTH, 700),
                 Vector2(-100, 900),
                 5
             ),

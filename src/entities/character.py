@@ -7,7 +7,7 @@ from entities.entity import Entity
 from events.event_bus import EventBus
 from events.events import Events
 from util.animatedSprite import AnimatedSprite
-from util.collision.collidable import Collidable
+from collision.collidable import Collidable
 
 
 class Character(Entity, Collidable):

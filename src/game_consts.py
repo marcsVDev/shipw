@@ -1,6 +1,6 @@
-class GameConsts:
-    ASSETS_PATH = "assets/"
-    PLAYER_IMG_PATH = ASSETS_PATH + "foguete.png"
 
-    SCREEN_WIDTH = 1920
-    SCREEN_HEIGHT = 1080
+ASSETS_PATH = "assets/"
+PLAYER_IMG_PATH = ASSETS_PATH + "foguete.png"
+
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
