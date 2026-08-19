@@ -26,7 +26,6 @@ class Game:
 
         # inicializacao de imagens
         btn_img = pygame.transform.scale_by(pygame.image.load(ASSETS_PATH + "play.png"), 5)
-
         # inicializacao das entidades
     
         player = Player()
