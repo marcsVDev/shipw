@@ -46,14 +46,17 @@ class Enemy(Character):
         super().__init__()
 
     def update(self, delta):
+        
+
         if self._patterns[self._current_pattern].finished:
             if self._current_pattern + 1 >= len(self._patterns):
+                
                 self.visible = False # TODO apagar inimigo quando acaba patterns ??
                 return       
             
             self._current_pattern += 1          
-
-        self._patterns[self._current_pattern].update(delta)
+        if self.can_move: 
+            self._patterns[self._current_pattern].update(delta)
             
         return super().update(delta)
 

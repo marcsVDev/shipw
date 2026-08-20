@@ -15,7 +15,8 @@ class DialoguePanel(UI):
     TEXT_CHARACTERS_PER_SECOND = 40
 
     DIALOGUE_AREA = Rect(6 * MULTIPLIER + POSITION.x, 6 * MULTIPLIER + POSITION.y, 74 * MULTIPLIER, 51 * MULTIPLIER)
-    PICTURE_AREA = Rect(6 * MULTIPLIER + POSITION.x, 6 * MULTIPLIER + POSITION.y, 74 * MULTIPLIER, 51 * MULTIPLIER)
+    PICTURE_AREA = Rect(93 * MULTIPLIER + POSITION.x, 9 * MULTIPLIER + POSITION.y, 25 * MULTIPLIER, 29 * MULTIPLIER)
+    NAME_POSITION = Vector2(106 * MULTIPLIER + POSITION.x, 49 * MULTIPLIER + POSITION.y)
 
     def __init__(self, image: Surface, _, dialogues: list[str]):
         self.dialogues: list[str] = dialogues
@@ -71,7 +72,8 @@ class DialoguePanel(UI):
             screen.blit(line_surface, (self.DIALOGUE_AREA.x, y))
             y += line_surface.get_height()
 
-        #pygame.draw.rect(screen, (0xFF, 0, 0), self.DIALOGUE_AREA, 1)
+        pygame.draw.circle(screen, (0xff,0xff,0xff), self.NAME_POSITION, 1)
+        pygame.draw.rect(screen, (0xFF, 0, 0), self.PICTURE_AREA, 1)
         return super().draw(screen)
 
     def scale(self, by):
