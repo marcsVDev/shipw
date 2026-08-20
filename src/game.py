@@ -5,7 +5,7 @@ from entities.enemy import Enemy
 from entities.player import Player
 from entities.scrollers.moving_object import MovingObject
 from events.events import Events
-from game_consts import ASSETS_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from game_consts import UI_PATH
 from initializations.scenery import get_earth_scenery
 from initializations.ui import get_dialogue_panel
 from ui.button import Button
@@ -27,7 +27,7 @@ class Game:
 
         # inicializacao de imagens
 
-        btn_img = pygame.transform.scale_by(pygame.image.load(ASSETS_PATH + "play.png"), 5)
+        btn_img = pygame.transform.scale_by(pygame.image.load(UI_PATH + "play.png"), 5)
 
         # inicializacao das entidades
     

@@ -1,9 +1,9 @@
 import pygame
 
-from game_consts import ASSETS_PATH
+from game_consts import UI_PATH
 from ui.dialogue_panel import DialoguePanel
 
-DIALOGUEPANEL_PATH = ASSETS_PATH + "dialogue_panel.png"
+DIALOGUEPANEL_PATH = UI_PATH + "dialogue_panel.png"
 DIALOGUES_P = [
     "ARRUMA A BOSTA DAS AREAS AI", 
     "TO FALANO MEU",

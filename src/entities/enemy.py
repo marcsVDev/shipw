@@ -4,12 +4,12 @@ from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
 from enemys.patterns.wait import Wait
 from entities.character import Character
-from game_consts import ASSETS_PATH, SCREEN_WIDTH
+from game_consts import ENEMYS_PATH, SCREEN_WIDTH
 
 class Enemy(Character):    
     INITIAL_POSITION = Vector2(0, 0)
     ROTATION_ANGLE = 360    
-    DEFAULT_SPRITESHEET = ASSETS_PATH + "meteor_enemy.png"
+    DEFAULT_SPRITESHEET = ENEMYS_PATH + "meteor_enemy.png"
     FRAME_SIZE = 128
 
     ROTATE = False
