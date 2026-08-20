@@ -40,7 +40,7 @@ class Enemy(Character):
             MoveTo(
                 Vector2(SCREEN_WIDTH * 0.75, 850),
                 Vector2(SCREEN_WIDTH + 100, 1000),
-                0.5
+                10
             ),
         ]
 
