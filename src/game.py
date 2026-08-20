@@ -7,6 +7,7 @@ from entities.scrollers.moving_object import MovingObject
 from events.events import Events
 from game_consts import ASSETS_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from initializations.scenery import get_earth_scenery
+from initializations.ui import get_dialogue_panel
 from ui.button import Button
 from events.event_bus import EventBus
 from util.progresssion import Progression
@@ -25,11 +26,12 @@ class Game:
         self.running = True
 
         # inicializacao de imagens
+
         btn_img = pygame.transform.scale_by(pygame.image.load(ASSETS_PATH + "play.png"), 5)
+
         # inicializacao das entidades
     
         player = Player()
-        player.can_move = False
         enemys = []
         for _ in range(1):
             enemys.append(Enemy())
@@ -37,7 +39,7 @@ class Game:
         
         #inicialização de UI
 
-        btn = Button(btn_img, Vector2(SCREEN_WIDTH//2, SCREEN_HEIGHT//2), 64*5, self.play, (58*5, 21*5))      
+        btn = Button(btn_img, Vector2(0, 0), 64*5, self.play, (58*5, 21*5))      
 
         #inicializacao dos Sistemas
 
@@ -45,6 +47,7 @@ class Game:
 
         # adicao na cena
 
+        self.main_scene.add_ui_item(get_dialogue_panel())
         self.main_scene.add_system("progression", progression)
         self.main_scene.add_ui_blackboarded(btn, "play_btn")
         self.main_scene.add_entity_blackboarded(get_earth_scenery(), "earth")        

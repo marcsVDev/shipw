@@ -36,18 +36,18 @@ class Button(UI):
                     self.pressed = False
 
         if self.pressed:
-            self.image = self.button_animation.get_frame(1)
+            self._image = self.button_animation.get_frame(1)
         elif self.hovered:
-            self.image = self.button_animation.get_frame(2)
+            self._image = self.button_animation.get_frame(2)
         else:
-            self.image = self.button_animation.get_frame(0)
+            self._image = self.button_animation.get_frame(0)
                     
 
     def draw(self, screen):
         if not self.visible: 
             return
         
-        screen.blit(self.image, (self.position.x, self.position.y))
+        screen.blit(self._image, (self.position.x, self.position.y))
 
         if self.DRAW_AREA:
             pygame.draw.rect(

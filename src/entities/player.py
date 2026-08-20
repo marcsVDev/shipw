@@ -7,10 +7,25 @@ from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from events.event_bus import EventBus
 
 class Player(Character):    
+    SCALE = 128
     INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - Character.MIDDLE_SCALE)
     ROTATION_ANGLE = 65
     DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
-    FRAME_SIZE = 64
+    FRAME_SIZE = 128
+    DRAW_COLLIDER = True
+    MIDDLE_VECTOR = Vector2(SCALE // 2,SCALE // 2)
+    MIDDLE_VERTICES = [
+        Vector2(62, 7) - MIDDLE_VECTOR,     # TL
+        Vector2(65, 7) - MIDDLE_VECTOR,     # TR
+        Vector2(67, 29) - MIDDLE_VECTOR,    # MR
+        Vector2(78, 53) - MIDDLE_VECTOR,    # MMR
+        Vector2(78, 75) - MIDDLE_VECTOR,    # BR
+        Vector2(85, 112) - MIDDLE_VECTOR,   # BBR
+        Vector2(42, 112) - MIDDLE_VECTOR,   # BBL
+        Vector2(49, 75) - MIDDLE_VECTOR,    # BL
+        Vector2(49, 53) - MIDDLE_VECTOR,    # MML
+        Vector2(60, 29) - MIDDLE_VECTOR,    # ML
+    ]
 
     ROTATION_WEIGHT = 8
     SPEED = 1000

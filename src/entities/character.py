@@ -59,12 +59,12 @@ class Character(Entity, Collidable):
 
     def draw(self, screen: Surface):
         if not self.visible:
-            return        
+            return  
+        
+        screen.blit(self._image, self._rect)   
 
         if self.DRAW_COLLIDER:
-            self.draw_collider(screen) 
-
-        screen.blit(self._image, self._rect)   
+                    self.draw_collider(screen) 
 
     @abstractmethod
     def movement(delta):
