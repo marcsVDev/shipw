@@ -7,11 +7,11 @@ from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from events.event_bus import EventBus
 
 class Player(Character):
-    MULTIPLIER = 2
+    MULTIPLIER = 1.5
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
     INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - MIDDLE_SCALE)
-    ROTATION_ANGLE = 65
+    ROTATION_ANGLE = 45
     DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
     FRAME_SIZE = 128
     DRAW_COLLIDER = True
@@ -29,8 +29,8 @@ class Player(Character):
         Vector2(60, 29) * MULTIPLIER - MIDDLE_VECTOR,    # ML
     ]
 
-    ROTATION_WEIGHT = 8
-    SPEED = 1000
+    ROTATION_WEIGHT = 15
+    SPEED = 1500
 
     def __init__(self):
         EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
@@ -56,8 +56,16 @@ class Player(Character):
 
         if keys[pygame.K_d]:
             direction.x += 1
-            self._rotation = pygame.math.lerp(self._rotation, -self.ROTATION_ANGLE, self.ROTATION_WEIGHT * delta)           
+            self._rotation = pygame.math.lerp(self._rotation, -self.ROTATION_ANGLE, self.ROTATION_WEIGHT * delta)   
 
+        if keys[pygame.K_w]:
+            direction.y -= 1                 
+        
+        if keys[pygame.K_s]:
+            direction.y += 1
+            self._rotation = pygame.math.lerp(self._rotation, 0, self.ROTATION_WEIGHT * delta)
+            
+            
         if direction.length_squared() > 0:
             direction = direction.normalize()
 

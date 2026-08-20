@@ -19,27 +19,28 @@ class Enemy(Character):
         self._patterns: list[EnemyPattern] = [
             MoveTo(
                 Vector2(-100, 100),
-                Vector2(SCREEN_WIDTH, 300),
-                5
-            ),
-            Wait(
-                Vector2(SCREEN_WIDTH, 300), 
-                5
+                Vector2(SCREEN_WIDTH * 0.25, 250),
+                0.5
             ),
             MoveTo(
-                Vector2(SCREEN_WIDTH, 300),
-                Vector2(-100, 500),
-                5
+                Vector2(SCREEN_WIDTH * 0.25, 250),
+                Vector2(SCREEN_WIDTH * 0.75, 450),
+                0.5
             ),
             MoveTo(
-                Vector2(-100, 500),
-                Vector2(SCREEN_WIDTH, 700),
-                5
+                Vector2(SCREEN_WIDTH * 0.75, 450),
+                Vector2(SCREEN_WIDTH * 0.25, 650),
+                0.5
             ),
             MoveTo(
-                Vector2(SCREEN_WIDTH, 700),
-                Vector2(-100, 900),
-                5
+                Vector2(SCREEN_WIDTH * 0.25, 650),
+                Vector2(SCREEN_WIDTH * 0.75, 850),
+                0.5
+            ),
+            MoveTo(
+                Vector2(SCREEN_WIDTH * 0.75, 850),
+                Vector2(SCREEN_WIDTH + 100, 1000),
+                0.5
             ),
         ]
 
