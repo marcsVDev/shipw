@@ -74,3 +74,6 @@ class Scene:
 
         if len(colliding_enemys) > 0:
             EventBus.emit(Events.PLAYER_COLLIDE, colliding_enemys)
+
+    def clear_entities(self):
+        self.entities = []

@@ -7,14 +7,16 @@ from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from events.event_bus import EventBus
 
 class Player(Character):
-    MULTIPLIER = 1.3
+    MULTIPLIER = 1.2
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
     INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - MIDDLE_SCALE)
+
     DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
     FRAME_SIZE = 128
-    DRAW_COLLIDER = True
-    MIDDLE_VECTOR = Vector2(SCALE // 2,SCALE // 2)
+
+    DRAW_COLLIDER = False
+    MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     MIDDLE_VERTICES = [
         Vector2(62, 7) * MULTIPLIER - MIDDLE_VECTOR,     # TL
         Vector2(65, 7)* MULTIPLIER - MIDDLE_VECTOR,     # TR
@@ -28,9 +30,9 @@ class Player(Character):
         Vector2(60, 29) * MULTIPLIER - MIDDLE_VECTOR,    # ML
     ]
 
-    SPEED = 1450
+    SPEED = 1200
     ACCELERATION = 9000
-    BRAKE_ACCELERATION = 3000
+    BRAKE_ACCELERATION = 2000
     MAX_TILT = 40
     TILT_RESPONSE = 90
 

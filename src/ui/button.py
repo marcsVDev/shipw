@@ -7,7 +7,7 @@ from util.animatedSprite import AnimatedSprite
 from ui.ui import UI
 
 class Button(UI):
-    DRAW_AREA = True
+    DRAW_AREA = False
 
     def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0)):
         self.press_callable = press_callable
