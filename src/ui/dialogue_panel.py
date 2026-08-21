@@ -18,7 +18,7 @@ class DialoguePanel(UI):
     PICTURE_AREA = Rect(93 * MULTIPLIER + POSITION.x, 9 * MULTIPLIER + POSITION.y, 25 * MULTIPLIER, 29 * MULTIPLIER)
     NAME_POSITION = Vector2(106 * MULTIPLIER + POSITION.x, 49 * MULTIPLIER + POSITION.y)
 
-    def __init__(self, image: Surface, _, dialogues: list[str]):
+    def __init__(self, image: Surface, dialogues: list[str]):
         self.dialogues: list[str] = dialogues
         self.pressed = False
         self.current_dialogue = 0
@@ -35,7 +35,8 @@ class DialoguePanel(UI):
         self._visible_dialogue_surfaces: list[Surface] = []
         self.render_visible_text()
 
-        super().__init__(image, self.POSITION)
+        self._image = image
+        self.position = self.POSITION
 
         self.scale(self.SCALE)
         self.align_rect()

@@ -2,8 +2,8 @@ from xml.dom.minidom import Entity
 
 
 class Phase:
-    def __init__(self, name, starts_at, duration, default_entities: list[Entity]):
+    def __init__(self, name, starts_at, duration, default_entities: dict[str, Entity]):
         self.name: str = name
         self.starts_at: float = starts_at
         self.duration: float = duration
-        self.default_entities: list[Entity] = default_entities
+        self.default_entities: dict[str, Entity] = default_entities

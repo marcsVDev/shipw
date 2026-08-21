@@ -5,9 +5,7 @@ from entities.entity import Entity
 
 
 class UI(Entity):
-    def __init__(self, image: Surface, position: Vector2):
-        self.position: Vector2 = position
-        self._image: Surface = image
+    def __init__(self):
         super().__init__()
 
     def draw(self, screen: Surface):

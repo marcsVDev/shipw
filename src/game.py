@@ -10,6 +10,7 @@ from initializations.scenery import get_earth_scenery, get_satellite_scenery
 from initializations.ui import get_dialogue_panel
 from ui.button import Button
 from events.event_bus import EventBus
+from ui.ui import UI
 from util.phase import Phase
 from util.progresssion import Progression
 from util.scene import Scene
@@ -43,9 +44,10 @@ class Game:
         # adicao na cena
 
         #self.main_scene.add_ui_item(get_dialogue_panel())        
-        self.game_scene.add_system("progression", progression)
-        self.game_scene.add_ui_blackboarded(btn, "play_btn")
+        
         self.load_phase(progression.PHASES[0])
+        self.game_scene.add_system("progression", progression)
+        self.game_scene.add_ui(btn, "play_btn")
 
         # main loop
 
@@ -75,14 +77,19 @@ class Game:
             delta = clock.tick(self.FPS) / 1000
 
     def play(self):
-        EventBus.emit(Events.GAME_STARTED)
-        self.game_scene.get_blackboard_entity("earth", MovingObject).run()      
-        self.game_scene.get_blackboard_entity("sat", MovingObject).run()      
-        self.game_scene.get_blackboard_entity("play_btn", Button).visible = False # TODO adicionar o ui blackboard
+        EventBus.emit(Events.GAME_STARTED) # ARRUMAR UM JEITO DE CHAMAR ESSA GALERA, EVENTS???
+        self.game_scene.get_entity("earth", MovingObject).run()      
+        self.game_scene.get_entity("sat", MovingObject).run()      
+        self.game_scene.get_entity("play_btn", Button).visible = False # TODO adicionar o ui blackboard
 
     def load_phase(self, phase: Phase):
-        self.game_scene.clear_entities()
-        for entity in phase.default_entities:
-            self.game_scene.add_entity(entity)
+        self.game_scene.clear_scene()
+        for key in phase.default_entities.keys():
+            match phase.default_entities[key]:
+                case UI():
+                    self.game_scene.add_ui(phase.default_entities[key], key)                 
+                case _:
+                    self.game_scene.add_entity(phase.default_entities[key], key)    
+
 
 GAME = Game()

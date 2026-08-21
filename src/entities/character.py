@@ -27,7 +27,7 @@ class Character(Entity, Collidable):
     DEFAULT_SPRITESHEET = None    
 
     def __init__(self):
-        self.position: Vector2 = self.INITIAL_POSITION
+        self.position: Vector2 = self.INITIAL_POSITION.copy()
         self.can_move: bool = False
 
         self._idle_image: Surface = pygame.image.load(self.DEFAULT_SPRITESHEET).convert_alpha()

@@ -19,7 +19,10 @@ class Button(UI):
         )
         self.button_animation = AnimatedSprite(image, 0, frame_size)
         self.pressed = False
-        super().__init__(image, position)
+        self._image = image
+        self.position = position
+
+        super().__init__()
 
     def update(self, delta, events):        
         mouse_pos = pygame.mouse.get_pos()

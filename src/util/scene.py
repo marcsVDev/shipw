@@ -1,3 +1,5 @@
+from typing import overload
+
 from entities.enemy import Enemy
 from entities.entity import Entity
 from entities.player import Player
@@ -16,7 +18,13 @@ class Scene:
         self.player: Player
         self.enemys: list[Enemy] = []
 
-    def add_entity(self, entity: Entity):
+    @overload
+    def add_entity(self, entity: Entity) -> None: ...
+
+    @overload
+    def add_entity(self, entity: Entity, blackboard_name: str) -> None: ...
+
+    def add_entity(self, entity: Entity, blackboard_name: str | None = None) -> None:
         self.entities.append(entity)
 
         if isinstance(entity, Player):
@@ -24,20 +32,23 @@ class Scene:
         elif isinstance(entity, Enemy):
             self.enemys.append(entity)
 
+        if blackboard_name is not None:
+            self.blackboard[blackboard_name] = entity
 
-    def add_entity_blackboarded(self, entity: Entity, blackboard_name: str):
-        self.entities.append(entity)
-        self.blackboard[blackboard_name] = entity
+    def get_entity[T](self, entity_name: str, et: type[T]) -> T:
+        return self.blackboard[entity_name] 
 
-    def get_blackboard_entity[T](self, blackboard_name: str, entity_type: type[T]) -> T:
-        return self.blackboard.get(blackboard_name)
+    @overload
+    def add_ui(self, ui: UI) -> None: ...
 
-    def add_ui_item(self, ui: UI):
+    @overload
+    def add_ui(self, ui: UI, blackboard_name: str) -> None: ...
+
+    def add_ui(self, ui: UI, blackboard_name: str | None = None) -> None:
         self.ui_items.append(ui)
 
-    def add_ui_blackboarded(self, ui: UI, blackboard_name: str):
-        self.ui_items.append(ui)
-        self.blackboard[blackboard_name] = ui
+        if blackboard_name is not None:
+            self.blackboard[blackboard_name] = ui
 
     def add_system(self, sys_name: str, sys: System):
         self.systems[sys_name] = sys
@@ -75,5 +86,10 @@ class Scene:
         if len(colliding_enemys) > 0:
             EventBus.emit(Events.PLAYER_COLLIDE, colliding_enemys)
 
-    def clear_entities(self):
+    def clear_scene(self):
         self.entities = []
+        self.player = None
+        self.enemys = []
+        self.ui_items = []
+        self.blackboard = {}
+

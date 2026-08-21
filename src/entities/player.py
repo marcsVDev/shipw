@@ -19,7 +19,7 @@ class Player(Character):
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     MIDDLE_VERTICES = [
         Vector2(62, 7) * MULTIPLIER - MIDDLE_VECTOR,     # TL
-        Vector2(65, 7)* MULTIPLIER - MIDDLE_VECTOR,     # TR
+        Vector2(65, 7)* MULTIPLIER - MIDDLE_VECTOR,      # TR
         Vector2(67, 29) * MULTIPLIER - MIDDLE_VECTOR,    # MR
         Vector2(78, 53) * MULTIPLIER - MIDDLE_VECTOR,    # MMR
         Vector2(78, 75) * MULTIPLIER - MIDDLE_VECTOR,    # BR
