@@ -1,5 +1,7 @@
 from pygame import Font, Vector2
 
+from events.event_bus import EventBus
+from events.events import Events
 from game_consts import SCREEN_WIDTH
 from initializations.misc import get_font
 from ui.ui import UI
@@ -23,6 +25,7 @@ class SceneTitle(UI):
     def update(self, delta, events):
         if not self.visible or self._alpha <= 0: 
             self.visible = False
+            EventBus.emit(Events.DESTROY_ENTITY, "title")
             return
         
         self._elapsed_time += delta

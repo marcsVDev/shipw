@@ -18,6 +18,8 @@ class Scene:
         self.player: Player
         self.enemys: list[Enemy] = []
 
+        EventBus.connect(Events.DESTROY_ENTITY, self.destroy_entity)
+
     @overload
     def add_entity(self, entity: Entity) -> None: ...
 
@@ -75,6 +77,9 @@ class Scene:
             item.draw(screen)
 
     def check_collisions(self):
+        if self.player is None:
+            return
+
         colliding_enemys: list[Enemy] = []
         for enemy in self.enemys:
             if not enemy.visible:
@@ -84,12 +89,26 @@ class Scene:
                 colliding_enemys.append(enemy)
 
         if len(colliding_enemys) > 0:
-            EventBus.emit(Events.PLAYER_COLLIDE, colliding_enemys)
+            EventBus.emit(Events.PLAYER_COLLIDE, self.player, colliding_enemys)
 
     def clear_scene(self):
-        self.entities = []
+        self.entities.clear()
         self.player = None
-        self.enemys = []
-        self.ui_items = []
-        self.blackboard = {}
+        self.enemys.clear()
+        self.ui_items.clear()
+        self.blackboard.clear()
 
+    def destroy_entity(self, name: str):
+        item = self.blackboard.pop(name, None)
+        if item is None:
+            return
+
+        if isinstance(item, UI):
+            self.ui_items.remove(item)
+        else:
+            self.entities.remove(item)
+
+            if item is self.player:
+                self.player = None
+            if isinstance(item, Enemy):
+                self.enemys.remove(item)

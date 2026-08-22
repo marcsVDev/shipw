@@ -7,7 +7,7 @@ from entities.scrollers.moving_object import MovingObject
 from events.events import Events
 from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH, UI_PATH
 from initializations.scenery import get_earth_scenery, get_satellite_scenery
-from initializations.ui import get_dialogue_panel
+from initializations.ui import get_dialogue_panel, get_play_button
 from ui.button import Button
 from events.event_bus import EventBus
 from ui.ui import UI
@@ -29,25 +29,11 @@ class Game:
         self.game_scene = Scene()
         self.running = True
 
-        # inicializacao de imagens
-
-        btn_img = pygame.transform.scale_by(pygame.image.load(UI_PATH + "play.png"), 5)
-        
-        #inicialização de UI
-
-        btn = Button(btn_img, Vector2(SCREEN_WIDTH-64*5, SCREEN_HEIGHT-64*4), 64*5, self.play, (58*5, 21*5))      
-
-        #inicializacao dos Sistemas
-
-        progression = Progression() 
-
-        # adicao na cena
-
-        #self.main_scene.add_ui_item(get_dialogue_panel())        
+        progression = Progression()             
         
         self.load_phase(progression.PHASES[0])
         self.game_scene.add_system("progression", progression)
-        self.game_scene.add_ui(btn, "play_btn")
+        self.game_scene.add_ui(get_play_button(self.play), "play_btn") 
 
         # main loop
 
@@ -80,7 +66,7 @@ class Game:
         EventBus.emit(Events.GAME_STARTED) # ARRUMAR UM JEITO DE CHAMAR ESSA GALERA, EVENTS???
         self.game_scene.get_entity("earth", MovingObject).run()      
         self.game_scene.get_entity("sat", MovingObject).run()      
-        self.game_scene.get_entity("play_btn", Button).visible = False # TODO adicionar o ui blackboard
+        self.game_scene.destroy_entity("play_btn")
 
     def load_phase(self, phase: Phase):
         self.game_scene.clear_scene()

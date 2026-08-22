@@ -93,6 +93,8 @@ class Player(Character):
             self.position.y = self.MIDDLE_SCALE
             self.velocity.y = max(0, self.velocity.y)
 
-    def player_collide(self, collisions):
-        print(collisions)
-        pass
+    def player_collide(self, player, collisions):
+        if player is not self:
+            return
+
+        EventBus.emit(Events.DESTROY_ENTITY, "player")
