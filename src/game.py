@@ -63,7 +63,7 @@ class Game:
             delta = clock.tick(self.FPS) / 1000
 
     def play(self):
-        EventBus.emit(Events.GAME_STARTED) # ARRUMAR UM JEITO DE CHAMAR ESSA GALERA, EVENTS???
+        EventBus.emit(Events.GAME_STARTED)
         self.game_scene.get_entity("earth", MovingObject).run()      
         self.game_scene.get_entity("sat", MovingObject).run()      
         self.game_scene.destroy_entity("play_btn")
