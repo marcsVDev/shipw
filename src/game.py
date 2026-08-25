@@ -17,6 +17,7 @@ from util.scene import Scene
 
 class Game:
     FPS = 60
+    FILL_COLOR = (0x17, 0x18, 0x1d)
 
     def __init__(self):
         pygame.init()  
@@ -33,7 +34,7 @@ class Game:
         
         self.load_phase(progression.PHASES[0])
         self.game_scene.add_system("progression", progression)
-        self.game_scene.add_ui(get_play_button(self.play), "play_btn") 
+        self.game_scene.add_ui(get_play_button(self.play), "play_btn")
 
         # main loop
 
@@ -49,9 +50,9 @@ class Game:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    self.running = False                 
 
-            self.screen.fill((0x17, 0x18, 0x1d))
+            self.screen.fill(self.FILL_COLOR)
             self.game_scene.run(self.screen, delta, events)
 
             self.fps = clock.get_fps()
@@ -63,9 +64,7 @@ class Game:
             delta = clock.tick(self.FPS) / 1000
 
     def play(self):
-        EventBus.emit(Events.GAME_STARTED)
-        self.game_scene.get_entity("earth", MovingObject).run()      
-        self.game_scene.get_entity("sat", MovingObject).run()      
+        EventBus.emit(Events.GAME_STARTED) 
         self.game_scene.destroy_entity("play_btn")
 
     def load_phase(self, phase: Phase):

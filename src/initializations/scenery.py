@@ -1,5 +1,6 @@
 import pygame
 
+from entities.background import Background
 from entities.scrollers.moving_object import MovingObject
 from game_consts import SCENERY_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from util.animatedSprite import AnimatedSprite
@@ -35,7 +36,10 @@ def get_satellite_scenery():
 
     return MovingObject(
         AnimatedSprite(sat_img, 1, sat_size),
-        pygame.Vector2(SCREEN_WIDTH + sat_size//2, 0),
+        pygame.Vector2(SCREEN_WIDTH + sat_size // 2, 0),
         pygame.Vector2(-1, 0.1),
         SATELLITE_SPEED
     )
+
+def get_krasny_mir_background():
+    return Background(pygame.image.load(SCENERY_PATH + "krasny_mir_station.png").convert_alpha(), 4)

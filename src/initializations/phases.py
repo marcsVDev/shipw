@@ -1,6 +1,8 @@
+import pygame
+
 from entities.enemy import Enemy
 from entities.player import Player
-from initializations.scenery import get_earth_scenery, get_satellite_scenery
+from initializations.scenery import get_earth_scenery, get_krasny_mir_background, get_satellite_scenery
 from initializations.ui import get_scene_title
 from util.phase import Phase
 
@@ -8,17 +10,17 @@ def minutes(s): return s * 60
 
 START_TIMES = [0, 10, minutes(0.5)]
 
+
+
 def get_launch_phase():
     return Phase(
         "Estação Krasny Mir",
         START_TIMES[0],
         START_TIMES[1],
-        {
+        {            
             "title": get_scene_title("Estacao Krasny Mir"),
-            "earth": get_earth_scenery(),
-            "sat": get_satellite_scenery(),
+            "background": get_krasny_mir_background(),
             "player": Player(),
-            "enemy": Enemy()
         }
     )
 

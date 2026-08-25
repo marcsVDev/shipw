@@ -25,14 +25,22 @@ class Character(Entity, Collidable):
     ROTATION_ANGLE = None
     FRAME_SIZE = None
     DEFAULT_SPRITESHEET = None    
+    ANIMATIONS = None
+    DEFAULT_ANIMATION = "default"
 
     def __init__(self):
         self.position: Vector2 = self.INITIAL_POSITION.copy()
         self.can_move: bool = False
 
-        self._idle_image: Surface = pygame.image.load(self.DEFAULT_SPRITESHEET).convert_alpha()
-        self._idle_animation = AnimatedSprite(self._idle_image, self.ANIMATION_FRAME_DURATION, self.FRAME_SIZE)     
-        self._image = self._idle_animation.get_current_frame()
+        self._spritesheet: Surface = pygame.image.load(self.DEFAULT_SPRITESHEET).convert_alpha()
+        self._animation = AnimatedSprite(
+            self._spritesheet,
+            self.ANIMATION_FRAME_DURATION,
+            self.FRAME_SIZE,
+            self.ANIMATIONS,
+        )
+        self._animation.play(self.DEFAULT_ANIMATION)
+        self._image = self._animation.get_current_frame()
         
         self._original_image = self._image
         self._rotation = 0
@@ -43,8 +51,8 @@ class Character(Entity, Collidable):
         super().__init__()
 
     def update(self, delta):
-        self._idle_animation.update_frame(delta)
-        self._image = self._idle_animation.get_current_frame()
+        self._animation.update(delta)
+        self._image = self._animation.get_current_frame()
 
         if self.can_move: 
             self.movement(delta) 
@@ -84,3 +92,11 @@ class Character(Entity, Collidable):
 
     def game_started(self):
         self.can_move = True
+
+    def play_animation(self, name: str, *, restart: bool = True):
+        """Inicia uma animação configurada em ``ANIMATIONS``."""
+        self._animation.play(name, restart=restart)
+
+    def stop_animation(self, *, reset: bool = False):
+        """Para a animação atual do personagem."""
+        self._animation.stop(reset=reset)

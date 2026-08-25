@@ -20,7 +20,7 @@ class MovingObject(Entity):
 
         self.position += self.target_direction * self.speed * delta
 
-        self.animation_sprite.update_frame(delta)
+        self.animation_sprite.update(delta)
 
         return super().update(delta)
 

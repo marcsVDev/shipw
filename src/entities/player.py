@@ -7,10 +7,10 @@ from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from events.event_bus import EventBus
 
 class Player(Character):
-    MULTIPLIER = 1.2
+    MULTIPLIER = 1.3
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
-    INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - MIDDLE_SCALE)
+    INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - SCALE)
 
     DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
     FRAME_SIZE = 128
@@ -28,7 +28,7 @@ class Player(Character):
         Vector2(49, 75) * MULTIPLIER - MIDDLE_VECTOR,    # BL
         Vector2(49, 53) * MULTIPLIER - MIDDLE_VECTOR,    # MML
         Vector2(60, 29) * MULTIPLIER - MIDDLE_VECTOR,    # ML
-    ]
+    ]    
 
     SPEED = 1200
     ACCELERATION = 9000
@@ -43,7 +43,8 @@ class Player(Character):
         super().__init__()
 
     def update(self, delta):
-        self.screen_collide() 
+        if self.can_move:
+            self.screen_collide() 
 
         return super().update(delta)
 
