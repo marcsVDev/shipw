@@ -37,7 +37,7 @@ class Enemy(Character):
             Vector2(SCREEN_WIDTH * 0.75, 850),
             Vector2(SCREEN_WIDTH + 100, 1000),
             10
-        ),
+        )
     ]
 
     def __init__(self):
@@ -48,19 +48,18 @@ class Enemy(Character):
 
     def update(self, delta):
         if self._patterns[self._current_pattern].finished:
-            if self._current_pattern + 1 >= len(self._patterns):
-                
+            if self._current_pattern + 1 >= len(self._patterns):                
                 self.visible = False # TODO apagar inimigo quando acaba patterns !! identificar inimigo ??
-                return       
+                return
             
             self._current_pattern += 1
+
         if self.can_move:
             self._patterns[self._current_pattern].update(delta)
             
         super().update(delta)
 
-    def movement(self, delta):        
-        if self.ROTATE:
-            self._rotation += self.ROTATION_ANGLE * delta
+    def movement(self, delta):  
 
+        self._rotation = self._patterns[self._current_pattern].rotation
         self.position = self._patterns[self._current_pattern].position

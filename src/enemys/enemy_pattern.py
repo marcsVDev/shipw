@@ -1,9 +1,10 @@
 from pygame import Vector2
 
 class EnemyPattern:
-    def __init__(self, position: Vector2, duration: float):
+    def __init__(self, position: Vector2, rotation: float, duration: float):
         self.position: Vector2 = position
         self.duration: float = duration
+        self.rotation: float = rotation
         ...
         
     def update(self, delta):
