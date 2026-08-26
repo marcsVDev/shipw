@@ -21,20 +21,27 @@ class Game:
 
     def __init__(self):
         pygame.init()  
-        pygame.display.set_caption("Shipw")
+        pygame.display.set_caption("Projeto Cosmonauta")
 
         EventBus.connect(Events.PHASE_CHANGED, self.load_phase)
 
         # propriedades
-        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))         
-        self.game_scene = Scene()
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+        self.scenes: dict[str, Scene] = {}
+        self.current_scene: str = "menu"
         self.running = True
 
-        progression = Progression()             
+        inital_menu = Scene(False) 
+
+        inital_menu.add_ui(get_play_button(self.play))
+        self.scenes["menu"] = inital_menu
+
+        game_scene = Scene(True)
+
+        progression = Progression()
         
-        self.load_phase(progression.PHASES[0])
-        self.game_scene.add_system("progression", progression)
-        self.game_scene.add_ui(get_play_button(self.play), "play_btn")
+        game_scene.add_system("progression", progression)
+        self.scenes["game"] = game_scene        
 
         # main loop
 
@@ -53,7 +60,7 @@ class Game:
                     self.running = False                 
 
             self.screen.fill(self.FILL_COLOR)
-            self.game_scene.run(self.screen, delta, events)
+            self.scenes[self.current_scene].run(self.screen, delta, events)
 
             self.fps = clock.get_fps()
             if self.fps < 30:
@@ -65,16 +72,23 @@ class Game:
 
     def play(self):
         EventBus.emit(Events.GAME_STARTED) 
-        self.game_scene.destroy_entity("play_btn")
+
+        self.load_phase(self.scenes["game"].get_system("progression", Progression).PHASES[0])
+        self.scenes["game"].destroy_entity("play_btn")
+        self.change_scene_to("game")        
 
     def load_phase(self, phase: Phase):
-        self.game_scene.clear_scene()
+        game_scene = self.scenes["game"]
+        game_scene.clear_scene()
         for key in phase.default_entities.keys():
             match phase.default_entities[key]:
                 case UI():
-                    self.game_scene.add_ui(phase.default_entities[key], key)                 
+                    game_scene.add_ui(phase.default_entities[key], key)                 
                 case _:
-                    self.game_scene.add_entity(phase.default_entities[key], key)    
+                    game_scene.add_entity(phase.default_entities[key], key) 
+                    
+    def change_scene_to(self, name: str):
+         self.current_scene = name   
 
 
 GAME = Game()

@@ -3,14 +3,12 @@ import pygame
 from entities.enemy import Enemy
 from entities.player import Player
 from initializations.scenery import get_earth_scenery, get_krasny_mir_background, get_satellite_scenery
-from initializations.ui import get_scene_title
+from initializations.ui import get_dialogue_panel, get_scene_title
 from util.phase import Phase
 
 def minutes(s): return s * 60
 
 START_TIMES = [0, 10, minutes(0.5)]
-
-
 
 def get_launch_phase():
     return Phase(
@@ -32,6 +30,7 @@ def get_troposphere_phase():
         {
             "title": get_scene_title("Troposfera"),
             "sat": get_satellite_scenery(),
+            "dialogue": get_dialogue_panel(),
             "player": Player()
         }
     )

@@ -23,7 +23,8 @@ PLAY_BUTTON_PATH = UI_PATH + "play.png"
 
 def get_play_button(callable: Callable) -> Button:
     M = 5
+    SCALE = 64 * M
     image = pygame.image.load(PLAY_BUTTON_PATH).convert_alpha()
     image = pygame.transform.scale_by(image, M)
 
-    return Button(image, pygame.Vector2(SCREEN_WIDTH-64*5, SCREEN_HEIGHT-64*4), 64*M, callable, (58*5, 21*5))
+    return Button(image, pygame.Vector2(SCREEN_WIDTH//2-SCALE//2, SCREEN_HEIGHT//2-SCALE//2), SCALE, callable, (58*5, 21*5))

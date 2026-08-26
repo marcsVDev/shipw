@@ -10,13 +10,14 @@ from ui.ui import UI
 
 
 class Scene:
-    def __init__(self):
+    def __init__(self, game_scene: bool):
         self.entities: list[Entity] = []
         self.ui_items: list[UI] = []
         self.systems: dict[str, System] = {}
         self.blackboard: dict[str, Entity] = {}
         self.player: Player
         self.enemys: list[Enemy] = []
+        self.game_scene = game_scene
 
         EventBus.connect(Events.DESTROY_ENTITY, self.destroy_entity)
 
@@ -65,7 +66,8 @@ class Scene:
         for et in self.entities:
             et.update(delta)
 
-        self.check_collisions()
+        if self.game_scene:
+            self.check_collisions()
 
         for item in self.ui_items:
             item.update(delta, events)

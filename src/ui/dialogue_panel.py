@@ -20,6 +20,7 @@ class DialoguePanel(UI):
 
     def __init__(self, image: Surface, dialogues: list[str]):
         self.dialogues: list[str] = dialogues
+        self.visible = True
         self.pressed = False
         self.current_dialogue = 0
         self.visible_characters = 0.0

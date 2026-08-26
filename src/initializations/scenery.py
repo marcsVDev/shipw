@@ -34,12 +34,15 @@ def get_satellite_scenery():
 
     sat_size = SATELLITE_FRAME_SIZE * SATELLITE_SCALE
 
-    return MovingObject(
+    sat = MovingObject(
         AnimatedSprite(sat_img, 1, sat_size),
         pygame.Vector2(SCREEN_WIDTH + sat_size // 2, 0),
         pygame.Vector2(-1, 0.1),
         SATELLITE_SPEED
     )
+    sat.run()
+    
+    return sat
 
 def get_krasny_mir_background():
     return Background(pygame.image.load(SCENERY_PATH + "krasny_mir_station.png").convert_alpha(), 4)
