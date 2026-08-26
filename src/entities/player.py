@@ -95,4 +95,4 @@ class Player(Character):
         if player is not self:
             return
 
-        EventBus.emit(Events.DESTROY_ENTITY, "player")
+        self.destroy()

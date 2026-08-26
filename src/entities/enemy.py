@@ -4,6 +4,8 @@ from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
 from enemys.patterns.wait import Wait
 from entities.character import Character
+from events.event_bus import EventBus
+from events.events import Events
 from game_consts import ENEMYS_PATH, SCREEN_WIDTH
 
 class Enemy(Character):    
@@ -48,8 +50,9 @@ class Enemy(Character):
 
     def update(self, delta):
         if self._patterns[self._current_pattern].finished:
-            if self._current_pattern + 1 >= len(self._patterns):                
-                self.visible = False # TODO apagar inimigo quando acaba patterns !! identificar inimigo ??
+            if self._current_pattern + 1 >= len(self._patterns):                               
+                # self.visible = False
+                self.destroy()
                 return
             
             self._current_pattern += 1

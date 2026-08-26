@@ -9,3 +9,6 @@ from game_consts import ASSETS_PATH, ENEMYS_PATH, SCREEN_WIDTH
 class GaivotaEnemy(Enemy):
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "gaivota.png"
     PATTERNS = EnemyPatternDeserializer().deserialize(ASSETS_PATH+"patterns/test_pattern.tmj")
+
+    def __init__(self):
+        super().__init__()

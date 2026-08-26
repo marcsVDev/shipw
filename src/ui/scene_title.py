@@ -24,7 +24,7 @@ class SceneTitle(UI):
     def update(self, delta, events):
         if not self.visible or self._alpha <= 0: 
             self.visible = False
-            EventBus.emit(Events.DESTROY_ENTITY, "title")
+            self.to_destroy = True
             return
         
         self._elapsed_time += delta

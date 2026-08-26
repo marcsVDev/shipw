@@ -28,7 +28,7 @@ def get_troposphere_phase():
         {
             "title": get_scene_title("Troposfera"),
             "sat": get_satellite_scenery(),
-            "dialogue": get_dialogue_panel(),
+            # "dialogue": get_dialogue_panel(),
             "gaivota": GaivotaEnemy(),
             "player": Player()
         }

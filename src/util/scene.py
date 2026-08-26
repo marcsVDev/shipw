@@ -19,8 +19,6 @@ class Scene:
         self.enemys: list[Enemy] = []
         self.game_scene = game_scene
 
-        EventBus.connect(Events.DESTROY_ENTITY, self.destroy_entity)
-
     @overload
     def add_entity(self, entity: Entity) -> None: ...
 
@@ -64,12 +62,20 @@ class Scene:
             system.update(delta)
 
         for et in self.entities:
+            if et.to_destroy:
+                self.entities.remove(et)
+                continue
+
             et.update(delta)
 
         if self.game_scene:
             self.check_collisions()
 
         for item in self.ui_items:
+            if item.to_destroy:
+                self.ui_items.remove(item)
+                continue
+
             item.update(delta, events)
             
         for et in self.entities:
