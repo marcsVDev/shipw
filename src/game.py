@@ -31,17 +31,17 @@ class Game:
         self.current_scene: str = "menu"
         self.running = True
 
-        inital_menu = Scene(False) 
+        inital_menu = Scene(game_scene=False) 
 
         inital_menu.add_ui(get_play_button(self.play))
         self.scenes["menu"] = inital_menu
 
-        game_scene = Scene(True)
+        game_scene = Scene(game_scene=True)
 
         progression = Progression()
         
         game_scene.add_system("progression", progression)
-        self.scenes["game"] = game_scene        
+        self.scenes["game"] = game_scene
 
         # main loop
 
@@ -86,7 +86,7 @@ class Game:
                     game_scene.add_ui(phase.default_entities[key], key)                 
                 case _:
                     game_scene.add_entity(phase.default_entities[key], key) 
-                    
+
     def change_scene_to(self, name: str):
          self.current_scene = name   
 
