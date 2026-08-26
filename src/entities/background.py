@@ -9,8 +9,7 @@ class Background(Entity):
         self.image = pygame.transform.scale_by(image, scale)
         super().__init__()
     def update(self, delta):
-        return super().update(delta)
+        pass
+
     def draw(self, screen):
-        screen.blit(self.image, (0, 0))
-        return super().draw(screen)
-    
+        self.draw_image(screen, self.image, (0, 0))

@@ -63,16 +63,11 @@ class Character(Entity, Collidable):
 
         self._collider_vertices = self.get_rotated_vertices()
         
-        return super().update(delta)
-
     def draw(self, screen: Surface):
-        if not self.visible:
-            return  
-        
-        screen.blit(self._image, self._rect)   
+        self.draw_image(screen, self._image, self._rect)
 
-        if self.DRAW_COLLIDER:
-                    self.draw_collider(screen) 
+        if self.visible and self.DRAW_COLLIDER:
+            self.draw_collider(screen)
 
     @abstractmethod
     def movement(delta):

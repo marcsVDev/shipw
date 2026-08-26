@@ -8,6 +8,10 @@ class Entity(ABC):
         self.visible = True
         super().__init__()
 
+    def draw_image(self, screen: Surface, image: Surface, position) -> None:
+        if self.visible:
+            screen.blit(image, position)
+
     @abstractmethod
     def draw(self, screen: Surface):
         pass

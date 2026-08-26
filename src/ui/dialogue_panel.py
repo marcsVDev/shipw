@@ -19,8 +19,8 @@ class DialoguePanel(UI):
     NAME_POSITION = Vector2(106 * MULTIPLIER + POSITION.x, 49 * MULTIPLIER + POSITION.y)
 
     def __init__(self, image: Surface, dialogues: list[str]):
+        super().__init__(image, self.POSITION)
         self.dialogues: list[str] = dialogues
-        self.visible = True
         self.pressed = False
         self.current_dialogue = 0
         self.visible_characters = 0.0
@@ -36,10 +36,7 @@ class DialoguePanel(UI):
         self._visible_dialogue_surfaces: list[Surface] = []
         self.render_visible_text()
 
-        self._image = image
-        self.position = self.POSITION
-
-        self.scale(self.SCALE)
+        self.scale_image(self.SCALE)
         self.align_rect()
 
     def update(self, delta, events):
@@ -59,12 +56,10 @@ class DialoguePanel(UI):
                     self.pressed = False
                 
 
-        return super().update(delta, events)
-    
     def draw(self, screen):
         if not self.visible: return
 
-        screen.blit(self._image, (self.position.x, self.position.y))
+        super().draw(screen)
 
         y = self.DIALOGUE_AREA.y
         for line_surface in self._visible_dialogue_surfaces:
@@ -76,14 +71,6 @@ class DialoguePanel(UI):
 
         pygame.draw.circle(screen, (0xff,0xff,0xff), self.NAME_POSITION, 1)
         pygame.draw.rect(screen, (0xFF, 0, 0), self.PICTURE_AREA, 1)
-        return super().draw(screen)
-
-    def scale(self, by):
-        self._image = pygame.transform.scale(self._image, by)
-
-    def align_rect(self):
-        self._rect = self._image.get_rect(center=self.position)
-
     def wrap_text(self, text: str) -> list[str]:
         lines: list[str] = []
 

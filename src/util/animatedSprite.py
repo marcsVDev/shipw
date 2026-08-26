@@ -33,7 +33,7 @@ class AnimatedSprite:
 
         self._animations: dict[str, dict] = {}
         self.current_animation: str | None = None
-        self.frame = 0  # índice dentro da animação atual
+        self.frame = 0
         self.time = 0.0
         self.is_playing = False
 

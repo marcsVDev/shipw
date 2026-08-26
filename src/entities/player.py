@@ -46,10 +46,7 @@ class Player(Character):
         if self.can_move:
             self.screen_collide() 
 
-        return super().update(delta)
-
-    def draw(self, screen):
-        return super().draw(screen)
+        super().update(delta)
     
     def movement(self, delta):
         keys = pygame.key.get_pressed()

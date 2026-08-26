@@ -22,11 +22,8 @@ class MovingObject(Entity):
 
         self.animation_sprite.update(delta)
 
-        return super().update(delta)
-
     def draw(self, screen):
-        screen.blit(self.animation_sprite.get_current_frame(), (self.position.x, self.position.y))
-        return super().draw(screen)
+        self.draw_image(screen, self.animation_sprite.get_current_frame(), self.position)
 
     def run(self):
         self.can_move = True

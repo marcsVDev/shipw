@@ -10,6 +10,7 @@ class Button(UI):
     DRAW_AREA = False
 
     def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0)):
+        super().__init__(image, position)
         self.press_callable = press_callable
         self.area = Rect(
             position.x + (frame_size - area_size[0]) / 2,
@@ -19,10 +20,6 @@ class Button(UI):
         )
         self.button_animation = AnimatedSprite(image, 0, frame_size)
         self.pressed = False
-        self._image = image
-        self.position = position
-
-        super().__init__()
 
     def update(self, delta, events):        
         mouse_pos = pygame.mouse.get_pos()
@@ -47,12 +44,9 @@ class Button(UI):
                     
 
     def draw(self, screen):
-        if not self.visible: 
-            return
-        
-        screen.blit(self._image, (self.position.x, self.position.y))
+        super().draw(screen)
 
-        if self.DRAW_AREA:
+        if self.visible and self.DRAW_AREA:
             pygame.draw.rect(
                 screen,
                 (255, 0, 0),

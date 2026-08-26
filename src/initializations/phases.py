@@ -1,14 +1,11 @@
-import pygame
-
-from entities.enemy import Enemy
 from entities.player import Player
-from initializations.scenery import get_earth_scenery, get_krasny_mir_background, get_satellite_scenery
-from initializations.ui import get_dialogue_panel, get_scene_title
+from initializations.scenery import get_krasny_mir_background, get_satellite_scenery
+from initializations.ui_inits import get_dialogue_panel, get_scene_title
 from util.phase import Phase
 
-def minutes(s): return s * 60
+def minutes(m): return m * 60
 
-START_TIMES = [0, 10, minutes(0.5)]
+START_TIMES = [0, 10, minutes(1)]
 
 def get_launch_phase():
     return Phase(

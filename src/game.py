@@ -1,14 +1,8 @@
 import pygame
-from pygame import Vector2
 
-from entities.enemy import Enemy
-from entities.player import Player
-from entities.scrollers.moving_object import MovingObject
 from events.events import Events
-from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH, UI_PATH
-from initializations.scenery import get_earth_scenery, get_satellite_scenery
-from initializations.ui import get_dialogue_panel, get_play_button
-from ui.button import Button
+from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
+from initializations.ui_inits import get_play_button
 from events.event_bus import EventBus
 from ui.ui import UI
 from util.phase import Phase

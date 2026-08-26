@@ -14,13 +14,12 @@ class SceneTitle(UI):
     COLOR_FONT = (0xFF, 0xFF, 0xFF)
     POSITION = Vector2(SCREEN_WIDTH//2, 0 + 40)
     def __init__(self, title: str):
+        super().__init__(position=self.POSITION)
         self.title: str = title
         self._font: Font = get_font(32)
         self._alpha = 0xFF
         self._elapsed_time = 0
         self._disappear = False
-
-        super().__init__()
 
     def update(self, delta, events):
         if not self.visible or self._alpha <= 0: 
@@ -38,8 +37,6 @@ class SceneTitle(UI):
             self._disappear = True
             self._elapsed_time = 0
         
-        return super().update(delta, events)
-
     def draw(self, screen):
         if not self.visible:
             return
@@ -47,5 +44,4 @@ class SceneTitle(UI):
         render = self._font.render(self.title, False, self.COLOR_FONT)
         render.set_alpha(self._alpha)
 
-        screen.blit(render, render.get_rect(center=self.POSITION))
-        return super().draw(screen)
+        screen.blit(render, render.get_rect(center=self.position))
