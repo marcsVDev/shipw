@@ -6,10 +6,10 @@ from ui.ui import UI
 
 
 class Title(UI):
-    M = 5
+    M = 5.2
     SIZE = (128*M, 64*M)
     TITLE_PATH = UI_PATH + "title.png"
-    POSITION = (SCREEN_WIDTH // 2 - SIZE[0] // 2, SCREEN_HEIGHT // 2 - SIZE[1] // 2)
+    POSITION = (SCREEN_WIDTH // 2 - SIZE[0] // 2, SIZE[1] // 4.5)
 
     def __init__(self):
         image: Surface = pygame.image.load(self.TITLE_PATH).convert_alpha()

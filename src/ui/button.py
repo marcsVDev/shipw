@@ -29,7 +29,9 @@ class Button(UI):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT and self.hovered:
-                    if self.press_callable is not None: self.press_callable()
+                    if self.press_callable is not None: 
+                        self.press_callable()
+                        
                     self.pressed = True
             if self.pressed and event.type == pygame.MOUSEBUTTONUP:
                 if event.button == pygame.BUTTON_LEFT:

@@ -102,7 +102,7 @@ class EnemyPatternDeserializer:
                 rotation=rotation,
                 target_position=Vector2(tiled_object["x"], tiled_object["y"]),
                 target_rotation=float(tiled_object.get("rotation", 0)),
-                duration=self._duration(properties, object_id),
+                duration=float(properties["duration"]),
                 properties=properties,
                 object_id=object_id,
             )
@@ -150,21 +150,6 @@ class EnemyPatternDeserializer:
         }
 
     @staticmethod
-    def _duration(properties: Mapping[str, object], object_id: int | None) -> float:
-        try:
-            duration = float(properties["duration"])
-        except (KeyError, TypeError, ValueError) as error:
-            raise PatternDeserializationError(
-                f"O objeto {object_id} precisa da propriedade numérica 'duration'."
-            ) from error
-
-        if duration <= 0:
-            raise PatternDeserializationError(
-                f"A duração do objeto {object_id} deve ser maior que zero."
-            )
-        return duration
-
-    @staticmethod
     def _build_move_to(context: PatternContext) -> PatternBuildResult:
         return PatternBuildResult(
             MoveTo(context.position, context.target_position, context.duration, context.rotation),
@@ -193,6 +178,7 @@ class EnemyPatternDeserializer:
             context.target_rotation,
         )
 
+    @staticmethod
     def _build_yell(context: PatternContext) -> PatternBuildResult:
         pass
         return PatternBuildResult(
@@ -200,6 +186,8 @@ class EnemyPatternDeserializer:
                 context.position,
                 context.rotation,
                 context.duration,
-                context.
+                str(context.properties["sound_file"])
             ),
+            context.position,
+            context.rotation,
         )

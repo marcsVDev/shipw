@@ -120,6 +120,68 @@
                  "width":0,
                  "x":927.272727272727,
                  "y":542.424242424242
+                }, 
+                {
+                 "height":0,
+                 "id":9,
+                 "name":"Yell",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"duration",
+                         "type":"float",
+                         "value":0
+                        }, 
+                        {
+                         "name":"sound_file",
+                         "type":"string",
+                         "value":"gaivota_attack"
+                        }],
+                 "rotation":0,
+                 "type":"yell",
+                 "visible":true,
+                 "width":0,
+                 "x":1474.66666666667,
+                 "y":124
+                }, 
+                {
+                 "height":0,
+                 "id":13,
+                 "name":"Move",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"duration",
+                         "type":"float",
+                         "value":1
+                        }],
+                 "rotation":0,
+                 "type":"move_to",
+                 "visible":true,
+                 "width":0,
+                 "x":1303.0303030303,
+                 "y":757.575757575758
+                }, 
+                {
+                 "height":0,
+                 "id":14,
+                 "name":"Move",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"duration",
+                         "type":"float",
+                         "value":1
+                        }],
+                 "rotation":0,
+                 "type":"move_to",
+                 "visible":true,
+                 "width":0,
+                 "x":290.909090909091,
+                 "y":454.545454545455
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -128,7 +190,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":7,
+ "nextobjectid":16,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

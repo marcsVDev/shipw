@@ -1,9 +1,12 @@
+import time
+
 import pygame
 
 from events.events import Events
 from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
 from initializations.ui_inits import get_play_button
 from events.event_bus import EventBus
+from ui.title import Title
 from ui.ui import UI
 from util.phase import Phase
 from util.progresssion import Progression
@@ -16,6 +19,7 @@ class Game:
     def __init__(self):
         pygame.init()  
         pygame.display.set_caption("Projeto Cosmonauta")
+        pygame.mixer.init()
 
         EventBus.connect(Events.PHASE_CHANGED, self.load_phase)
 
@@ -28,6 +32,7 @@ class Game:
         inital_menu = Scene(game_scene=False) 
 
         inital_menu.add_ui(get_play_button(self.play))
+        inital_menu.add_ui(Title())
         self.scenes["menu"] = inital_menu
 
         game_scene = Scene(game_scene=True)
@@ -65,6 +70,7 @@ class Game:
             delta = clock.tick(self.FPS) / 1000
 
     def play(self):
+        # time.sleep(2)
         EventBus.emit(Events.GAME_STARTED) 
 
         self.load_phase(self.scenes["game"].get_system("progression", Progression).PHASES[0])
