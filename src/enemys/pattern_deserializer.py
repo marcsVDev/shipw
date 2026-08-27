@@ -11,6 +11,7 @@ from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
 from enemys.patterns.rotate import Rotate
 from enemys.patterns.wait import Wait
+from enemys.patterns.yell import Yell
 
 
 class PatternDeserializationError(ValueError):
@@ -54,6 +55,7 @@ class EnemyPatternDeserializer:
         self.register("move_to", self._build_move_to)
         self.register("wait", self._build_wait)
         self.register("rotate", self._build_rotate)
+        self.register("yell", self._build_yell)
 
     def register(self, pattern_type: str, factory: PatternFactory, *, replace: bool = False) -> None:
         """Registra a fábrica responsável por um ``type`` de objeto do Tiled."""
@@ -189,4 +191,15 @@ class EnemyPatternDeserializer:
             ),
             context.position,
             context.target_rotation,
+        )
+
+    def _build_yell(context: PatternContext) -> PatternBuildResult:
+        pass
+        return PatternBuildResult(
+            Yell(
+                context.position,
+                context.rotation,
+                context.duration,
+                context.
+            ),
         )

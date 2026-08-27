@@ -6,14 +6,14 @@ from util.phase import Phase
 
 def minutes(m): return m * 60
 
-START_TIMES = [0, 1, minutes(1)]
+START_TIMES = [0, minutes(10), minutes(11)]
 
 def get_launch_phase():
     return Phase(
         "Estação Krasny Mir",
         START_TIMES[0],
         START_TIMES[1],
-        {            
+        {
             "title": get_scene_title("Estacao Krasny Mir"),
             "background": get_krasny_mir_background(),
             "player": Player(),

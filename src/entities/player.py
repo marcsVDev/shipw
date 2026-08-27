@@ -15,19 +15,24 @@ class Player(Character):
     DEFAULT_SPRITESHEET = PLAYER_IMG_PATH
     FRAME_SIZE = 128
 
+    ANIMATIONS = {
+        "default": [0, 1, 2, 3, 4, 5, 6, 7]
+    }
+    ANIMATION_FRAME_DURATION = 0.10
+
     DRAW_COLLIDER = False
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     MIDDLE_VERTICES = [
-        Vector2(62, 7) * MULTIPLIER - MIDDLE_VECTOR,     # TL
-        Vector2(65, 7)* MULTIPLIER - MIDDLE_VECTOR,      # TR
-        Vector2(67, 29) * MULTIPLIER - MIDDLE_VECTOR,    # MR
-        Vector2(78, 53) * MULTIPLIER - MIDDLE_VECTOR,    # MMR
-        Vector2(78, 75) * MULTIPLIER - MIDDLE_VECTOR,    # BR
-        Vector2(85, 112) * MULTIPLIER - MIDDLE_VECTOR,   # BBR
-        Vector2(42, 112) * MULTIPLIER - MIDDLE_VECTOR,   # BBL
-        Vector2(49, 75) * MULTIPLIER - MIDDLE_VECTOR,    # BL
-        Vector2(49, 53) * MULTIPLIER - MIDDLE_VECTOR,    # MML
-        Vector2(60, 29) * MULTIPLIER - MIDDLE_VECTOR,    # ML
+        Vector2(62, 1) * MULTIPLIER - MIDDLE_VECTOR,     # TL
+        Vector2(65, 1)* MULTIPLIER - MIDDLE_VECTOR,      # TR
+        Vector2(67, 23) * MULTIPLIER - MIDDLE_VECTOR,    # MR
+        Vector2(78, 47) * MULTIPLIER - MIDDLE_VECTOR,    # MMR
+        Vector2(78, 69) * MULTIPLIER - MIDDLE_VECTOR,    # BR
+        Vector2(85, 106) * MULTIPLIER - MIDDLE_VECTOR,   # BBR
+        Vector2(42, 106) * MULTIPLIER - MIDDLE_VECTOR,   # BBL
+        Vector2(49, 69) * MULTIPLIER - MIDDLE_VECTOR,    # BL
+        Vector2(49, 47) * MULTIPLIER - MIDDLE_VECTOR,    # MML
+        Vector2(60, 23) * MULTIPLIER - MIDDLE_VECTOR,    # ML
     ]    
 
     SPEED = 1200
