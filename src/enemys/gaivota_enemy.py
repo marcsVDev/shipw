@@ -1,14 +1,31 @@
+
 from pygame import Vector2
 
+
 from enemys.pattern_deserializer import EnemyPatternDeserializer
-from enemys.patterns.move_to import MoveTo
 from entities.enemy import Enemy
-from game_consts import ASSETS_PATH, ENEMYS_PATH, SCREEN_WIDTH
+from game_consts import ENEMYS_PATH, PATTERNS_PATH
 
 
 class GaivotaEnemy(Enemy):
+    MULTIPLIER = 1.1
+    SCALE = 128 * MULTIPLIER
+    MIDDLE_SCALE = SCALE // 2
+
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "gaivota.png"
 
-    def __init__(self):        
+    MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
+    DRAW_COLLIDER = True
+    MIDDLE_VERTICES = [
+        Vector2(66, 36) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(127, 47) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(127, 68) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(63.5, 102) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(0, 67) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(0, 47) * MULTIPLIER - MIDDLE_VECTOR,
+        Vector2(61, 36) * MULTIPLIER - MIDDLE_VECTOR,
+    ]
+
+    def __init__(self):
         super().__init__()
-        self._patterns = EnemyPatternDeserializer().deserialize(ASSETS_PATH+"patterns/gaivota.tmj")
+        self._patterns = EnemyPatternDeserializer().deserialize(PATTERNS_PATH + "gaivota.tmj")

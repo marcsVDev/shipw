@@ -142,8 +142,8 @@
                  "type":"yell",
                  "visible":true,
                  "width":0,
-                 "x":1474.66666666667,
-                 "y":124
+                 "x":0,
+                 "y":0
                 }, 
                 {
                  "height":0,
@@ -182,6 +182,25 @@
                  "width":0,
                  "x":290.909090909091,
                  "y":454.545454545455
+                }, 
+                {
+                 "height":0,
+                 "id":16,
+                 "name":"Exit",
+                 "opacity":1,
+                 "point":true,
+                 "properties":[
+                        {
+                         "name":"duration",
+                         "type":"float",
+                         "value":1
+                        }],
+                 "rotation":0,
+                 "type":"move_to",
+                 "visible":true,
+                 "width":0,
+                 "x":162.606060606,
+                 "y":1206.060606061
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -190,7 +209,7 @@
          "y":0
         }],
  "nextlayerid":3,
- "nextobjectid":16,
+ "nextobjectid":18,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",

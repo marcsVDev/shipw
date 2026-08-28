@@ -3,7 +3,7 @@ from pygame import Vector2
 
 from entities.character import Character
 from events.events import Events
-from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH, SFX_PATH
 from events.event_bus import EventBus
 
 class Player(Character):
@@ -24,7 +24,7 @@ class Player(Character):
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     MIDDLE_VERTICES = [
         Vector2(62, 1) * MULTIPLIER - MIDDLE_VECTOR,     # TL
-        Vector2(65, 1)* MULTIPLIER - MIDDLE_VECTOR,      # TR
+        Vector2(65, 1) * MULTIPLIER - MIDDLE_VECTOR,     # TR
         Vector2(67, 23) * MULTIPLIER - MIDDLE_VECTOR,    # MR
         Vector2(78, 47) * MULTIPLIER - MIDDLE_VECTOR,    # MMR
         Vector2(78, 69) * MULTIPLIER - MIDDLE_VECTOR,    # BR
@@ -41,9 +41,14 @@ class Player(Character):
     MAX_TILT = 40
     TILT_RESPONSE = 90
 
+    PLAYER_SFX = SFX_PATH + "player.mp3"
+    VOLUME = 80
+
     def __init__(self):
         EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
         self.velocity = Vector2()
+        self.sound = pygame.mixer.Sound(self.PLAYER_SFX)   
+        self.sound.set_volume(self.VOLUME)
 
         super().__init__()
 
@@ -70,9 +75,14 @@ class Player(Character):
             direction = direction.normalize()
             target_velocity = direction * self.SPEED
             acceleration = self.ACCELERATION
+
+            self.sound.set_volume(self.VOLUME + 30)
         else:
             target_velocity = Vector2()
             acceleration = self.BRAKE_ACCELERATION
+
+        if direction == Vector2(0, 0):
+            self.sound.set_volume(self.VOLUME - 80)    
 
         self.velocity = self.velocity.move_towards(target_velocity, acceleration * delta)
         self.position += self.velocity * delta
@@ -100,4 +110,11 @@ class Player(Character):
         if player is not self:
             return
 
+        self.sound.stop()
+
         self.destroy()
+
+    def game_started(self):
+        super().game_started()
+        self.sound.play(-1)
+    

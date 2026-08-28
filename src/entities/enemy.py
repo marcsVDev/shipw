@@ -50,7 +50,7 @@ class Enemy(Character):
 
     def update(self, delta):
         if self._patterns[self._current_pattern].finished:
-            if self._current_pattern + 1 >= len(self._patterns):                               
+            if self._current_pattern + 1 >= len(self._patterns):         
                 # self.visible = False
                 self.destroy()
                 return

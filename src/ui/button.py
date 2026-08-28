@@ -3,11 +3,13 @@ from typing import Callable
 import pygame
 from pygame import Rect, Surface, Vector2
 
+from game_consts import SFX_PATH
 from util.animatedSprite import AnimatedSprite
 from ui.ui import UI
 
 class Button(UI):
     DRAW_AREA = False
+    SFX_BUTTON = SFX_PATH + "click.mp3"
 
     def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0)):
         super().__init__(image, position)
@@ -29,9 +31,10 @@ class Button(UI):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT and self.hovered:
-                    if self.press_callable is not None: 
+                    if self.press_callable is not None:
+                        pygame.mixer.Sound(self.SFX_BUTTON).play() 
                         self.press_callable()
-                        
+
                     self.pressed = True
             if self.pressed and event.type == pygame.MOUSEBUTTONUP:
                 if event.button == pygame.BUTTON_LEFT:
