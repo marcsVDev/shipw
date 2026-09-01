@@ -1,4 +1,3 @@
-
 ASSETS_PATH = "assets/"
 ENEMYS_PATH = ASSETS_PATH + "enemys/"
 SCENERY_PATH = ASSETS_PATH + "scenery/"

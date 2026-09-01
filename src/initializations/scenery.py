@@ -16,12 +16,16 @@ def get_earth_scenery():
 
     earth_size = EARTH_FRAME_SIZE * EARTH_SCALE
 
-    return MovingObject(
+    earth = MovingObject(
         AnimatedSprite(earth_img, 1, earth_size),
         pygame.Vector2(SCREEN_WIDTH - earth_size, SCREEN_HEIGHT - earth_size),
         pygame.Vector2(0, 1),
         EARTH_SPEED
     )
+
+    earth.run()
+
+    return earth
 
 SATELLITE_SCALE = 4
 SATELLITE_FRAME_SIZE = 90

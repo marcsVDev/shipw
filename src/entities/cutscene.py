@@ -1,5 +1,3 @@
-from pygame import Surface
-
 from entities.entity import Entity
 from util.animatedSprite import AnimatedSprite
 

@@ -1,12 +1,13 @@
+from enemys.drone_enemy import DroneEnemy
 from enemys.gaivota_enemy import GaivotaEnemy
 from entities.player import Player
-from initializations.scenery import get_krasny_mir_background, get_satellite_scenery
+from initializations.scenery import get_krasny_mir_background, get_satellite_scenery, get_earth_scenery
 from initializations.ui_inits import get_dialogue_panel, get_scene_title
 from util.phase import Phase
 
 def minutes(m): return m * 60
 
-START_TIMES = [0, 3, minutes(11)]
+START_TIMES = [0, 30, minutes(3)]
 
 def get_launch_phase():
     return Phase(
@@ -14,13 +15,14 @@ def get_launch_phase():
         START_TIMES[0],
         START_TIMES[1],
         {
-            "title": get_scene_title("Estacao Krasny Mir"),
+            "title": get_scene_title("Estacao Krasny Mir"),            
             "background": get_krasny_mir_background(),
-            "player": Player(),
+            "drone": DroneEnemy(),
+            "player": Player(),            
         }
     )
 
-def get_troposphere_phase():
+def get_estratosfera_phase():
     return Phase(
         "Estratosfera",
         START_TIMES[1],
@@ -28,7 +30,8 @@ def get_troposphere_phase():
         {
             "title": get_scene_title("Estratosfera"),
             "sat": get_satellite_scenery(),
-            "dialogue": get_dialogue_panel(),
+            # "dialogue": get_dialogue_panel(),
+            "earth": get_earth_scenery(),
             "gaivota": GaivotaEnemy(),
             "player": Player()
         }
@@ -37,5 +40,5 @@ def get_troposphere_phase():
 def get_phases() -> list[Phase]:
     return [
         get_launch_phase(),
-        get_troposphere_phase()
+        get_estratosfera_phase()
     ]

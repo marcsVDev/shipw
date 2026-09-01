@@ -1,5 +1,3 @@
-import time
-
 import pygame
 
 from events.events import Events
