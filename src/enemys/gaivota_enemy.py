@@ -1,10 +1,11 @@
 
 from pygame import Vector2
+import pygame
 
 
 from enemys.pattern_deserializer import EnemyPatternDeserializer
 from entities.enemy import Enemy
-from game_consts import ENEMYS_PATH, PATTERNS_PATH
+from game_consts import ENEMYS_PATH, PATTERNS_PATH, SFX_PATH
 
 
 class GaivotaEnemy(Enemy):
@@ -26,6 +27,15 @@ class GaivotaEnemy(Enemy):
         Vector2(61, 36) * MULTIPLIER - MIDDLE_VECTOR,
     ]
 
+    DEFAULT_SFX_PATH = SFX_PATH + "gaivota_default.mp3"
+
     def __init__(self):
         super().__init__()
+        
         self._patterns = EnemyPatternDeserializer().deserialize(PATTERNS_PATH + "gaivota.tmj")
+
+    def update(self, delta):       
+
+        return super().update(delta)
+
+    

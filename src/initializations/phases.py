@@ -6,7 +6,7 @@ from util.phase import Phase
 
 def minutes(m): return m * 60
 
-START_TIMES = [0, 1000, minutes(11)]
+START_TIMES = [0, 3, minutes(11)]
 
 def get_launch_phase():
     return Phase(
