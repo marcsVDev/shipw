@@ -22,13 +22,13 @@ def get_launch_phase():
 
 def get_troposphere_phase():
     return Phase(
-        "Troposfera",
+        "Estratosfera",
         START_TIMES[1],
         START_TIMES[2],
         {
-            "title": get_scene_title("Troposfera"),
+            "title": get_scene_title("Estratosfera"),
             "sat": get_satellite_scenery(),
-            # "dialogue": get_dialogue_panel(),
+            "dialogue": get_dialogue_panel(),
             "gaivota": GaivotaEnemy(),
             "player": Player()
         }

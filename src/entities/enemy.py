@@ -66,11 +66,19 @@ class Enemy(Character):
                 self._sound.play(-1) 
                 self.playing_sound = True                
         elif self.playing_sound:
-            self._sound.stop()
-            self.playing_sound = False
+            self.stop_sound()
             
-        super().update(delta)
+        super().update(delta)        
 
     def movement(self, delta):
         self._rotation = self._patterns[self._current_pattern].rotation
         self.position = self._patterns[self._current_pattern].position
+
+    def destroy(self):
+        self.stop_sound()
+        return super().destroy()        
+
+    def stop_sound(self):
+        self._sound.stop()
+        self.playing_sound = False
+        
