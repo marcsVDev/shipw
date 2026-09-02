@@ -71,22 +71,23 @@ class Game:
         # time.sleep(2)
         EventBus.emit(Events.GAME_STARTED) 
 
-        self.load_phase(self.scenes["game"].get_system("progression", Progression).PHASES[0])
+        self.load_phase(self.scenes["game"].get_system("progression", Progression).phases[0])
         self.scenes["game"].destroy_entity("play_btn")
-        self.change_scene_to("game")        
+        self.change_scene_to("game")
 
     def load_phase(self, phase: Phase):
         game_scene = self.scenes["game"]
         game_scene.clear_scene()
+        print(phase.name)
         for key in phase.default_entities.keys():
             match phase.default_entities[key]:
                 case UI():
-                    game_scene.add_ui(phase.default_entities[key], key)                 
+                    game_scene.add_ui(phase.default_entities[key], key)
                 case _:
-                    game_scene.add_entity(phase.default_entities[key], key) 
+                    game_scene.add_entity(phase.default_entities[key], key)
 
     def change_scene_to(self, name: str):
-         self.current_scene = name   
+         self.current_scene = name
 
 
 GAME = Game()
