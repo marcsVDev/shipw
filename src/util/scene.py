@@ -100,6 +100,11 @@ class Scene:
             EventBus.emit(Events.PLAYER_COLLIDE, self.player, colliding_enemys)
 
     def clear_scene(self):
+        # Permite que cada entidade libere seus recursos (como sons em loop)
+        # antes de ser removida da cena.
+        for entity in self.entities:
+            entity.destroy()
+
         self.entities.clear()
         self.player = None
         self.enemys.clear()

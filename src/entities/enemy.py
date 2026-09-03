@@ -76,9 +76,11 @@ class Enemy(Character):
 
     def destroy(self):
         self.stop_sound()
-        return super().destroy()        
+        super().destroy()
 
     def stop_sound(self):
-        self._sound.stop()
+        if self._sound is not None:
+            self._sound.stop()
+
         self.playing_sound = False
         

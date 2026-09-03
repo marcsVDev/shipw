@@ -12,7 +12,7 @@ from util.scene import Scene
 
 class Game:
     FPS = 60
-    FILL_COLOR = (0x17, 0x18, 0x1d)
+    FILL_COLOR = (0,0,0) #(0x4d, 0x9b, 0xe6)
 
     def __init__(self):
         pygame.init()  
@@ -88,6 +88,5 @@ class Game:
 
     def change_scene_to(self, name: str):
          self.current_scene = name
-
-
+         
 GAME = Game()

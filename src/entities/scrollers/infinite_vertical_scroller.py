@@ -4,12 +4,13 @@ from ..entity import Entity
 
 class InfiniteVerticalScroller(Entity):
     def __init__(self, image: Surface, velocity: float, running: bool = False):
+        super().__init__()
+
         self.image = image
         self.velocity = velocity
-        self.running = running        
-        self.height = self.image.get_height()    
-
-        self.positions = [-(self.height * 2), -self.height, 0]  
+        self.running = running
+        self.height = image.get_height()
+        self.positions = [-self.height, 0] 
 
     def update(self, delta):
         if not self.running: return

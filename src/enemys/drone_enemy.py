@@ -12,7 +12,7 @@ class DroneEnemy(Enemy):
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "drone.png"
 
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
-    DRAW_COLLIDER = True
+    DRAW_COLLIDER = False
     MIDDLE_VERTICES = [
         Vector2(64, 23) * MULTIPLIER - MIDDLE_VECTOR,
         Vector2(104, 64) * MULTIPLIER - MIDDLE_VECTOR,

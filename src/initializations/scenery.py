@@ -1,6 +1,7 @@
 import pygame
 
 from entities.background import Background
+from entities.scrollers.infinite_vertical_scroller import InfiniteVerticalScroller
 from entities.scrollers.moving_object import MovingObject
 from game_consts import SCENERY_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from util.animatedSprite import AnimatedSprite
@@ -11,6 +12,20 @@ EARTH_SPEED = 2.5
 
 S4_SCALE = 4
 S128_FRAME_SIZE = 128
+
+def darken_image(image: pygame.Surface, amount: int = 100) -> pygame.Surface:
+    """Retorna uma copia escurecida da imagem sem alterar a original.
+
+    ``amount`` deve estar entre 0 (sem alteracao) e 255 (preto).
+    """
+    amount = max(0, min(255, amount))
+    darkened_image = image.copy()
+    brightness = 255 - amount
+    darkened_image.fill(
+        (brightness, brightness, brightness, 255),
+        special_flags=pygame.BLEND_RGBA_MULT,
+    )
+    return darkened_image
 
 def get_earth_scenery():
     earth_img = pygame.image.load(SCENERY_PATH + "earth.png").convert_alpha()
@@ -36,14 +51,11 @@ def get_venus_scenery():
 
     venus_size = venus_img.get_width()
 
-    shad = pygame.Surface(venus_img.get_size(), pygame.SRCALPHA)
-    shad.blit(venus_img, (0, 0, 0, 55))
-
     venus = MovingObject(
-        AnimatedSprite(venus_img, 1, venus_size),
+        AnimatedSprite(darken_image(venus_img, 60), 1, venus_size),
         pygame.Vector2(SCREEN_WIDTH - venus_size // 2, 0),
         pygame.Vector2(1, 0.1),
-        1
+        4
     )
     venus.run()
     
@@ -53,16 +65,13 @@ def get_satellite_scenery():
     sat_img = pygame.image.load(SCENERY_PATH + "satelite.png").convert_alpha()
     sat_img = pygame.transform.scale_by(sat_img, S4_SCALE)
 
-    sat_size = sat_img.get_width()
-
-    shad = pygame.Surface(sat_img.get_size(), pygame.SRCALPHA)
-    shad.blit(sat_img, (0, 0, 0, 55))
+    sat_size = sat_img.get_width()    
 
     sat = MovingObject(
-        AnimatedSprite(shad, 1, sat_size),
+        AnimatedSprite(darken_image(sat_img, 50), 1, sat_size),
         pygame.Vector2(SCREEN_WIDTH + sat_size // 2, 100),
         pygame.Vector2(-1, 0.1),
-        100
+        90
     )
     sat.run()
     
@@ -73,5 +82,10 @@ def get_krasny_mir_background():
 
 def get_espaco_proximo_background():
     image = pygame.image.load(SCENERY_PATH + "espaco_proximo.png").convert_alpha()
-    image.set_alpha(120)
-    return Background(image, 4)
+    image = pygame.transform.scale_by(image, 1.14)
+    return InfiniteVerticalScroller(darken_image(image), 5, True)
+
+def get_estratosfera_background():
+    image = pygame.image.load(SCENERY_PATH + "estratosfera.png").convert_alpha()
+    image = pygame.transform.scale_by(image, 1.1)
+    return InfiniteVerticalScroller(image, 500, True)

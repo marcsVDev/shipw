@@ -12,7 +12,7 @@ class GaivotaEnemy(Enemy):
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "gaivota.png"
 
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
-    DRAW_COLLIDER = True
+    DRAW_COLLIDER = False
     MIDDLE_VERTICES = [
         Vector2(66, 36) * MULTIPLIER - MIDDLE_VECTOR,
         Vector2(127, 47) * MULTIPLIER - MIDDLE_VECTOR,
