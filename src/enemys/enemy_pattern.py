@@ -10,6 +10,10 @@ class EnemyPattern:
     def update(self, delta):
         ...
 
+    def bind_target(self, target):
+        """Provider opcional da posição atual do jogador; padrões fixos ignoram."""
+        pass
+
     @property
     def finished(self) -> bool:
         ...

@@ -1,5 +1,3 @@
-from pydoc import get_pager
-
 from events.event_bus import EventBus
 from events.events import Events
 from initializations.phases import get_phases
@@ -7,30 +5,26 @@ from system.system import System
 
 
 class Progression(System):
-
-    
     def __init__(self):
-        self._elapsed_time: float = 0
-        self._game_started: bool = False
-        self.phase_index: int = 0
+        self._game_started = False
+        self.phase_index = 0
         self.phases = get_phases()
-
         EventBus.connect(Events.GAME_STARTED, self.game_started)
-        super().__init__()
+        EventBus.connect(Events.PHASE_COMPLETED, self.phase_completed)
 
     def update(self, delta):
-        if not self._game_started: 
-            return
-        
-        self._elapsed_time += delta
+        pass
 
-        next_index = self.phase_index + 1
-        if next_index < len(self.phases):
-            next_phase = self.phases[next_index]
-            if self._elapsed_time >= next_phase.starts_at:
-                self.phase_index = next_index
-                print(self.phase_index)
-                EventBus.emit(Events.PHASE_CHANGED, self.phases[self.phase_index])
+    def phase_completed(self, phase):
+        if not self._game_started or phase is not self.phases[self.phase_index]:
+            return
+        if self.phase_index + 1 == len(self.phases):
+            self._game_started = False
+            EventBus.emit(Events.GAME_COMPLETED)
+            return
+        self.phase_index += 1
+        EventBus.emit(Events.PHASE_CHANGED, self.phases[self.phase_index])
 
     def game_started(self):
+        self.phase_index = 0
         self._game_started = True

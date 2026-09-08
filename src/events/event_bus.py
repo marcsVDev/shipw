@@ -9,6 +9,12 @@ class EventBus:
         EventBus.events.setdefault(event, []).append(func)
 
     @staticmethod
+    def disconnect(event: str, func: Callable):
+        listeners = EventBus.events.get(event, [])
+        if func in listeners:
+            listeners.remove(func)
+
+    @staticmethod
     def emit(event: str, *args):
-        for fn in EventBus.events.get(event, []):
+        for fn in tuple(EventBus.events.get(event, [])):
             fn(*args)

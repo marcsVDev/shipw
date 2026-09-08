@@ -1,11 +1,14 @@
 import pygame
 
+from initializations.enemy_waves import get_enemy_registry
+from system.wave_system import WaveSystem
 from events.events import Events
 from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
 from initializations.ui_inits import get_play_button
 from events.event_bus import EventBus
 from ui.title import Title
 from ui.ui import UI
+from ui.wave_status import WaveStatus
 from util.phase import Phase
 from util.progresssion import Progression
 from util.scene import Scene
@@ -38,6 +41,7 @@ class Game:
         progression = Progression()
         
         game_scene.add_system("progression", progression)
+        game_scene.add_system("waves", WaveSystem(game_scene, get_enemy_registry()))
         self.scenes["game"] = game_scene
 
         # main loop
@@ -85,6 +89,10 @@ class Game:
                     game_scene.add_ui(phase.default_entities[key], key)
                 case _:
                     game_scene.add_entity(phase.default_entities[key], key)
+
+        game_scene.player.free_movement = phase.free_movement
+        game_scene.get_system("waves", WaveSystem).load_phase(phase)
+        game_scene.add_ui(WaveStatus(game_scene.get_system("waves", WaveSystem)))
 
     def change_scene_to(self, name: str):
          self.current_scene = name

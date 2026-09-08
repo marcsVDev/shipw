@@ -25,9 +25,10 @@ class GaivotaEnemy(Enemy):
 
     DEFAULT_SFX_PATH = SFX_PATH + "gaivota_default.mp3"
 
-    def __init__(self):
-        super().__init__()        
-        self._patterns = EnemyPatternDeserializer().deserialize(PATTERNS_PATH + "gaivota.tmj")
+    def __init__(self, patterns=None):
+        if patterns is None:
+            patterns = EnemyPatternDeserializer().deserialize(PATTERNS_PATH + "gaivota.tmj")
+        super().__init__(patterns=patterns)
 
     def update(self, delta):
         return super().update(delta)

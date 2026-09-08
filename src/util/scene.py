@@ -1,6 +1,7 @@
 from typing import overload
 
 from entities.enemy import Enemy
+from entities.enemy_projectile import EnemyProjectile
 from entities.entity import Entity
 from entities.player import Player
 from events.event_bus import EventBus
@@ -15,7 +16,7 @@ class Scene:
         self.ui_items: list[UI] = []
         self.systems: dict[str, System] = {}
         self.blackboard: dict[str, Entity] = {}
-        self.player: Player
+        self.player: Player | None = None
         self.enemys: list[Enemy] = []
         self.game_scene = game_scene
 
@@ -61,17 +62,18 @@ class Scene:
         for system in self.systems.values():
             system.update(delta)
 
-        for et in self.entities:
+        for et in tuple(self.entities):
             if et.to_destroy:
-                self.entities.remove(et)
                 continue
 
             et.update(delta)
 
+        self._remove_destroyed()
         if self.game_scene:
             self.check_collisions()
+        self._remove_destroyed()
 
-        for item in self.ui_items:
+        for item in tuple(self.ui_items):
             if item.to_destroy:
                 self.ui_items.remove(item)
                 continue
@@ -85,12 +87,21 @@ class Scene:
             item.draw(screen)
 
     def check_collisions(self):
-        if self.player is None:
+        if self.player is None or self.player.to_destroy:
             return
 
         colliding_enemys: list[Enemy] = []
-        for enemy in self.enemys:
-            if not enemy.visible:
+        for enemy in self.entities:
+            if not isinstance(enemy, (Enemy, EnemyProjectile)):
+                continue
+            if not enemy.visible or enemy.to_destroy:
+                continue
+
+            # Triagem barata antes do SAT. Os limites incluem o polígono inteiro.
+            distance = self.player.position - enemy.position
+            enemy_radius = enemy.SCALE if isinstance(enemy, Enemy) else enemy.RADIUS
+            reach = self.player.SCALE + enemy_radius
+            if abs(distance.x) > reach or abs(distance.y) > reach:
                 continue
 
             if self.player.collide_with(enemy):
@@ -98,6 +109,13 @@ class Scene:
 
         if len(colliding_enemys) > 0:
             EventBus.emit(Events.PLAYER_COLLIDE, self.player, colliding_enemys)
+
+    def _remove_destroyed(self):
+        self.entities[:] = [entity for entity in self.entities if not entity.to_destroy]
+        self.enemys[:] = [enemy for enemy in self.enemys if not enemy.to_destroy]
+        self.blackboard = {key: value for key, value in self.blackboard.items() if not value.to_destroy}
+        if self.player is not None and self.player.to_destroy:
+            self.player = None
 
     def clear_scene(self):
         # Permite que cada entidade libere seus recursos (como sons em loop)
@@ -115,6 +133,8 @@ class Scene:
         item = self.blackboard.pop(name, None)
         if item is None:
             return
+
+        item.destroy()
 
         if isinstance(item, UI):
             self.ui_items.remove(item)

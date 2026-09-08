@@ -8,6 +8,7 @@ from events.event_bus import EventBus
 from events.events import Events
 from util.animatedSprite import AnimatedSprite
 from collision.collidable import Collidable
+from util.resources import load_image, scaled_frame
 
 
 class Character(Entity, Collidable):
@@ -32,7 +33,7 @@ class Character(Entity, Collidable):
         self.position: Vector2 = self.INITIAL_POSITION.copy()
         self.can_move: bool = False
 
-        self._spritesheet: Surface = pygame.image.load(self.DEFAULT_SPRITESHEET).convert_alpha()
+        self._spritesheet: Surface = load_image(self.DEFAULT_SPRITESHEET)
         self._animation = AnimatedSprite(
             self._spritesheet,
             self.ANIMATION_FRAME_DURATION,
@@ -74,10 +75,11 @@ class Character(Entity, Collidable):
         ...
 
     def scale(self, by):
-        self._image = pygame.transform.scale(self._image, (by, by))
+        self._image = scaled_frame(self._spritesheet, self.FRAME_SIZE, self._animation.frame_index, by)
     
     def rotate(self):
-        self._image = pygame.transform.rotate(self._image, self._rotation)
+        if self._rotation % 360:
+            self._image = pygame.transform.rotate(self._image, self._rotation)
 
     def align_rect(self):
         self._rect = self._image.get_rect(center=self.position)
@@ -87,6 +89,10 @@ class Character(Entity, Collidable):
 
     def game_started(self):
         self.can_move = True
+
+    def destroy(self):
+        EventBus.disconnect(Events.GAME_STARTED, self.game_started)
+        super().destroy()
 
     def play_animation(self, name: str, *, restart: bool = True):
         """Inicia uma animação configurada em ``ANIMATIONS``."""

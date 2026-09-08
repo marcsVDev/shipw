@@ -116,8 +116,11 @@ class AnimatedSprite:
                     self.is_playing = False
 
     def get_current_frame(self) -> Surface:
-        animation = self._animations[self.current_animation]
-        return self.get_frame(animation["frames"][self.frame])
+        return self.get_frame(self.frame_index)
+
+    @property
+    def frame_index(self):
+        return self._animations[self.current_animation]["frames"][self.frame]
 
     def get_frame(self, frame: int) -> Surface:
         if frame < 0 or frame >= self.frames_count:

@@ -7,7 +7,7 @@ from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH, SFX_PATH
 from events.event_bus import EventBus
 
 class Player(Character):
-    MULTIPLIER = 1.3
+    MULTIPLIER = 1.2
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
     INITIAL_POSITION = Vector2(SCREEN_WIDTH // 2, SCREEN_HEIGHT - SCALE)
@@ -33,7 +33,7 @@ class Player(Character):
         Vector2(49, 69) * MULTIPLIER - MIDDLE_VECTOR,    # BL
         Vector2(49, 47) * MULTIPLIER - MIDDLE_VECTOR,    # MML
         Vector2(60, 23) * MULTIPLIER - MIDDLE_VECTOR,    # ML
-    ]    
+    ]
 
     SPEED = 1200
     ACCELERATION = 9000
@@ -47,27 +47,36 @@ class Player(Character):
     def __init__(self):
         EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
         self.velocity = Vector2()
-        self.sound = pygame.mixer.Sound(self.PLAYER_SFX)   
+        self.free_movement = True
+        self._sound_started = False
+        self.sound = pygame.mixer.Sound(self.PLAYER_SFX)
         self.sound.set_volume(self.VOLUME)
 
         super().__init__()
 
     def update(self, delta):
         if self.can_move:
-            self.screen_collide() 
+            if not self._sound_started:
+                self.sound.play(-1)
+                self._sound_started = True
+            self.screen_collide()
 
         super().update(delta)
-    
+
     def movement(self, delta):
+        if not self.free_movement:
+            self.velocity.update(0, 0)
+            self._rotation = 0
+            return
         keys = pygame.key.get_pressed()
-        direction = Vector2(0, 0)        
+        direction = Vector2(0, 0)
 
         if keys[pygame.K_a]:
             direction.x -= 1
         if keys[pygame.K_d]:
             direction.x += 1
         if keys[pygame.K_w]:
-            direction.y -= 1                 
+            direction.y -= 1
         if keys[pygame.K_s]:
             direction.y += 1
 
@@ -82,7 +91,7 @@ class Player(Character):
             acceleration = self.BRAKE_ACCELERATION
 
         if direction == Vector2(0, 0):
-            self.sound.set_volume(self.VOLUME - 80)    
+            self.sound.set_volume(self.VOLUME - 80)
 
         self.velocity = self.velocity.move_towards(target_velocity, acceleration * delta)
         self.position += self.velocity * delta
@@ -116,5 +125,9 @@ class Player(Character):
 
     def game_started(self):
         super().game_started()
-        self.sound.play(-1)
-    
+
+    def destroy(self):
+        self.sound.stop()
+        EventBus.disconnect(Events.PLAYER_COLLIDE, self.player_collide)
+        super().destroy()
+
