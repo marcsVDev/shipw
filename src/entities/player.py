@@ -47,6 +47,7 @@ class Player(Character):
     def __init__(self):
         EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
         self.velocity = Vector2()
+        self._external_acceleration = Vector2()
         self.free_movement = True
         self._sound_started = False
         self.sound = pygame.mixer.Sound(self.PLAYER_SFX)
@@ -66,6 +67,7 @@ class Player(Character):
     def movement(self, delta):
         if not self.free_movement:
             self.velocity.update(0, 0)
+            self._external_acceleration.update(0, 0)
             self._rotation = 0
             return
         keys = pygame.key.get_pressed()
@@ -94,6 +96,8 @@ class Player(Character):
             self.sound.set_volume(self.VOLUME - 80)
 
         self.velocity = self.velocity.move_towards(target_velocity, acceleration * delta)
+        self.velocity += self._external_acceleration * delta
+        self._external_acceleration.update(0, 0)
         self.position += self.velocity * delta
 
         target_tilt = -(self.velocity.x / self.SPEED) * self.MAX_TILT
@@ -114,6 +118,10 @@ class Player(Character):
         elif self.position.y - self.MIDDLE_SCALE < 0:
             self.position.y = self.MIDDLE_SCALE
             self.velocity.y = max(0, self.velocity.y)
+
+    def apply_force(self, acceleration):
+        """Acumula uma aceleração externa para o próximo passo de movimento."""
+        self._external_acceleration += Vector2(acceleration)
 
     def player_collide(self, player, collisions):
         if player is not self:

@@ -12,6 +12,7 @@ class Enemy(Character):
     INITIAL_POSITION = Vector2(0, 0)
     ROTATION_ANGLE = 360  
     ROTATE = False  
+    LOOK_AT_PLAYER = False
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "meteor_enemy.png"
     FRAME_SIZE = 128
     PATTERNS = [
@@ -48,6 +49,7 @@ class Enemy(Character):
         self._current_pattern: int = 0
         self._patterns: list[EnemyPattern] = deepcopy(self.PATTERNS) if patterns is None else patterns
         self.attack = None
+        self._target_provider = lambda: None
         self._sound = load_sound(self.DEFAULT_SFX_PATH) if self.DEFAULT_SFX_PATH is not None else None
         self._channel = None
         self.playing_sound = False
@@ -77,7 +79,7 @@ class Enemy(Character):
             
         super().update(delta)        
 
-    def configure(self, patterns, attack=None):
+    def configure(self, patterns, attack=None, target=None):
         """Recebe comportamentos novos por instância, sem compartilhar timers."""
         if not patterns:
             raise ValueError("O inimigo precisa de pelo menos um movimento")
@@ -85,13 +87,25 @@ class Enemy(Character):
         self._current_pattern = 0
         self.position = patterns[0].position.copy()
         self.attack = attack
+        self.bind_target(target)
         self.game_started()
         self.update(0)
         return self
 
     def movement(self, delta):
-        self._rotation = self._patterns[self._current_pattern].rotation
         self.position = self._patterns[self._current_pattern].position
+        self._rotation = self._patterns[self._current_pattern].rotation
+        if self.LOOK_AT_PLAYER:
+            target = self._target_provider()
+            if target is not None:
+                direction = Vector2(target) - self.position
+                if direction.length_squared():
+                    # Os sprites de inimigos apontam para baixo em rotação zero.
+                    self._rotation = -Vector2(0, 1).angle_to(direction)
+
+    def bind_target(self, target):
+        """Define um provider da posição do alvo, sem acoplar o inimigo à Scene."""
+        self._target_provider = target if target is not None else lambda: None
 
     def draw(self, screen):
         super().draw(screen)

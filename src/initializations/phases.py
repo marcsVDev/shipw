@@ -37,7 +37,7 @@ def get_espaco_profundo_phase():
     return Phase("Espaço Profundo", 0, 0, {
         "title": get_scene_title("Espaco Profundo"),
         "background": get_espaco_proximo_background(), "player": Player(),
-    }, waves=deep_space_waves(), planned_enemies=("novos_drones", "mina_espacial", "alienigena"))
+    }, waves=deep_space_waves(), planned_enemies=("novos_drones", "alienigena"))
 
 
 def get_orbita_marte_phase():

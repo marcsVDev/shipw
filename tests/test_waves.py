@@ -10,7 +10,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import pygame
 
-from enemys.attacks import VolleyAttack
+from enemys.attacks import AttractionAttack, VolleyAttack
+from enemys.mine_enemy import MineEnemy
+from enemys.patterns.charge import Charge
+from enemys.patterns.fly_by import FlyBy
 from entities.enemy_projectile import EnemyProjectile
 from events.event_bus import EventBus
 from events.events import Events
@@ -62,10 +65,7 @@ class WavesTest(unittest.TestCase):
             self.assertTrue(system.finished)
             self.assertEqual([index for index, _ in started], [0, 1, 2])
             self.assertTrue(all(count >= 10 for _, count in started))
-            if waves[0].spawns[0].enemy == "drone":
-                self.assertGreater(shot_count, 100)
-            else:
-                self.assertEqual(shot_count, 0)
+            self.assertEqual(shot_count, 0)
             self.assertEqual(completed, [phase])
             self.assertFalse(scene.enemys)
             self.assertFalse(EventBus.events.get(Events.GAME_STARTED))
@@ -79,9 +79,8 @@ class WavesTest(unittest.TestCase):
         spawn = near_space_waves()[0].spawns[0]
         first, second = registry.create(spawn), registry.create(spawn)
         first.update(1)
-        first.attack.remaining = 0
         self.assertNotEqual(first.position, second.position)
-        self.assertNotEqual(first.attack.remaining, second.attack.remaining)
+        self.assertIsNot(first._patterns[0], second._patterns[0])
         first.destroy()
         second.destroy()
 
@@ -143,7 +142,10 @@ class WavesTest(unittest.TestCase):
                          {"gaivota", "asteroid"})
         for phase in phases[2:5]:
             self.assertTrue(phase.free_movement)
-            self.assertEqual({spawn.enemy for wave in phase.waves for spawn in wave.spawns}, {"drone"})
+        self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone"})
+        self.assertEqual({spawn.enemy for wave in phases[3].waves for spawn in wave.spawns},
+                         {"drone", "mine"})
+        self.assertEqual({spawn.enemy for wave in phases[4].waves for spawn in wave.spawns}, {"drone"})
         for phase in (phases[0], phases[-1]):
             self.assertFalse(phase.free_movement)
             self.assertFalse(phase.waves)
@@ -174,6 +176,63 @@ class WavesTest(unittest.TestCase):
         system.load_phase(SimpleNamespace(waves=launch_waves(), duration=5))
         system.update(100)
         self.assertFalse(scene.enemys)
+
+    def test_drones_and_gaivotas_never_receive_projectile_attacks(self):
+        registry = get_enemy_registry()
+        for waves in (stratosphere_waves(), near_space_waves(), deep_space_waves(), mars_orbit_waves()):
+            for wave in waves:
+                for spawn in wave.spawns:
+                    enemy = registry.create(spawn, lambda: pygame.Vector2(960, 900))
+                    if spawn.enemy in ("drone", "gaivota"):
+                        self.assertIsNone(enemy.attack)
+                        self.assertTrue(any(isinstance(pattern, (Charge, FlyBy))
+                                            for pattern in enemy._patterns))
+                    enemy.destroy()
+
+    def test_mine_attracts_player_and_has_collision_placeholder(self):
+        from entities.player import Player
+        registry = get_enemy_registry()
+        spawn = next(spawn for wave in deep_space_waves() for spawn in wave.spawns
+                     if spawn.enemy == "mine")
+        mine = registry.create(spawn)
+        self.assertIsInstance(mine, MineEnemy)
+        self.assertEqual(mine.MIDDLE_VERTICES, [])
+        self.assertIsInstance(mine.attack, AttractionAttack)
+
+        player = Player()
+        player.position.update(mine.position.x - 200, mine.position.y)
+        mine.attack.update(mine, player, .1, lambda projectile: None)
+        player.movement(.1)
+        self.assertGreater(player.velocity.x, 0)
+        mine.destroy()
+        player.destroy()
+
+    def test_fast_flybys_cross_the_screen_on_both_axes(self):
+        patterns = [spawn.movement()[0] for waves in (near_space_waves(), deep_space_waves())
+                    for wave in waves for spawn in wave.spawns]
+        flybys = [pattern for pattern in patterns if isinstance(pattern, FlyBy)]
+        self.assertTrue(any(abs(pattern._direction.x) == 1 for pattern in flybys))
+        self.assertTrue(any(abs(pattern._direction.y) == 1 for pattern in flybys))
+        for pattern in flybys:
+            pattern.update(pattern.duration + 1)
+            self.assertTrue(pattern.finished)
+
+    def test_enemy_look_at_rotates_sprite_and_collision_together(self):
+        registry = get_enemy_registry()
+        spawn = near_space_waves()[0].spawns[0]
+        target = pygame.Vector2()
+        enemy = registry.create(spawn, lambda: target)
+        target.update(enemy.position.x + 500, enemy.position.y)
+        enemy.update(0)
+
+        self.assertTrue(enemy.LOOK_AT_PLAYER)
+        self.assertAlmostEqual(enemy._rotation, 90)
+        expected = [enemy.position + vertex.rotate(-enemy._rotation)
+                    for vertex in enemy.MIDDLE_VERTICES]
+        for actual, rotated in zip(enemy._collider_vertices, expected):
+            self.assertTrue(actual.distance_to(rotated) < .001)
+        self.assertLessEqual(pygame.Vector2(enemy._rect.center).distance_to(enemy.position), 1)
+        enemy.destroy()
 
 
 if __name__ == "__main__":

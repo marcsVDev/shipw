@@ -38,4 +38,4 @@ class EnemyRegistry:
         patterns = spawn.movement()
         for pattern in patterns:
             pattern.bind_target(target)
-        return self._factories[spawn.enemy]().configure(patterns, spawn.attack())
+        return self._factories[spawn.enemy]().configure(patterns, spawn.attack(), target)

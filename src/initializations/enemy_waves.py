@@ -3,11 +3,13 @@ from functools import partial
 
 from pygame import Vector2
 
-from enemys.attacks import VolleyAttack
+from enemys.attacks import AttractionAttack
 from enemys.drone_enemy import DroneEnemy
 from enemys.gaivota_enemy import GaivotaEnemy
+from enemys.mine_enemy import MineEnemy
 from entities.enemy import Enemy
 from enemys.patterns.charge import Charge
+from enemys.patterns.fly_by import FlyBy
 from enemys.patterns.move_to import MoveTo
 from enemys.patterns.wait import Wait
 from enemys.waves import EnemyRegistry, EnemySpawn, Wave
@@ -17,7 +19,8 @@ from util.resources import load_image, load_sound
 
 def get_enemy_registry():
     registry = EnemyRegistry()
-    for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy), ("asteroid", Enemy)):
+    for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy),
+                             ("asteroid", Enemy), ("mine", MineEnemy)):
         # As ondas fornecem seus próprios movimentos; não carregar o TMJ legado.
         registry.register(name, partial(enemy_type, patterns=[]))
         load_image(enemy_type.DEFAULT_SPRITESHEET)
@@ -53,12 +56,38 @@ def formation_path(slot, count, layout, duration, charge_speed=1800):
             MoveTo(anchor, Vector2(x, H + 180), 3)]
 
 
-def make_wave(name, layout, species, count, duration, interval, speed, angles, aimed, charge_speed=1800):
+def fly_by_path(slot, count, axis, speed=2200):
+    lane = slot % max(1, min(count, 10))
+    reverse = slot % 2 == 1
+    if axis == "horizontal":
+        y = H * (.09 + lane * .09)
+        start, end = Vector2(-180, y), Vector2(W + 180, y)
+    elif axis == "vertical":
+        x = W * (.06 + lane * .098)
+        start, end = Vector2(x, -180), Vector2(x, H + 180)
+    else:
+        raise ValueError(f"Eixo de passagem desconhecido: {axis}")
+    if reverse:
+        start, end = end, start
+    return [FlyBy(start, end, speed + (slot % 3) * 140)]
+
+
+def enemy_path(enemy, slot, count, layout, duration, charge_speed):
+    if layout in ("horizontal", "vertical"):
+        return fly_by_path(slot, count, layout, charge_speed)
+    path = formation_path(slot, count, layout, duration, charge_speed)
+    if enemy in ("drone", "gaivota") and layout != "charge":
+        # O único ataque desses inimigos é a investida contra o jogador.
+        last_position = path[-1].position.copy()
+        path[-1] = Charge(last_position, speed=charge_speed)
+    return path
+
+
+def make_wave(name, layout, species, count, duration, charge_speed=1800):
     return Wave(name, tuple(
-        EnemySpawn(species[i % len(species)],
-                   partial(formation_path, i, count, layout, duration, charge_speed),
-                   partial(VolleyAttack, interval, speed, angles, aimed, 3 + i * .11)
-                   if species[i % len(species)] == "drone" else no_attack)
+        EnemySpawn(enemy := species[i % len(species)],
+                   partial(enemy_path, enemy, i, count, layout, duration, charge_speed),
+                   partial(AttractionAttack, 2600, 720, 90) if enemy == "mine" else no_attack)
         for i in range(count)
     ))
 
@@ -73,32 +102,32 @@ def launch_waves():
 
 def stratosphere_waves():
     return (
-        make_wave("Bando em V", "v", ("gaivota",), 12, 10, 2, 360, (0,), False),
-        make_wave("Chuva de asteroides", "diagonal", ("asteroid",), 18, 8, 2, 360, (0,), False),
-        make_wave("Gaivotas em investida", "charge", ("gaivota",), 18, 10, 2, 360, (0,), True, 1900),
+        make_wave("Bando em V", "v", ("gaivota",), 12, 10, 1900),
+        make_wave("Chuva de asteroides", "diagonal", ("asteroid",), 18, 8),
+        make_wave("Gaivotas em investida", "charge", ("gaivota",), 18, 10, 1900),
     )
 
 
 def near_space_waves():
     return (
-        make_wave("Cerco orbital", "pincer", ("drone",), 18, 16, 1.6, 400, (-10, 10), True),
-        make_wave("Intercepcao veloz", "charge", ("drone",), 12, 12, 1.8, 430, (0,), True, 2100),
-        make_wave("Orbitas cruzadas", "cross", ("drone",), 18, 16, 1.5, 430, (-25, 0, 25), False),
+        make_wave("Cerco orbital", "pincer", ("drone",), 18, 16, 2100),
+        make_wave("Intercepcao veloz", "charge", ("drone",), 12, 12, 2100),
+        make_wave("Corte horizontal", "horizontal", ("drone",), 18, 16, 2250),
     )
 
 
 def deep_space_waves():
     return (
-        make_wave("Patrulha distante", "diagonal", ("drone",), 18, 14, 1.5, 430, (-12, 12), True),
-        make_wave("Ataque de ruptura", "charge", ("drone",), 18, 12, 1.6, 450, (0,), True, 2300),
-        make_wave("Cerco profundo", "pincer", ("drone",), 18, 18, 1.4, 440, (-20, 0, 20), False),
+        make_wave("Campo gravitacional", "diagonal", ("mine", "drone"), 18, 14, 2300),
+        make_wave("Ataque de ruptura", "charge", ("drone",), 18, 12, 2300),
+        make_wave("Queda vertical", "vertical", ("mine", "drone"), 18, 18, 2150),
     )
 
 
 def mars_orbit_waves():
     # Escolta disponível; nave-mãe será integrada quando seu inimigo existir.
     return (
-        make_wave("Escolta de Marte", "v", ("drone",), 18, 16, 1.4, 450, (-15, 15), True),
-        make_wave("Investida da escolta", "charge", ("drone",), 18, 12, 1.5, 470, (0,), True, 2500),
-        make_wave("Ultimo bloqueio", "cross", ("drone",), 18, 20, 1.4, 450, (-18, 0, 18), True),
+        make_wave("Escolta de Marte", "v", ("drone",), 18, 16, 2500),
+        make_wave("Investida da escolta", "charge", ("drone",), 18, 12, 2500),
+        make_wave("Ultimo bloqueio", "horizontal", ("drone",), 18, 20, 2500),
     )

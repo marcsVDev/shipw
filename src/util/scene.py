@@ -96,6 +96,8 @@ class Scene:
                 continue
             if not enemy.visible or enemy.to_destroy:
                 continue
+            if not self.player._collider_vertices or not enemy._collider_vertices:
+                continue
 
             # Triagem barata antes do SAT. Os limites incluem o polígono inteiro.
             distance = self.player.position - enemy.position
