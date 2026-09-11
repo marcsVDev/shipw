@@ -4,23 +4,28 @@ from functools import partial
 from pygame import Vector2
 
 from enemys.attacks import AttractionAttack
+from enemys.asteroid_enemy import AsteroidEnemy
+from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
+from enemys.behaviors import (
+    AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig, OrganizedAttackConfig,
+    PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig,
+    asteroid_rain, circular_formation, floating_mines, organized_attack, pursuit_wave,
+    safe_flybys, satellite_flyby, side_attack, zigzag_wave,
+)
 from enemys.drone_enemy import DroneEnemy
 from enemys.gaivota_enemy import GaivotaEnemy
 from enemys.mine_enemy import MineEnemy
-from entities.enemy import Enemy
-from enemys.patterns.charge import Charge
-from enemys.patterns.fly_by import FlyBy
-from enemys.patterns.move_to import MoveTo
-from enemys.patterns.wait import Wait
+from enemys.patterns import Charge, FlyBy, MoveTo, Wait, Yell
 from enemys.waves import EnemyRegistry, EnemySpawn, Wave
-from game_consts import SCREEN_HEIGHT as H, SCREEN_WIDTH as W
+from game_consts import SCREEN_HEIGHT as H, SCREEN_WIDTH as W, SFX_PATH
 from util.resources import load_image, load_sound
 
 
 def get_enemy_registry():
     registry = EnemyRegistry()
     for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy),
-                             ("asteroid", Enemy), ("mine", MineEnemy)):
+                             ("asteroid", AsteroidEnemy), ("mine", MineEnemy),
+                             ("broken_satellite", BrokenSatelliteEnemy)):
         # As ondas fornecem seus próprios movimentos; não carregar o TMJ legado.
         registry.register(name, partial(enemy_type, patterns=[]))
         load_image(enemy_type.DEFAULT_SPRITESHEET)
@@ -73,21 +78,59 @@ def fly_by_path(slot, count, axis, speed=2200):
 
 
 def enemy_path(enemy, slot, count, layout, duration, charge_speed):
-    if layout in ("horizontal", "vertical"):
-        return fly_by_path(slot, count, layout, charge_speed)
-    path = formation_path(slot, count, layout, duration, charge_speed)
-    if enemy in ("drone", "gaivota") and layout != "charge":
+    try:
+        path = PATH_FACTORIES[layout](slot, count, duration, charge_speed)
+    except KeyError as error:
+        raise ValueError(f"Layout de onda desconhecido: {layout}") from error
+    if enemy in ("drone", "gaivota") and layout not in ("charge", "horizontal", "vertical"):
         # O único ataque desses inimigos é a investida contra o jogador.
         last_position = path[-1].position.copy()
         path[-1] = Charge(last_position, speed=charge_speed)
+    if enemy in ATTACK_SFX:
+        path = add_attack_yells(path, ATTACK_SFX[enemy])
     return path
+
+
+def _formation_factory(layout):
+    return lambda slot, count, duration, speed: formation_path(
+        slot, count, layout, duration, speed
+    )
+
+
+def _fly_by_factory(axis):
+    return lambda slot, count, duration, speed: fly_by_path(slot, count, axis, speed)
+
+
+# Catálogo de estratégias: estender layouts não exige novos condicionais em enemy_path.
+PATH_FACTORIES = {
+    layout: _formation_factory(layout)
+    for layout in ("v", "diagonal", "pincer", "cross", "dive", "charge")
+}
+PATH_FACTORIES.update({
+    axis: _fly_by_factory(axis) for axis in ("horizontal", "vertical")
+})
+
+ATTACK_SFX = {
+    "drone": SFX_PATH + "drone_attack.mp3",
+    "gaivota": SFX_PATH + "gaivota_attack.mp3",
+}
+
+
+def add_attack_yells(patterns, sound_path):
+    """Insere um aviso sonoro imediatamente antes de cada investida."""
+    result = []
+    for pattern in patterns:
+        if isinstance(pattern, Charge):
+            result.append(Yell(pattern.position, sound_path, pattern.rotation))
+        result.append(pattern)
+    return result
 
 
 def make_wave(name, layout, species, count, duration, charge_speed=1800):
     return Wave(name, tuple(
         EnemySpawn(enemy := species[i % len(species)],
                    partial(enemy_path, enemy, i, count, layout, duration, charge_speed),
-                   partial(AttractionAttack, 2600, 720, 90) if enemy == "mine" else no_attack)
+                   partial(AttractionAttack, 2600) if enemy == "mine" else no_attack)
         for i in range(count)
     ))
 
@@ -102,32 +145,47 @@ def launch_waves():
 
 def stratosphere_waves():
     return (
-        make_wave("Bando em V", "v", ("gaivota",), 12, 10, 1900),
-        make_wave("Chuva de asteroides", "diagonal", ("asteroid",), 18, 8),
-        make_wave("Gaivotas em investida", "charge", ("gaivota",), 18, 10, 1900),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=16,  groups=5, simultaneous=False)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=16, groups=3, simultaneous=True)),
+        side_attack("gaivota", W, H, SideAttackConfig(per_side=4)),
+        pursuit_wave("gaivota", W, H, PursuitConfig(count=3, speed=1900)),
+        safe_flybys("gaivota", W, H, config=FlyByConfig(count=10, speed=800, seed=11)),
+        asteroid_rain(W, H, AsteroidRainConfig(
+            direction="left", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+        )),
+        asteroid_rain(W, H, AsteroidRainConfig(
+            direction="right", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+        )),
     )
 
 
 def near_space_waves():
     return (
-        make_wave("Cerco orbital", "pincer", ("drone",), 18, 16, 2100),
-        make_wave("Intercepcao veloz", "charge", ("drone",), 12, 12, 2100),
-        make_wave("Corte horizontal", "horizontal", ("drone",), 18, 16, 2250),
+        circular_formation("drone", W, H, CircularFormationConfig(count=14)),
+        organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
+        satellite_flyby(W, H, SatelliteConfig(seed=1)),
+        satellite_flyby(W, H, SatelliteConfig(seed=2)),
+        satellite_flyby(W, H, SatelliteConfig(seed=3)),
     )
 
 
 def deep_space_waves():
     return (
-        make_wave("Campo gravitacional", "diagonal", ("mine", "drone"), 18, 14, 2300),
-        make_wave("Ataque de ruptura", "charge", ("drone",), 18, 12, 2300),
-        make_wave("Queda vertical", "vertical", ("mine", "drone"), 18, 18, 2150),
+        floating_mines(W, H, MineFloatConfig(count=6)),
+        floating_mines(W, H, MineFloatConfig(count=8)),
+        safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
+        zigzag_wave("drone", W, H, ZigZagConfig()),
     )
 
 
 def mars_orbit_waves():
     # Escolta disponível; nave-mãe será integrada quando seu inimigo existir.
     return (
-        make_wave("Escolta de Marte", "v", ("drone",), 18, 16, 2500),
+        pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
         make_wave("Investida da escolta", "charge", ("drone",), 18, 12, 2500),
         make_wave("Ultimo bloqueio", "horizontal", ("drone",), 18, 20, 2500),
     )

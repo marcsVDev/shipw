@@ -44,6 +44,7 @@ class Enemy(Character):
     ]
 
     DEFAULT_SFX_PATH = None
+    DRAW_COLLIDER = True
 
     def __init__(self, patterns=None):
         self._current_pattern: int = 0
@@ -93,9 +94,10 @@ class Enemy(Character):
         return self
 
     def movement(self, delta):
-        self.position = self._patterns[self._current_pattern].position
-        self._rotation = self._patterns[self._current_pattern].rotation
-        if self.LOOK_AT_PLAYER:
+        pattern = self._patterns[self._current_pattern]
+        self.position = pattern.position
+        self._rotation = pattern.rotation
+        if self.LOOK_AT_PLAYER and not pattern.locks_facing:
             target = self._target_provider()
             if target is not None:
                 direction = Vector2(target) - self.position
@@ -109,8 +111,12 @@ class Enemy(Character):
 
     def draw(self, screen):
         super().draw(screen)
-        if self.visible and self._patterns and getattr(self._patterns[self._current_pattern], "telegraphing", False):
+        pattern = self._patterns[self._current_pattern] if self._patterns else None
+        if self.visible and pattern and getattr(pattern, "telegraphing", False):
             pygame.draw.circle(screen, (255, 90, 60), self.position, int(self.SCALE * .55), 3)
+            danger_line = getattr(pattern, "danger_line", None)
+            if danger_line:
+                pygame.draw.line(screen, (255, 90, 60), *danger_line, 5)
 
     def destroy(self):
         self.stop_sound()

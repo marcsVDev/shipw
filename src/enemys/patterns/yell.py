@@ -1,21 +1,23 @@
-from enemys.enemy_pattern import EnemyPattern
-import pygame
+from pygame import Vector2
 
-from game_consts import SFX_PATH
+from enemys.enemy_pattern import EnemyPattern
+from util.resources import load_sound
 
 class Yell(EnemyPattern):
-    def __init__(self, position, rotation, duration, sound_file: str):
-        self.sound: pygame.Sound = pygame.mixer.Sound(SFX_PATH + sound_file + ".mp3")
-        self.runned = False
-        super().__init__(position, rotation, duration)
+    """Passo instantâneo que sinaliza, uma única vez, o início de um ataque."""
+
+    locks_facing = True
+
+    def __init__(self, position, sound_path: str, rotation=0):
+        self.sound = load_sound(sound_path)
+        self._played = False
+        super().__init__(Vector2(position), rotation, 0)
 
     def update(self, delta):
-        if not self.runned:
+        if not self._played:
             self.sound.play()
-            self.runned = True
-
-        return super().update(delta)
+            self._played = True
 
     @property
     def finished(self):
-        return self.runned
+        return self._played

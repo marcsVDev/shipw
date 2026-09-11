@@ -3,8 +3,8 @@ import pygame
 from initializations.enemy_waves import get_enemy_registry
 from system.wave_system import WaveSystem
 from events.events import Events
-from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
-from initializations.ui_inits import get_play_button
+from game_consts import BACKGROUND_MUSIC_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from initializations.ui_inits import get_initial_menu_background, get_play_button
 from events.event_bus import EventBus
 from ui.title import Title
 from ui.ui import UI
@@ -16,11 +16,13 @@ from util.scene import Scene
 class Game:
     FPS = 60
     FILL_COLOR = (0,0,0) #(0x4d, 0x9b, 0xe6)
+    BACKGROUND_MUSIC_VOLUME = 0.35
 
     def __init__(self):
         pygame.init()  
         pygame.display.set_caption("Projeto Cosmonauta")
         pygame.mixer.init()
+        self.start_background_music()
 
         EventBus.connect(Events.PHASE_CHANGED, self.load_phase)
 
@@ -33,6 +35,7 @@ class Game:
         inital_menu = Scene(game_scene=False) 
 
         inital_menu.add_ui(get_play_button(self.play))
+        inital_menu.add_entity(get_initial_menu_background())
         inital_menu.add_ui(Title())
         self.scenes["menu"] = inital_menu
 
@@ -48,7 +51,14 @@ class Game:
 
         self.loop()
 
+        pygame.mixer.music.stop()
         pygame.quit()
+
+    def start_background_music(self):
+        """Inicia uma única trilha contínua para menu e campanha."""
+        pygame.mixer.music.load(BACKGROUND_MUSIC_PATH)
+        pygame.mixer.music.set_volume(self.BACKGROUND_MUSIC_VOLUME)
+        pygame.mixer.music.play(-1)
 
     def loop(self):        
         clock = pygame.time.Clock()
@@ -58,7 +68,9 @@ class Game:
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
-                    self.running = False                 
+                    self.running = False
+                elif event.type == pygame.KEYDOWN:
+                    self.handle_keydown(event.key)
 
             self.screen.fill(self.FILL_COLOR)
             self.scenes[self.current_scene].run(self.screen, delta, events)
@@ -72,12 +84,29 @@ class Game:
             delta = clock.tick(self.FPS) / 1000
 
     def play(self):
-        # time.sleep(2)
+        if self.current_scene != "menu":
+            return
         EventBus.emit(Events.GAME_STARTED) 
 
         self.load_phase(self.scenes["game"].get_system("progression", Progression).phases[0])
         self.scenes["game"].destroy_entity("play_btn")
         self.change_scene_to("game")
+
+    def handle_keydown(self, key: int):
+        if self.current_scene == "menu" and key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+            self.play()
+        elif self.current_scene == "game" and key == pygame.K_ESCAPE:
+            self.return_to_menu()
+
+    def return_to_menu(self):
+        """Limpa a partida atual e prepara uma campanha nova para o próximo play."""
+        if self.current_scene != "game":
+            return
+        game_scene = self.scenes["game"]
+        game_scene.clear_scene()
+        game_scene.get_system("waves", WaveSystem).reset()
+        game_scene.get_system("progression", Progression).reset()
+        self.change_scene_to("menu")
 
     def load_phase(self, phase: Phase):
         game_scene = self.scenes["game"]
@@ -97,4 +126,5 @@ class Game:
     def change_scene_to(self, name: str):
          self.current_scene = name
          
-GAME = Game()
+if __name__ == "__main__":
+    GAME = Game()

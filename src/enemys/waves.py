@@ -1,6 +1,7 @@
 """Descrições imutáveis: factories sempre criam comportamentos independentes."""
 from collections.abc import Callable
 from dataclasses import dataclass
+from dataclasses import field
 
 from enemys.enemy_pattern import EnemyPattern
 
@@ -9,7 +10,14 @@ from enemys.enemy_pattern import EnemyPattern
 class EnemySpawn:
     enemy: str
     movement: Callable[[], list[EnemyPattern]]
-    attack: Callable
+    attack: Callable = lambda: None
+    delay: float = 0.0
+    group: int = 0
+    options: dict[str, object] = field(default_factory=dict)
+
+    def __post_init__(self):
+        if self.delay < 0:
+            raise ValueError("O atraso de spawn não pode ser negativo")
 
 
 @dataclass(frozen=True)
@@ -32,10 +40,14 @@ class EnemyRegistry:
             raise ValueError(f"Inimigo já registrado: {name}")
         self._factories[name] = factory
 
+    @property
+    def registered(self) -> frozenset[str]:
+        return frozenset(self._factories)
+
     def create(self, spawn: EnemySpawn, target=None):
         if spawn.enemy not in self._factories:
             raise ValueError(f"Inimigo desconhecido: {spawn.enemy}")
         patterns = spawn.movement()
         for pattern in patterns:
             pattern.bind_target(target)
-        return self._factories[spawn.enemy]().configure(patterns, spawn.attack(), target)
+        return self._factories[spawn.enemy](**spawn.options).configure(patterns, spawn.attack(), target)

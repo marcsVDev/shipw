@@ -28,3 +28,12 @@ class Progression(System):
     def game_started(self):
         self.phase_index = 0
         self._game_started = True
+
+    def reset(self):
+        """Descarta entidades pré-criadas e recompõe a campanha do início."""
+        for phase in self.phases:
+            for entity in phase.default_entities.values():
+                entity.destroy()
+        self.phases = get_phases()
+        self.phase_index = 0
+        self._game_started = False

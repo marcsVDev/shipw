@@ -32,20 +32,18 @@ class VolleyAttack:
 
 
 class AttractionAttack:
-    """Aplica no jogador uma aceleração apontando para o inimigo."""
+    """Aplica no jogador uma atração contínua em direção ao inimigo."""
 
-    def __init__(self, strength=2400, radius=650, minimum_distance=90):
-        if strength <= 0 or radius <= 0 or minimum_distance <= 0:
-            raise ValueError("Força, raio e distância mínima devem ser positivos")
+    def __init__(self, strength=2400, minimum_distance=90):
+        if strength <= 0 or minimum_distance <= 0:
+            raise ValueError("Força e distância mínima devem ser positivas")
         self.strength = strength
-        self.radius = radius
         self.minimum_distance = minimum_distance
 
     def update(self, enemy, player, delta, emit_projectile):
         offset = enemy.position - player.position
-        distance = offset.length()
-        if distance == 0 or distance > self.radius or not hasattr(player, "apply_force"):
+        if offset.length_squared() == 0 or not hasattr(player, "apply_force"):
             return
-        # A intensidade cresce perto da mina, mas permanece limitada.
-        proximity = 1 - max(distance, self.minimum_distance) / self.radius
-        player.apply_force(offset.normalize() * self.strength * max(.15, proximity))
+        distance = offset.length()
+        intensity = self.strength * self.minimum_distance / max(distance, self.minimum_distance)
+        player.apply_force(offset.normalize() * intensity)

@@ -30,7 +30,7 @@ def get_espaco_proximo_phase():
     return Phase("Espaço Próximo", 0, 0, {
         "title": get_scene_title("Espaco Proximo"),
         "background": get_espaco_proximo_background(), "player": Player(),
-    }, waves=near_space_waves(), planned_enemies=("satelite_quebrado", "buran"))
+    }, waves=near_space_waves(), planned_enemies=("buran",))
 
 
 def get_espaco_profundo_phase():

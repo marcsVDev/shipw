@@ -12,6 +12,7 @@ from enemys.patterns.move_to import MoveTo
 from enemys.patterns.rotate import Rotate
 from enemys.patterns.wait import Wait
 from enemys.patterns.yell import Yell
+from game_consts import SFX_PATH
 
 
 class PatternDeserializationError(ValueError):
@@ -180,13 +181,11 @@ class EnemyPatternDeserializer:
 
     @staticmethod
     def _build_yell(context: PatternContext) -> PatternBuildResult:
-        pass
         return PatternBuildResult(
             Yell(
                 context.position,
+                SFX_PATH + str(context.properties["sound_file"]) + ".mp3",
                 context.rotation,
-                context.duration,
-                str(context.properties["sound_file"])
             ),
             context.position,
             context.rotation,

@@ -5,6 +5,8 @@ from enemys.enemy_pattern import EnemyPattern
 
 class Charge(EnemyPattern):
     """Avisa, captura a posição do alvo e avança em linha reta até sair."""
+    locks_facing = True
+
     def __init__(self, position, speed=1800, warning=.55, duration=2.5):
         if speed <= 0 or warning < 0 or duration <= 0:
             raise ValueError("Velocidade/duração positivas e aviso não negativo")
@@ -13,6 +15,7 @@ class Charge(EnemyPattern):
         self.warning = warning
         self.time = 0.0
         self.direction = None
+        self.facing_direction = None
         self.target = lambda: None
 
     def bind_target(self, target):
@@ -24,6 +27,11 @@ class Charge(EnemyPattern):
         return self.time < self.warning
 
     def update(self, delta):
+        if self.facing_direction is None:
+            target = self.target()
+            direction = Vector2(target) - self.position if target is not None else Vector2(0, 1)
+            self.facing_direction = direction.normalize() if direction.length_squared() else Vector2(0, 1)
+            self.rotation = -Vector2(0, 1).angle_to(self.facing_direction)
         before = max(0, self.time - self.warning)
         self.time += delta
         if self.time < self.warning:
@@ -32,6 +40,7 @@ class Charge(EnemyPattern):
             target = self.target()
             direction = Vector2(target) - self.position if target is not None else Vector2(0, 1)
             self.direction = direction.normalize() if direction.length_squared() else Vector2(0, 1)
+            self.rotation = -Vector2(0, 1).angle_to(self.direction)
         travel = min(self.duration, self.time - self.warning) - min(self.duration, before)
         self.position += self.direction * self.speed * travel
 

@@ -2,6 +2,7 @@ from typing import Callable
 
 import pygame
 
+from entities.background import Background
 from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH, UI_PATH
 from ui.button import Button
 from ui.dialogue_panel import DialoguePanel
@@ -28,3 +29,7 @@ def get_play_button(callable: Callable) -> Button:
     image = pygame.transform.scale_by(image, M)
 
     return Button(image, pygame.Vector2(SCREEN_WIDTH//2-SCALE//2, SCREEN_HEIGHT//1.7-SCALE//2), SCALE, callable, (58*5, 21*5))
+
+def get_initial_menu_background() -> Background:
+    return Background(pygame.image.load(UI_PATH+"init_background.png"), 1.2)
+    

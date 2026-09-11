@@ -10,7 +10,10 @@ class DroneEnemy(Enemy):
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
 
-    DEFAULT_SPRITESHEET = ENEMYS_PATH + "drone.png"
+    DEFAULT_SPRITESHEET = ENEMYS_PATH + "drone_animation.png"
+    FRAME_SIZE = 128
+    ANIMATIONS = {"default": (0, 1, 2, 3)}
+    ANIMATION_FRAME_DURATION = 0.10
 
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     DRAW_COLLIDER = False

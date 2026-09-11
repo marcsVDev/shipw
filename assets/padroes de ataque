@@ -1,0 +1,22 @@
+quero que monte os sistemas expondo variaveis modificavies de quantidade de indivduos velocidade, etc
+eles devem ser reutilizaveis e faceis de inserir
+
+gaivota: 
+ataque: organizado varias gaivotas atacam o player, elas se organizam em cima da tela e vao para cima do player rapidamente
+ataque lateral, elas se organizam-se em fila nas duas laterais e atacam o player uma por uma
+perseguicao, ela vem para cima do player, o player desvia mas ai depois ela vai pra cima  denovo 2 vezes ate surgir outra gaivota e fazer o mesmo
+rasgando os ceus, elas surgem na vertical sem dar avisos em direção reta do topo da tela ou das laterais em posicoes aleatorias
+
+drone:
+formação circular: formam circulos e giram em torno do centro em X pela tela, possuem alguns burcos no circulor para o player passar
+perseguicao, que nem nas gaivotas
+ataque organizado igual nas gaivotas
+rasgando os ceus: ataque organizado igual nas gaivotas
+ataque em zigzge: semelhante ao rasgando o ceu mas vem dois ou tres de cada vez em zigzage ate desaparecer em baico
+
+satelite quebrado
+rasgando o ceu: avisa o player que vira o ataque e de onde e dispara em na diagonal o grande satelite rapidamente
+
+mina espacial:
+flutuacao: faz movimentacoes de flutuacao na tela, somente umas duas, como se movimentam o player deve ficar escapando esporadicamente
+

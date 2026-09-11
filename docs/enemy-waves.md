@@ -8,7 +8,7 @@ livre e usam `duration` para concluir a apresentação.
 | --- | --- | --- |
 | Estação Krasny Mir | Nenhum | — |
 | Estratosfera | Gaivotas e asteroides (sprite de meteoro existente) | — |
-| Espaço Próximo | Drones | Satélite quebrado e Buran |
+| Espaço Próximo | Drones e satélite quebrado | Buran |
 | Espaço Profundo | Drones e minas gravitacionais | Novos drones e alienígena |
 | Órbita de Marte | Drones de escolta | Nave-mãe/boss |
 | Chegada a Marte | Nenhum | Arte e cena final |
@@ -131,3 +131,74 @@ colisão letal, mira, expiração, ausência de spawns sem jogador, isolamento
 dos comportamentos emissão única de conclusão, elenco por fase, bloqueio de movimento e mira
 fixada após o aviso da investida. A dificuldade exige
 playtest humano; a simulação não mede a possibilidade de desviar de tudo.
+
+## Builders configuráveis
+
+`enemys.behaviors` contém dataclasses imutáveis e builders que retornam `Wave`.
+As factories continuam criando padrões e ataques novos por entidade. Os builders
+disponíveis são `organized_attack`, `side_attack`, `pursuit_wave`,
+`safe_flybys`, `circular_formation`, `zigzag_wave`, `satellite_flyby` e
+`floating_mines`. A campanha usa todos eles diretamente em
+`initializations.enemy_waves`; o sistema de ondas não conhece nenhuma espécie.
+
+Exemplo de cadastro de uma onda sem alterar `WaveSystem`:
+
+```python
+from enemys.behaviors import PursuitConfig, pursuit_wave
+
+wave = pursuit_wave(
+    "drone", SCREEN_WIDTH, SCREEN_HEIGHT,
+    PursuitConfig(count=5, charges=4, spawn_interval=5, speed=2300),
+)
+phase = Phase("Exemplo", 0, 0, entities, waves=(wave,))
+```
+
+`EnemySpawn.delay` agenda filas e grupos, `group` identifica membros simultâneos
+para ferramentas e testes, e `options` encaminha configuração visual ao factory
+do inimigo. Spawns existentes com três argumentos permanecem válidos.
+
+Principais parâmetros expostos:
+
+- `OrganizedAttackConfig`: quantidade, grupos, espaçamento, tempos de entrada,
+  espera e aviso, velocidade, simultaneidade e altura da formação.
+- `SideAttackConfig`: quantidade por lado, ordem alternada/fixa, espaçamento,
+  intervalo, velocidade, aviso e margens das filas.
+- `PursuitConfig`: quantidade, três investidas por padrão, intervalo entre
+  inimigos, velocidade, aviso, duração e reposicionamento.
+- `FlyByConfig`: quantidade, origens permitidas, velocidade, intervalo, margem,
+  distância segura do jogador e semente determinística.
+- `CircularFormationConfig`: quantidade, raio, anéis, rotação, sentido, centro
+  móvel, duração, margens e setores angulares reservados como buracos.
+- `ZigZagConfig`: total, tamanho e intervalo dos grupos, velocidade vertical,
+  amplitude, frequência, espaçamento e margem.
+- `SatelliteConfig`: origem aleatória por padrão, seed, ângulo, velocidade,
+  aviso, escala, rotação e margem. `origin="left"` e `"right"` continuam
+  disponíveis quando for necessário forçar um lado.
+- `MineFloatConfig`: duas minas por padrão, deriva, amplitudes, frequências,
+  duração, distância mínima e ativação independente da atração gravitacional.
+
+`Charge` e `Pursuit` controlam explicitamente `locks_facing`: a mira visual é
+fixada no aviso e na investida e volta ao acompanhamento normal nas etapas que
+o permitem. `Orbit`, `ZigZag` e `Float` usam tempo acumulado, tornando o cálculo
+independente da taxa de quadros. `TelegraphedFlyBy` fornece a mesma reta tanto
+ao aviso visual quanto ao movimento real do satélite.
+
+### Chuva de asteroides
+
+`asteroid_rain(width, height, AsteroidRainConfig(...))` cobre toda a largura
+com faixas separadas por duas larguras do jogador por padrão. A ordem das
+faixas é embaralhada, enquanto os atrasos continuam crescentes para produzir
+uma queda rápida e sequencial. `direction="left"` mantém a arte normal;
+`direction="right"` espelha horizontalmente cada asteroide.
+
+```python
+asteroid_rain(W, H, AsteroidRainConfig(
+    direction="left",
+    speed=1550,
+    interval=.14,
+    interval_jitter=.05,
+    angle=18,
+    player_clearance=2,
+    seed=17,
+))
+```

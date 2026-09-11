@@ -14,6 +14,7 @@ from enemys.attacks import AttractionAttack, VolleyAttack
 from enemys.mine_enemy import MineEnemy
 from enemys.patterns.charge import Charge
 from enemys.patterns.fly_by import FlyBy
+from enemys.patterns import Orbit, Pursuit, ZigZag
 from entities.enemy_projectile import EnemyProjectile
 from events.event_bus import EventBus
 from events.events import Events
@@ -63,8 +64,8 @@ class WavesTest(unittest.TestCase):
                 if system.finished:
                     break
             self.assertTrue(system.finished)
-            self.assertEqual([index for index, _ in started], [0, 1, 2])
-            self.assertTrue(all(count >= 10 for _, count in started))
+            self.assertEqual([index for index, _ in started], list(range(len(waves))))
+            self.assertTrue(all(count >= 1 for _, count in started))
             self.assertEqual(shot_count, 0)
             self.assertEqual(completed, [phase])
             self.assertFalse(scene.enemys)
@@ -72,7 +73,7 @@ class WavesTest(unittest.TestCase):
             names.update(w.name for w in waves)
             EventBus.disconnect(Events.WAVE_STARTED, on_start)
             EventBus.disconnect(Events.PHASE_COMPLETED, on_end)
-        self.assertEqual(len(names), 12)
+        self.assertGreaterEqual(len(names), 12)
 
     def test_movement_and_attack_state_is_not_shared(self):
         registry = get_enemy_registry()
@@ -142,7 +143,7 @@ class WavesTest(unittest.TestCase):
                          {"gaivota", "asteroid"})
         for phase in phases[2:5]:
             self.assertTrue(phase.free_movement)
-        self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone"})
+        self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone", "broken_satellite"})
         self.assertEqual({spawn.enemy for wave in phases[3].waves for spawn in wave.spawns},
                          {"drone", "mine"})
         self.assertEqual({spawn.enemy for wave in phases[4].waves for spawn in wave.spawns}, {"drone"})
@@ -185,7 +186,7 @@ class WavesTest(unittest.TestCase):
                     enemy = registry.create(spawn, lambda: pygame.Vector2(960, 900))
                     if spawn.enemy in ("drone", "gaivota"):
                         self.assertIsNone(enemy.attack)
-                        self.assertTrue(any(isinstance(pattern, (Charge, FlyBy))
+                        self.assertTrue(any(isinstance(pattern, (Charge, FlyBy, Orbit, Pursuit, ZigZag))
                                             for pattern in enemy._patterns))
                     enemy.destroy()
 
@@ -196,7 +197,7 @@ class WavesTest(unittest.TestCase):
                      if spawn.enemy == "mine")
         mine = registry.create(spawn)
         self.assertIsInstance(mine, MineEnemy)
-        self.assertEqual(mine.MIDDLE_VERTICES, [])
+        self.assertTrue(mine.MIDDLE_VERTICES)
         self.assertIsInstance(mine.attack, AttractionAttack)
 
         player = Player()

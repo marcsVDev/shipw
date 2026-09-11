@@ -8,15 +8,11 @@ class MineEnemy(Enemy):
     """Mina gravitacional; o formato de colisão será definido com a arte final."""
 
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "minaespacial.png"
-    MULTIPLIER = 1.0
+    MULTIPLIER = 2
     FRAME_SIZE = 256
-    SCALE = 120 * MULTIPLIER
+    SCALE = 256 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
 
-    
-
-    # TODO: substituir pelos vértices do contorno final da mina.
-    # Uma lista vazia faz a Scene ignorar colisão física com esta entidade.
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)
     MIDDLE_VERTICES = [
         Vector2(100, 159) * MULTIPLIER - MIDDLE_VECTOR,
