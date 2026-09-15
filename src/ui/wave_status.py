@@ -22,6 +22,5 @@ class WaveStatus(UI):
             text = "Prepare-se"
         else:
             wave = system.phase.waves[system.index]
-            alive = sum(not enemy.to_destroy for enemy in system.active)
-            text = f"Rodada {system.index + 1}/{len(system.phase.waves)} - {wave.name} - {alive} inimigos"
+            text = f"Rodada {system.index + 1}/{len(system.phase.waves)} - {wave.name}"
         screen.blit(self.font.render(text, True, (255, 235, 180)), self.position)

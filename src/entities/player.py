@@ -49,6 +49,7 @@ class Player(Character):
         self.velocity = Vector2()
         self._external_acceleration = Vector2()
         self.free_movement = True
+        self.god_mode = False
         self._sound_started = False
         self.sound = pygame.mixer.Sound(self.PLAYER_SFX)
         self.sound.set_volume(self.VOLUME)
@@ -124,7 +125,7 @@ class Player(Character):
         self._external_acceleration += Vector2(acceleration)
 
     def player_collide(self, player, collisions):
-        if player is not self:
+        if player is not self or self.god_mode:
             return
 
         self.sound.stop()

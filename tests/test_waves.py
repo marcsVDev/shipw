@@ -102,6 +102,21 @@ class WavesTest(unittest.TestCase):
         self.assertNotIn(player.player_collide, EventBus.events[Events.PLAYER_COLLIDE])
         scene.clear_scene()
 
+    def test_god_mode_disables_player_collisions(self):
+        from entities.player import Player
+        scene = Scene(True)
+        player = Player()
+        player.god_mode = True
+        player.update(0)
+        scene.add_entity(player)
+        scene.add_entity(EnemyProjectile(player.position, (0, 0)))
+
+        scene.check_collisions()
+
+        self.assertFalse(player.to_destroy)
+        self.assertIs(scene.player, player)
+        scene.clear_scene()
+
     def test_progression_requires_completion_and_finishes_once(self):
         progression = Progression()
         EventBus.emit(Events.GAME_STARTED)
@@ -145,7 +160,7 @@ class WavesTest(unittest.TestCase):
             self.assertTrue(phase.free_movement)
         self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone", "broken_satellite"})
         self.assertEqual({spawn.enemy for wave in phases[3].waves for spawn in wave.spawns},
-                         {"drone", "mine"})
+                         {"drone", "mine", "evil_drone"})
         self.assertEqual({spawn.enemy for wave in phases[4].waves for spawn in wave.spawns}, {"drone"})
         for phase in (phases[0], phases[-1]):
             self.assertFalse(phase.free_movement)

@@ -5,6 +5,9 @@ from enemys.enemy_pattern import EnemyPattern
 
 class FlyBy(EnemyPattern):
     """Cruza a tela em linha reta e velocidade constante."""
+    # A passagem sempre olha na direção da trajetória, independentemente da
+    # posição do jogador.
+    locks_facing = True
 
     def __init__(self, start, end, speed=2200):
         start = Vector2(start)

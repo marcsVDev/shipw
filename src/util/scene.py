@@ -2,6 +2,7 @@ from typing import overload
 
 from entities.enemy import Enemy
 from entities.enemy_projectile import EnemyProjectile
+from entities.enemy_beam import EnemyBeam
 from entities.entity import Entity
 from entities.player import Player
 from events.event_bus import EventBus
@@ -87,12 +88,13 @@ class Scene:
             item.draw(screen)
 
     def check_collisions(self):
-        if self.player is None or self.player.to_destroy:
+        if (self.player is None or self.player.to_destroy
+                or getattr(self.player, "god_mode", False)):
             return
 
         colliding_enemys: list[Enemy] = []
         for enemy in self.entities:
-            if not isinstance(enemy, (Enemy, EnemyProjectile)):
+            if not isinstance(enemy, (Enemy, EnemyProjectile, EnemyBeam)):
                 continue
             if not enemy.visible or enemy.to_destroy:
                 continue
@@ -100,11 +102,12 @@ class Scene:
                 continue
 
             # Triagem barata antes do SAT. Os limites incluem o polígono inteiro.
-            distance = self.player.position - enemy.position
-            enemy_radius = enemy.SCALE if isinstance(enemy, Enemy) else enemy.RADIUS
-            reach = self.player.SCALE + enemy_radius
-            if abs(distance.x) > reach or abs(distance.y) > reach:
-                continue
+            if not isinstance(enemy, EnemyBeam):
+                distance = self.player.position - enemy.position
+                enemy_radius = enemy.SCALE if isinstance(enemy, Enemy) else enemy.RADIUS
+                reach = self.player.SCALE + enemy_radius
+                if abs(distance.x) > reach or abs(distance.y) > reach:
+                    continue
 
             if self.player.collide_with(enemy):
                 colliding_enemys.append(enemy)

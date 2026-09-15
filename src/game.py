@@ -31,6 +31,7 @@ class Game:
         self.scenes: dict[str, Scene] = {}
         self.current_scene: str = "menu"
         self.running = True
+        self.god_mode = False
 
         inital_menu = Scene(game_scene=False) 
 
@@ -70,7 +71,7 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
-                    self.handle_keydown(event.key)
+                    self.handle_keydown(event.key, event.mod)
 
             self.screen.fill(self.FILL_COLOR)
             self.scenes[self.current_scene].run(self.screen, delta, events)
@@ -92,11 +93,23 @@ class Game:
         self.scenes["game"].destroy_entity("play_btn")
         self.change_scene_to("game")
 
-    def handle_keydown(self, key: int):
+    def handle_keydown(self, key: int, modifiers: int = 0):
+        if (key == pygame.K_o
+                and modifiers & pygame.KMOD_CTRL
+                and modifiers & pygame.KMOD_SHIFT):
+            self.toggle_god_mode()
+            return
         if self.current_scene == "menu" and key in (pygame.K_RETURN, pygame.K_KP_ENTER):
             self.play()
         elif self.current_scene == "game" and key == pygame.K_ESCAPE:
             self.return_to_menu()
+
+    def toggle_god_mode(self):
+        """Alterna invencibilidade e a detecção de colisões do jogador."""
+        self.god_mode = not getattr(self, "god_mode", False)
+        game_scene = self.scenes.get("game")
+        if game_scene is not None and game_scene.player is not None:
+            game_scene.player.god_mode = self.god_mode
 
     def return_to_menu(self):
         """Limpa a partida atual e prepara uma campanha nova para o próximo play."""
@@ -120,6 +133,7 @@ class Game:
                     game_scene.add_entity(phase.default_entities[key], key)
 
         game_scene.player.free_movement = phase.free_movement
+        game_scene.player.god_mode = self.god_mode
         game_scene.get_system("waves", WaveSystem).load_phase(phase)
         game_scene.add_ui(WaveStatus(game_scene.get_system("waves", WaveSystem)))
 

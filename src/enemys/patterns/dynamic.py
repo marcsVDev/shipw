@@ -77,6 +77,11 @@ class Float(EnemyPattern):
 
 class Pursuit(EnemyPattern):
     """Investe até alvos sucessivos e prolonga a última investida para fora da tela."""
+    # A rotação pertence ao padrão durante toda a perseguição. Isso impede que
+    # Enemy.LOOK_AT_PLAYER sobrescreva a direção durante a espera entre ataques;
+    # o look-at volta automaticamente quando o próximo padrão começar.
+    locks_facing = True
+
     def __init__(self, start, charges=3, speed=1800, warning=.45, charge_duration=1.1,
                  interval=.45, reposition=None, exit_bounds=None, exit_margin=160):
         if charges < 1 or min(speed, charge_duration) <= 0 or min(warning, interval) < 0:
@@ -115,15 +120,21 @@ class Pursuit(EnemyPattern):
         return distance / self.speed
 
     @property
-    def locks_facing(self): return self.state in ("warning", "charge")
-
-    @property
     def telegraphing(self): return self.state == "warning"
+
+    def _face_target(self):
+        target = self.target()
+        direction = Vector2(target) - self.position if target is not None else Vector2(0, 1)
+        if direction.length_squared():
+            self.rotation = -Vector2(0, 1).angle_to(direction)
 
     def update(self, delta):
         remaining = max(0.0, delta)
         while remaining and not self.finished:
             if self.state == "warning":
+                # Durante o aviso, acompanha o jogador visualmente. Ao começar
+                # a investida, a posição é capturada e a rotação fica travada.
+                self._face_target()
                 step = min(remaining, self.warning - self.elapsed)
                 self.elapsed += step; remaining -= step
                 if self.elapsed + 1e-9 < self.warning:

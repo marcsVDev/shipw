@@ -2,6 +2,7 @@
 from pygame import Vector2
 
 from entities.enemy_projectile import EnemyProjectile
+from entities.enemy_beam import EnemyBeam
 from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
 
 
@@ -47,3 +48,24 @@ class AttractionAttack:
         distance = offset.length()
         intensity = self.strength * self.minimum_distance / max(distance, self.minimum_distance)
         player.apply_force(offset.normalize() * intensity)
+
+
+class RotatingBeamAttack:
+    """Emite um único raio enquanto o padrão atual solicita a varredura."""
+
+    def __init__(self, source_pixel=(85.5, 115), width=18, color="#ae2334"):
+        self.source_pixel = source_pixel
+        self.width = width
+        self.color = color
+        self._pattern = None
+        self._beam = None
+
+    def update(self, enemy, player, delta, emit_projectile):
+        pattern = enemy._patterns[enemy._current_pattern]
+        if not getattr(pattern, "fires_beam", False):
+            return
+        if pattern is self._pattern:
+            return
+        self._pattern = pattern
+        self._beam = EnemyBeam(enemy, pattern, self.source_pixel, self.width, self.color)
+        emit_projectile(self._beam)

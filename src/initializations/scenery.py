@@ -86,6 +86,6 @@ def get_espaco_proximo_background():
     return InfiniteVerticalScroller(darken_image(image), 5, True)
 
 def get_estratosfera_background():
-    image = pygame.image.load(SCENERY_PATH + "estratosfera.png").convert_alpha()
-    image = pygame.transform.scale_by(image, 1.1)
-    return InfiniteVerticalScroller(image, 500, True)
+    image = pygame.image.load(SCENERY_PATH + "ceucomnuvens.png").convert_alpha()
+    image = pygame.transform.scale_by(image, 5)
+    return InfiniteVerticalScroller(image, 3000, True)

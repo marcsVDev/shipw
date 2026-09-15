@@ -6,8 +6,8 @@ from typing import Literal
 
 from pygame import Vector2
 
-from enemys.attacks import AttractionAttack
-from enemys.patterns import Charge, Float, FlyBy, MoveTo, Orbit, Pursuit, TelegraphedFlyBy, Wait, Yell, ZigZag
+from enemys.attacks import AttractionAttack, RotatingBeamAttack
+from enemys.patterns import Charge, Float, FlyBy, LaserSweep, MoveTo, Orbit, PrepareLaser, Pursuit, TelegraphedFlyBy, Wait, Yell, ZigZag
 from enemys.waves import EnemySpawn, Wave
 from game_consts import SFX_PATH
 
@@ -114,6 +114,43 @@ class MineFloatConfig:
         _positive("quantidade", self.count); _positive("duração", self.duration)
         _positive("distância", self.minimum_distance); _positive("força de atração", self.attraction_strength)
         _positive("distância mínima da atração", self.attraction_minimum_distance)
+
+
+@dataclass(frozen=True)
+class EvilDronePlacement:
+    corner: Literal["top_left", "top_right", "bottom_right", "bottom_left"]
+    start_angle: float
+    sweep_angle: float
+    clockwise: bool
+
+
+@dataclass(frozen=True)
+class EvilDroneWaveConfig:
+    placements: tuple[EvilDronePlacement, ...] = (
+        EvilDronePlacement("top_left", 0, 90, True),
+        EvilDronePlacement("top_right", 180, 90, False),
+        EvilDronePlacement("bottom_right", 180, 90, True),
+        EvilDronePlacement("bottom_left", 0, 90, False),
+    )
+    margin: float = 180
+    entry_duration: float = 1.0
+    preparation_duration: float = .8
+    beam_duration: float = 3.5
+    exit_duration: float = .8
+    spawn_interval: float = 6.4
+    beam_width: float = 18
+
+    def __post_init__(self):
+        if not self.placements:
+            raise ValueError("A onda precisa de pelo menos um drone do mal")
+        for name, value in (("margem", self.margin), ("entrada", self.entry_duration),
+                            ("preparação", self.preparation_duration),
+                            ("raio", self.beam_duration), ("saída", self.exit_duration),
+                            ("intervalo", self.spawn_interval), ("largura", self.beam_width)):
+            _positive(name, value)
+        if any(item.corner not in {"top_left", "top_right", "bottom_right", "bottom_left"}
+               or item.sweep_angle < 0 for item in self.placements):
+            raise ValueError("Posição ou arco do drone do mal inválido")
 
 
 def organized_attack(enemy, width, height, config=OrganizedAttackConfig()):
@@ -282,3 +319,37 @@ def floating_mines(width, height, config=MineFloatConfig()):
                                            config.attraction_minimum_distance)) if config.attraction else (lambda: None)
         spawns.append(EnemySpawn("mine", movement, attack))
     return Wave("Minas flutuantes", tuple(spawns))
+
+
+def evil_drone_sweeps(width, height, config=EvilDroneWaveConfig()):
+    """Agenda um drone por vez; cada posição define sentido e arco próprios."""
+    anchors = {
+        "top_left": Vector2(config.margin, config.margin),
+        "top_right": Vector2(width - config.margin, config.margin),
+        "bottom_right": Vector2(width - config.margin, height - config.margin),
+        "bottom_left": Vector2(config.margin, height - config.margin),
+    }
+    outward = {
+        "top_left": Vector2(-320, 0),
+        "top_right": Vector2(320, 0),
+        "bottom_right": Vector2(320, 0),
+        "bottom_left": Vector2(-320, 0),
+    }
+    spawns = []
+    for index, placement in enumerate(config.placements):
+        anchor = anchors[placement.corner]
+        outside = anchor + outward[placement.corner]
+        movement = lambda a=anchor, o=outside, p=placement: [
+            MoveTo(o, a, config.entry_duration,
+                   LaserSweep._sprite_rotation(p.start_angle)),
+            PrepareLaser(a, p.start_angle, config.preparation_duration),
+            LaserSweep(a, p.start_angle, p.sweep_angle, p.clockwise,
+                       config.beam_duration),
+            MoveTo(a, o, config.exit_duration,
+                   LaserSweep._sprite_rotation(
+                       p.start_angle + (p.sweep_angle if p.clockwise else -p.sweep_angle))),
+        ]
+        attack = lambda: RotatingBeamAttack(width=config.beam_width)
+        spawns.append(EnemySpawn("evil_drone", movement, attack,
+                                 delay=index * config.spawn_interval, group=index))
+    return Wave("Varredura dos drones do mal", tuple(spawns))

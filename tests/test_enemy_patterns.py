@@ -35,13 +35,14 @@ class EnemyPatternsTest(unittest.TestCase):
 
     def test_every_charge_is_preceded_by_a_yell(self):
         with patch("enemys.patterns.yell.load_sound", return_value=Mock()):
-            spawn = near_space_waves()[1].spawns[0]
-            patterns = spawn.movement()
-        charge_indexes = [index for index, pattern in enumerate(patterns)
-                          if isinstance(pattern, Charge)]
-        self.assertTrue(charge_indexes)
+            movements = [spawn.movement() for wave in near_space_waves()
+                         for spawn in wave.spawns]
+        charges = [(patterns, index) for patterns in movements
+                   for index, pattern in enumerate(patterns)
+                   if isinstance(pattern, Charge)]
+        self.assertTrue(charges)
         self.assertTrue(all(isinstance(patterns[index - 1], Yell)
-                            for index in charge_indexes))
+                            for patterns, index in charges))
 
     def test_charge_stops_live_tracking_of_player(self):
         charge = Charge((100, 100))

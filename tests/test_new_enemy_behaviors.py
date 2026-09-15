@@ -10,12 +10,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import pygame
 
-from enemys.behaviors import (AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig,
+from enemys.behaviors import (AsteroidRainConfig, CircularFormationConfig, EvilDroneWaveConfig, FlyByConfig, MineFloatConfig,
     PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig, circular_angles, circular_formation,
-    asteroid_rain, floating_mines, pursuit_wave, safe_flybys, satellite_flyby,
+    asteroid_rain, evil_drone_sweeps, floating_mines, pursuit_wave, safe_flybys, satellite_flyby,
     side_attack, zigzag_wave)
 from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
-from enemys.patterns import Float, Orbit, Pursuit, TelegraphedFlyBy, ZigZag
+from enemys.patterns import Float, FlyBy, Orbit, Pursuit, TelegraphedFlyBy, ZigZag
 from initializations.enemy_waves import get_enemy_registry
 from system.wave_system import WaveSystem
 from util.scene import Scene
@@ -29,9 +29,90 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
 
     def test_registry_contains_every_concrete_type(self):
         registry = get_enemy_registry()
-        self.assertEqual(registry.registered, {"drone", "gaivota", "asteroid", "mine", "broken_satellite"})
+        self.assertEqual(registry.registered, {"drone", "gaivota", "asteroid", "mine",
+                                               "broken_satellite", "evil_drone"})
         satellite = registry.create(satellite_flyby(1920, 1080).spawns[0])
         self.assertIsInstance(satellite, BrokenSatelliteEnemy); satellite.destroy()
+
+    def test_evil_drones_are_sequential_and_keep_individual_sweeps(self):
+        config = EvilDroneWaveConfig()
+        wave = evil_drone_sweeps(1920, 1080, config)
+        self.assertEqual([spawn.delay for spawn in wave.spawns],
+                         [index * config.spawn_interval for index in range(4)])
+
+        sweeps = [spawn.movement()[2] for spawn in wave.spawns]
+        self.assertEqual([(sweep.start_angle, sweep.sweep_angle, sweep.clockwise)
+                          for sweep in sweeps],
+                         [(0, 90, True), (180, 90, False),
+                          (180, 90, True), (0, 90, False)])
+        for sweep in sweeps:
+            expected = ((sweep.start_angle + (sweep.sweep_angle if sweep.clockwise
+                         else -sweep.sweep_angle)) % 360)
+            sweep.update(sweep.duration)
+            self.assertAlmostEqual(sweep.beam_angle, expected)
+
+    def test_evil_drone_beam_uses_exact_sprite_pixel_and_color(self):
+        from entities.enemy_beam import EnemyBeam
+
+        spawn = evil_drone_sweeps(1920, 1080).spawns[0]
+        enemy = get_enemy_registry().create(spawn)
+        enemy.update(2)
+        enemy.update(0)
+        enemy.update(.8)
+        enemy.update(0)
+        sweep = enemy._patterns[enemy._current_pattern]
+        beam = EnemyBeam(enemy, sweep)
+
+        local = (pygame.Vector2(85.5, 115) - pygame.Vector2(62)) * 2
+        expected_origin = enemy.position + local.rotate(-enemy._rotation)
+        self.assertLess(beam.origin.distance_to(expected_origin), .001)
+        self.assertEqual(beam.color, pygame.Color("#ae2334"))
+        self.assertTrue(beam._collider_vertices)
+        beam.destroy()
+        enemy.destroy()
+
+    def test_evil_drone_beam_collides_with_player(self):
+        from entities.enemy_beam import EnemyBeam
+        from entities.player import Player
+
+        enemy = get_enemy_registry().create(evil_drone_sweeps(1920, 1080).spawns[0])
+        enemy.update(2)
+        enemy.update(0)
+        enemy.update(.8)
+        enemy.update(0)
+        sweep = enemy._patterns[enemy._current_pattern]
+        beam = EnemyBeam(enemy, sweep)
+        player = Player()
+        player.position = beam.origin + sweep.beam_direction * 350
+        player.update(0)
+        scene = Scene(True)
+        scene.add_entity(player)
+        scene.add_entity(beam)
+
+        scene.check_collisions()
+        self.assertTrue(player.to_destroy)
+
+        scene.clear_scene()
+        enemy.destroy()
+
+    def test_evil_drone_animates_before_beam_and_holds_last_frame(self):
+        enemy = get_enemy_registry().create(evil_drone_sweeps(1920, 1080).spawns[0])
+        self.assertEqual(enemy._animation.current_animation, "idle")
+
+        enemy.update(2)
+        enemy.update(0)
+        self.assertEqual(enemy._animation.current_animation, "prepare_attack")
+        self.assertTrue(enemy._animation.is_playing)
+
+        enemy.update(.8)
+        self.assertEqual(enemy._animation.frame_index, 7)
+        self.assertFalse(enemy._animation.is_playing)
+        enemy.update(0)
+        self.assertTrue(getattr(enemy._patterns[enemy._current_pattern], "fires_beam", False))
+        enemy.update(.5)
+        self.assertEqual(enemy._animation.frame_index, 7)
+        self.assertFalse(enemy._animation.is_playing)
+        enemy.destroy()
 
     def test_organized_attack_uses_point_two_second_rest(self):
         from enemys.behaviors import organized_attack
@@ -72,6 +153,28 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         pursuit.update(2)
         self.assertTrue(pursuit.finished)
         self.assertGreater(pursuit.position.x, target.x)
+
+    def test_pursuit_owns_facing_until_the_pattern_finishes(self):
+        target = pygame.Vector2(700, 300)
+        pursuit = Pursuit((300, 300), charges=2, speed=400, warning=.2,
+                          charge_duration=.2, interval=.5)
+        pursuit.bind_target(lambda: target)
+
+        pursuit.update(.1)
+        self.assertTrue(pursuit.locks_facing)
+        self.assertAlmostEqual(pursuit.rotation, 90)
+
+        pursuit.update(1.1)
+        self.assertEqual(pursuit.state, "wait")
+        locked_rotation = pursuit.rotation
+        target.update(300, 900)
+        pursuit.update(.1)
+        self.assertEqual(pursuit.rotation, locked_rotation)
+
+        pursuit.update(.5)
+        self.assertEqual(pursuit.state, "warning")
+        expected = -pygame.Vector2(0, 1).angle_to(target - pursuit.position)
+        self.assertAlmostEqual(pursuit.rotation, expected)
 
     def test_pursuit_wave_finishes_its_last_charge_outside_the_screen(self):
         pursuit = pursuit_wave(
@@ -162,6 +265,12 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         config = FlyByConfig(count=6, origins=("top",), safe_distance=300, seed=9)
         wave = safe_flybys("drone", 1920, 1080, player, config)
         self.assertTrue(all(s.movement()[0].position.distance_to(player) >= 300 for s in wave.spawns))
+
+    def test_flyby_keeps_facing_its_straight_trajectory(self):
+        flyby = FlyBy((-100, 250), (1100, 250), speed=600)
+        self.assertTrue(flyby.locks_facing)
+        flyby.update(.1)
+        self.assertAlmostEqual(flyby.rotation, -90)
 
     def test_asteroid_rain_covers_screen_in_random_sequence(self):
         config = AsteroidRainConfig(direction="left", player_width=100,

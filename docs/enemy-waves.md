@@ -1,29 +1,55 @@
 # Inimigos e rodadas
 
-A jornada segue seis fases. As quatro fases de combate têm três ondas cada,
-com 12 a 18 inimigos simultâneos. Estação e chegada não têm ondas nem controle
-livre e usam `duration` para concluir a apresentação.
+A jornada segue seis fases. As quatro fases de combate têm, respectivamente,
+11, 5, 4 e 3 ondas. A quantidade de inimigos, grupos e atrasos varia por
+builder; não há uma quantidade fixa de inimigos simultâneos. Estação e chegada
+não têm ondas nem controle livre e usam `duration` para concluir a apresentação.
 
 | Fase | Inimigos ativos | Pendentes |
 | --- | --- | --- |
 | Estação Krasny Mir | Nenhum | — |
-| Estratosfera | Gaivotas e asteroides (sprite de meteoro existente) | — |
+| Estratosfera | Gaivotas e asteroides | — |
 | Espaço Próximo | Drones e satélite quebrado | Buran |
-| Espaço Profundo | Drones e minas gravitacionais | Novos drones e alienígena |
+| Espaço Profundo | Drones, drones do mal e minas gravitacionais | Alienígena |
 | Órbita de Marte | Drones de escolta | Nave-mãe/boss |
 | Chegada a Marte | Nenhum | Arte e cena final |
 
-`planned_enemies` em cada `Phase` documenta conteúdo futuro; essas chaves
-não são registradas nem instanciadas. O espaço profundo e a órbita reutilizam
-provisoriamente o fundo espacial disponível, rolando para baixo. A chegada
-usa uma tela de texto estática. A campanha atual permite passar pela escolta
-e chegar à tela final: isso não representa a implementação da nave-mãe.
+`planned_enemies` em cada `Phase` documenta conteúdo futuro; essas chaves não
+são registradas nem instanciadas. O espaço profundo e a órbita reutilizam
+provisoriamente o fundo espacial disponível, rolando para baixo. A chegada usa
+uma tela de texto estática. A campanha atual permite passar pela escolta e
+chegar à tela final: isso não representa a implementação da nave-mãe.
 
 Gaivotas e drones atacam somente por contato, investida ou passagem rápida;
 eles não disparam projéteis. Asteroides são perigos de contato. Minas atraem
 o jogador enquanto estão no raio de influência. A regra atual continua sendo
 sobrevivência: contato com inimigos que possuem colisão mata e cada onda acaba
 quando todos completam sua trajetória.
+
+## Drone do mal e raio giratório
+
+`EvilDroneEnemy` usa `assets/enemys/navedomal.png`. A origem do raio é o pixel
+local `(85.5, 115)` do frame de 124×124 px; a transformação considera a escala,
+a posição e a rotação atuais do sprite. O raio usa a cor `#ae2334`, possui
+colisor próprio e destrói o jogador ao contato.
+
+`evil_drone_sweeps()` agenda um inimigo de cada vez. Cada drone entra por fora
+da tela, para em um canto, reproduz uma preparação de 8 frames uma única vez,
+permanece no último frame durante o `LaserSweep`, desliga o raio e sai pelo
+mesmo lado. Os padrões padrão são:
+
+| Ordem | Canto | Ângulo inicial | Sentido | Arco | Ângulo final |
+| --- | --- | ---: | --- | ---: | ---: |
+| 1 | superior esquerdo | 0° | horário | 90° | 90° |
+| 2 | superior direito | 180° | anti-horário | 90° | 90° |
+| 3 | inferior direito | 180° | horário | 90° | 270° |
+| 4 | inferior esquerdo | 0° | anti-horário | 90° | 270° |
+
+A convenção visual é `0°` para a direita, `90°` para baixo, `180°` para a
+esquerda e `270°` para cima. `EvilDronePlacement` configura individualmente
+`corner`, `start_angle`, `sweep_angle` e `clockwise`. `EvilDroneWaveConfig`
+controla margem, tempos de entrada/preparação/raio/saída, intervalo e largura
+do raio.
 
 ## Investidas direcionadas
 
@@ -46,18 +72,18 @@ eixos inválidos geram erro imediatamente.
 
 ## Mina espacial e forças externas
 
-`MineEnemy` importa e herda diretamente de `Enemy`. Ela configura somente o
-sprite e suas dimensões; `MIDDLE_VERTICES = []` é intencional e marca o ponto
-em que o contorno deverá ser implementado. Enquanto a lista estiver vazia,
-`Scene` ignora a colisão física da mina, mas seu comportamento continua ativo.
+`MineEnemy` importa e herda diretamente de `Enemy`. Ela configura sprite,
+dimensões e um polígono de colisão provisório. Como as demais entidades
+colidíveis, a mina destrói o jogador ao contato; o contorno pode ser refinado
+quando a arte final estiver definida.
 
-`AttractionAttack(strength=2400, radius=650, minimum_distance=90)` calcula uma
-aceleração apontada do jogador para a mina. Dentro do raio, chama
-`player.apply_force(acceleration)`. O `Player` acumula forças externas durante
-o frame, aplica-as à velocidade no movimento seguinte e limpa o acumulador.
-Isso permite criar gravidade, vento ou repulsão sem colocar regras específicas
-de inimigo dentro do jogador. Para repulsão, passe o vetor na direção inversa
-em outro comportamento.
+`AttractionAttack(strength=2400, minimum_distance=90)` calcula uma aceleração
+apontada do jogador para a mina. A força não tem raio máximo e diminui com a
+distância, limitada por `minimum_distance` quando o jogador está muito perto.
+Ela chama `player.apply_force(acceleration)`. O `Player` acumula forças
+externas durante o frame, aplica-as à velocidade no movimento seguinte e limpa
+o acumulador. Isso permite criar gravidade, vento ou repulsão sem colocar regras
+específicas de inimigo dentro do jogador.
 
 ## Rotação para olhar o jogador
 

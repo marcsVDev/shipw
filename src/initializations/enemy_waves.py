@@ -9,10 +9,12 @@ from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
 from enemys.behaviors import (
     AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig, OrganizedAttackConfig,
     PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig,
-    asteroid_rain, circular_formation, floating_mines, organized_attack, pursuit_wave,
-    safe_flybys, satellite_flyby, side_attack, zigzag_wave,
+    asteroid_rain, circular_formation, evil_drone_sweeps, floating_mines,
+    organized_attack, pursuit_wave, safe_flybys, satellite_flyby, side_attack,
+    zigzag_wave,
 )
 from enemys.drone_enemy import DroneEnemy
+from enemys.evil_drone_enemy import EvilDroneEnemy
 from enemys.gaivota_enemy import GaivotaEnemy
 from enemys.mine_enemy import MineEnemy
 from enemys.patterns import Charge, FlyBy, MoveTo, Wait, Yell
@@ -25,7 +27,8 @@ def get_enemy_registry():
     registry = EnemyRegistry()
     for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy),
                              ("asteroid", AsteroidEnemy), ("mine", MineEnemy),
-                             ("broken_satellite", BrokenSatelliteEnemy)):
+                             ("broken_satellite", BrokenSatelliteEnemy),
+                             ("evil_drone", EvilDroneEnemy)):
         # As ondas fornecem seus próprios movimentos; não carregar o TMJ legado.
         registry.register(name, partial(enemy_type, patterns=[]))
         load_image(enemy_type.DEFAULT_SPRITESHEET)
@@ -165,11 +168,11 @@ def stratosphere_waves():
 
 def near_space_waves():
     return (
-        circular_formation("drone", W, H, CircularFormationConfig(count=14)),
         organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
-        satellite_flyby(W, H, SatelliteConfig(seed=1)),
-        satellite_flyby(W, H, SatelliteConfig(seed=2)),
-        satellite_flyby(W, H, SatelliteConfig(seed=3)),
+        satellite_flyby(W, H, SatelliteConfig(seed=131)),
+        satellite_flyby(W, H, SatelliteConfig(seed=332)),
+        circular_formation("drone", W, H, CircularFormationConfig(count=14)),
+        satellite_flyby(W, H, SatelliteConfig(seed=232)),
     )
 
 
@@ -177,6 +180,7 @@ def deep_space_waves():
     return (
         floating_mines(W, H, MineFloatConfig(count=6)),
         floating_mines(W, H, MineFloatConfig(count=8)),
+        evil_drone_sweeps(W, H),
         safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
         zigzag_wave("drone", W, H, ZigZagConfig()),
     )
