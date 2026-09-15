@@ -17,7 +17,7 @@ class BrokenSatelliteEnemy(Enemy):
         Vector2(MIDDLE_SCALE * .72, MIDDLE_SCALE * .35),
         Vector2(-MIDDLE_SCALE * .72, MIDDLE_SCALE * .35),
     ]
-    DRAW_COLLIDER = True
+    DRAW_COLLIDER = False
 
     def __init__(self, patterns=None, scale=2.0, collider_scale=1.0):
         if scale <= 0 or collider_scale <= 0:

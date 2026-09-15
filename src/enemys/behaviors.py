@@ -95,13 +95,13 @@ class ZigZagConfig:
 
 @dataclass(frozen=True)
 class SatelliteConfig:
-    origin: Literal["left", "right", "random"] = "random"
+    origin: Literal["top", "left", "right", "random"] = "top"
     seed: int | None = None
     angle: float = 35; speed: float = 1800; warning: float = 0.2
     scale: float = 7.0; collider_scale: float = .82; rotation: float = 0
     spin_speed: float = 60; margin: float = 220
     def __post_init__(self):
-        if self.origin not in ("left", "right", "random"): raise ValueError("Lado do satélite inválido")
+        if self.origin not in ("top", "left", "right", "random"): raise ValueError("Origem do satélite inválida")
         _positive("velocidade", self.speed); _positive("escala", self.scale); _positive("collider", self.collider_scale)
 
 
@@ -203,6 +203,7 @@ def side_attack(enemy, width, height, config=SideAttackConfig()):
 def safe_flybys(enemy, width, height, player_position=None, config=FlyByConfig()):
     rng, spawns = random.Random(config.seed), []
     player = Vector2(player_position) if player_position is not None else Vector2(width / 2, height * .82)
+    facing_offset = 180 if enemy == "gaivota" else 0
     for i in range(config.count):
         origin = config.origins[i % len(config.origins)]
         for _ in range(20):
@@ -212,7 +213,11 @@ def safe_flybys(enemy, width, height, player_position=None, config=FlyByConfig()
                 y = rng.uniform(config.margin, height - config.margin); left = origin == "left"
                 start, end = Vector2(-config.margin if left else width + config.margin, y), Vector2(width + config.margin if left else -config.margin, y)
             if start.distance_to(player) >= config.safe_distance: break
-        spawns.append(EnemySpawn(enemy, lambda s=start, e=end: [FlyBy(s, e, config.speed)], delay=i * config.interval))
+        spawns.append(EnemySpawn(
+            enemy,
+            lambda s=start, e=end: [FlyBy(s, e, config.speed, facing_offset)],
+            delay=i * config.interval,
+        ))
     return Wave(f"Rasgando os céus ({enemy})", tuple(spawns))
 
 
@@ -244,7 +249,7 @@ def asteroid_rain(width: float, height: float,
         if sequence:
             elapsed += config.interval + rng.uniform(-config.interval_jitter,
                                                        config.interval_jitter)
-        movement = lambda s=start, e=end: [FlyBy(s, e, config.speed)]
+        movement = lambda s=start, e=end: [FlyBy(s, e, config.speed, facing_offset=180)]
         spawns.append(EnemySpawn(
             "asteroid", movement, delay=elapsed, group=sequence,
             options={"flip_x": config.direction == "right"},
@@ -292,13 +297,20 @@ def zigzag_wave(enemy, width, height, config=ZigZagConfig()):
 
 
 def satellite_flyby(width, height, config=SatelliteConfig()):
-    origin = (random.Random(config.seed).choice(("left", "right"))
-              if config.origin == "random" else config.origin)
-    sign = 1 if origin == "left" else -1
-    start = Vector2(-config.margin if sign > 0 else width + config.margin, height * .2)
-    direction = Vector2(sign, 0).rotate(config.angle * sign)
-    if direction.y < 0: direction.y *= -1
-    distance = (width + 2 * config.margin) / abs(direction.x)
+    rng = random.Random(config.seed)
+    origin = rng.choice(("left", "right")) if config.origin == "random" else config.origin
+    if origin == "top":
+        sign = rng.choice((-1, 1))
+        start = Vector2(rng.uniform(config.margin, width - config.margin), -config.margin)
+        direction = Vector2(0, 1).rotate(config.angle * sign)
+        distance = (height + 2 * config.margin) / abs(direction.y)
+    else:
+        sign = 1 if origin == "left" else -1
+        start = Vector2(-config.margin if sign > 0 else width + config.margin, height * .2)
+        direction = Vector2(sign, 0).rotate(config.angle * sign)
+        if direction.y < 0:
+            direction.y *= -1
+        distance = (width + 2 * config.margin) / abs(direction.x)
     end = start + direction.normalize() * distance
     movement = lambda: [TelegraphedFlyBy(start, end, config.speed, config.warning,
                                          config.spin_speed, config.rotation)]

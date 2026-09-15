@@ -197,9 +197,9 @@ Principais parâmetros expostos:
   móvel, duração, margens e setores angulares reservados como buracos.
 - `ZigZagConfig`: total, tamanho e intervalo dos grupos, velocidade vertical,
   amplitude, frequência, espaçamento e margem.
-- `SatelliteConfig`: origem aleatória por padrão, seed, ângulo, velocidade,
-  aviso, escala, rotação e margem. `origin="left"` e `"right"` continuam
-  disponíveis quando for necessário forçar um lado.
+- `SatelliteConfig`: origem superior por padrão, seed, ângulo, velocidade,
+  aviso, escala, rotação e margem. `origin="left"`, `"right"` e `"random"`
+  continuam disponíveis para variações futuras.
 - `MineFloatConfig`: duas minas por padrão, deriva, amplitudes, frequências,
   duração, distância mínima e ativação independente da atração gravitacional.
 

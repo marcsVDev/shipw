@@ -216,6 +216,8 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
     def test_satellite_warning_matches_real_path(self):
         pattern = satellite_flyby(1920, 1080, SatelliteConfig(warning=1)).spawns[0].movement()[0]
         self.assertIsInstance(pattern, TelegraphedFlyBy)
+        self.assertLess(pattern.start.y, 0)
+        self.assertGreater(pattern.end.y, 1080)
         self.assertEqual(pattern.danger_line, (pattern.start, pattern.end))
         pattern.update(pattern.warning / 2); self.assertEqual(pattern.position, pattern.start)
         pattern.update(pattern.warning); self.assertGreater(pattern.position.distance_to(pattern.start), 0)
@@ -271,6 +273,19 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertTrue(flyby.locks_facing)
         flyby.update(.1)
         self.assertAlmostEqual(flyby.rotation, -90)
+
+    def test_gaivota_flyby_and_asteroid_face_the_opposite_way(self):
+        gaivota = safe_flybys(
+            "gaivota", 1920, 1080,
+            config=FlyByConfig(count=1, origins=("left",), seed=4),
+        ).spawns[0].movement()[0]
+        asteroid = asteroid_rain(1920, 1080, AsteroidRainConfig(seed=4)).spawns[0].movement()[0]
+
+        self.assertEqual(gaivota.facing_offset, 180)
+        self.assertEqual(asteroid.facing_offset, 180)
+        gaivota.update(.1)
+        asteroid.update(.1)
+        self.assertAlmostEqual(gaivota.rotation, 90)
 
     def test_asteroid_rain_covers_screen_in_random_sequence(self):
         config = AsteroidRainConfig(direction="left", player_width=100,

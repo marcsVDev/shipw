@@ -12,12 +12,9 @@ class AsteroidEnemy(Enemy):
     SCALE = 128 * MULTIPLIER
     MIDDLE_SCALE = SCALE // 2
 
-    DEFAULT_SPRITESHEET = ENEMYS_PATH + "meteor_enemy.png"
+    DEFAULT_SPRITESHEET = ENEMYS_PATH + "asteroidenormal.png"
     LOOK_AT_PLAYER = False
 
-    DEFAULT_SPRITESHEET = ENEMYS_PATH + "drone_animation.png"
-    FRAME_SIZE = 128
-    ANIMATIONS = {"default": (0, 1, 2, 3)}
     ANIMATION_FRAME_DURATION = 0.10
 
     MIDDLE_VECTOR = Vector2(MIDDLE_SCALE, MIDDLE_SCALE)

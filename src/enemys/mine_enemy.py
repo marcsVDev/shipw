@@ -23,5 +23,5 @@ class MineEnemy(Enemy):
         Vector2(173, 129.5) * MULTIPLIER - MIDDLE_VECTOR,
         Vector2(159, 159) * MULTIPLIER - MIDDLE_VECTOR
     ]
-    DRAW_COLLIDER = True
+    DRAW_COLLIDER = False
     DEFAULT_SFX_PATH = None
