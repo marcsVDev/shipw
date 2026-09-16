@@ -1,3 +1,4 @@
+import pygame
 from pygame import Vector2
 
 from entities.enemy import Enemy
@@ -24,3 +25,11 @@ class AlienEnemy(Enemy):
         (Vector2(2, 105) - _SPRITE_CENTER) * _SPRITE_SCALE,
     ]
 
+    def __init__(self, patterns=None, flip_x: bool = False):
+        self.flip_x = flip_x
+        super().__init__(patterns)
+
+    def scale(self, by):
+        super().scale(by)
+        if self.flip_x:
+            self._image = pygame.transform.flip(self._image, True, False)

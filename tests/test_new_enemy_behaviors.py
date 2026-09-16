@@ -42,6 +42,8 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertEqual(len(wave.spawns), 20)
         self.assertEqual([pattern._direction.x > 0 for pattern in patterns],
                          [index % 2 == 0 for index in range(20)])
+        self.assertEqual([spawn.options["flip_x"] for spawn in wave.spawns],
+                         [index % 2 == 1 for index in range(20)])
         self.assertGreater(len({round(pattern.position.y) for pattern in patterns}), 10)
         for pattern in patterns:
             pattern.update(.1)
@@ -49,9 +51,13 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         for current, following, pattern in zip(wave.spawns, wave.spawns[1:], patterns):
             self.assertGreaterEqual(following.delay, current.delay + pattern.duration)
 
-        alien = get_enemy_registry().create(wave.spawns[0])
-        self.assertTrue(alien.MIDDLE_VERTICES)
-        alien.destroy()
+        left_alien = get_enemy_registry().create(wave.spawns[0])
+        right_alien = get_enemy_registry().create(wave.spawns[1])
+        self.assertTrue(left_alien.MIDDLE_VERTICES)
+        self.assertFalse(left_alien.flip_x)
+        self.assertTrue(right_alien.flip_x)
+        left_alien.destroy()
+        right_alien.destroy()
 
     def test_evil_drones_are_sequential_and_keep_individual_sweeps(self):
         config = EvilDroneWaveConfig()
