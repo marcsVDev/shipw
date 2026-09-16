@@ -260,8 +260,8 @@ def alien_flybys(width, height, config=AlienFlyByConfig()):
             width + config.margin, -config.margin
         )
         start, end = Vector2(start_x, y), Vector2(end_x, y)
-        # A rotação permanece zerada. A classe do alien espelha somente o eixo
-        # X quando ele entra pela direita, sem deixá-lo de cabeça para baixo.
+        # A rotação permanece zerada. A arte original olha para a esquerda;
+        # espelhar quem entra pela esquerda faz todos olharem para onde vão.
         facing_offset = 90 if from_left else -90
         spawns.append(EnemySpawn(
             "alien",
@@ -270,7 +270,7 @@ def alien_flybys(width, height, config=AlienFlyByConfig()):
             ],
             delay=index * spawn_interval,
             group=index,
-            options={"flip_x": not from_left},
+            options={"flip_x": from_left},
         ))
     return Wave("Rasantes alienígenas", tuple(spawns))
 
