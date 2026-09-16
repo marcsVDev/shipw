@@ -10,9 +10,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 import pygame
 
-from enemys.behaviors import (AsteroidRainConfig, CircularFormationConfig, EvilDroneWaveConfig, FlyByConfig, MineFloatConfig,
+from enemys.behaviors import (AlienFlyByConfig, AsteroidRainConfig, CircularFormationConfig, EvilDroneWaveConfig, FlyByConfig, MineFloatConfig,
     PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig, circular_angles, circular_formation,
-    asteroid_rain, evil_drone_sweeps, floating_mines, pursuit_wave, safe_flybys, satellite_flyby,
+    alien_flybys, asteroid_rain, evil_drone_sweeps, floating_mines, pursuit_wave, safe_flybys, satellite_flyby,
     side_attack, zigzag_wave)
 from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
 from enemys.patterns import Float, FlyBy, Orbit, Pursuit, TelegraphedFlyBy, ZigZag
@@ -30,9 +30,25 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
     def test_registry_contains_every_concrete_type(self):
         registry = get_enemy_registry()
         self.assertEqual(registry.registered, {"drone", "gaivota", "asteroid", "mine",
-                                               "broken_satellite", "evil_drone"})
+                                               "broken_satellite", "evil_drone", "alien"})
         satellite = registry.create(satellite_flyby(1920, 1080).spawns[0])
         self.assertIsInstance(satellite, BrokenSatelliteEnemy); satellite.destroy()
+
+    def test_alien_flybys_are_random_lanes_alternating_and_sequential(self):
+        config = AlienFlyByConfig(count=20, speed=2600, gap=.2, seed=47)
+        wave = alien_flybys(1920, 1080, config)
+        patterns = [spawn.movement()[0] for spawn in wave.spawns]
+
+        self.assertEqual(len(wave.spawns), 20)
+        self.assertEqual([pattern._direction.x > 0 for pattern in patterns],
+                         [index % 2 == 0 for index in range(20)])
+        self.assertGreater(len({round(pattern.position.y) for pattern in patterns}), 10)
+        for current, following, pattern in zip(wave.spawns, wave.spawns[1:], patterns):
+            self.assertGreaterEqual(following.delay, current.delay + pattern.duration)
+
+        alien = get_enemy_registry().create(wave.spawns[0])
+        self.assertTrue(alien.MIDDLE_VERTICES)
+        alien.destroy()
 
     def test_evil_drones_are_sequential_and_keep_individual_sweeps(self):
         config = EvilDroneWaveConfig()

@@ -52,6 +52,26 @@ class FlyByConfig:
 
 
 @dataclass(frozen=True)
+class AlienFlyByConfig:
+    count: int = 20
+    speed: float = 2600
+    gap: float = .2
+    margin: float = 180
+    vertical_margin: float = 150
+    seed: int | None = None
+    start_from: Literal["left", "right"] = "left"
+
+    def __post_init__(self):
+        _positive("quantidade", self.count)
+        _positive("velocidade", self.speed)
+        _positive("margem", self.margin)
+        if self.gap < 0 or self.vertical_margin < 0:
+            raise ValueError("Intervalos e margens não podem ser negativos")
+        if self.start_from not in ("left", "right"):
+            raise ValueError("O ataque alienígena deve começar pela esquerda ou direita")
+
+
+@dataclass(frozen=True)
 class AsteroidRainConfig:
     """Chuva sequencial que cobre a largura com corredores de dois jogadores."""
 
@@ -219,6 +239,32 @@ def safe_flybys(enemy, width, height, player_position=None, config=FlyByConfig()
             delay=i * config.interval,
         ))
     return Wave(f"Rasgando os céus ({enemy})", tuple(spawns))
+
+
+def alien_flybys(width, height, config=AlienFlyByConfig()):
+    """Cria rasantes rápidos, alternados e estritamente sequenciais."""
+    if height <= config.vertical_margin * 2:
+        raise ValueError("A margem vertical não deixa espaço para o ataque alienígena")
+
+    rng = random.Random(config.seed)
+    traversal_time = (width + config.margin * 2) / config.speed
+    spawn_interval = traversal_time + config.gap
+    starts_from_left = config.start_from == "left"
+    spawns = []
+    for index in range(config.count):
+        from_left = starts_from_left if index % 2 == 0 else not starts_from_left
+        y = rng.uniform(config.vertical_margin, height - config.vertical_margin)
+        start_x, end_x = (-config.margin, width + config.margin) if from_left else (
+            width + config.margin, -config.margin
+        )
+        start, end = Vector2(start_x, y), Vector2(end_x, y)
+        spawns.append(EnemySpawn(
+            "alien",
+            lambda s=start, e=end: [FlyBy(s, e, config.speed, facing_offset=270)],
+            delay=index * spawn_interval,
+            group=index,
+        ))
+    return Wave("Rasantes alienígenas", tuple(spawns))
 
 
 def asteroid_rain(width: float, height: float,

@@ -1,7 +1,7 @@
 # Inimigos e rodadas
 
 A jornada segue seis fases. As quatro fases de combate têm, respectivamente,
-11, 5, 4 e 3 ondas. A quantidade de inimigos, grupos e atrasos varia por
+11, 5, 4 e 4 ondas. A quantidade de inimigos, grupos e atrasos varia por
 builder; não há uma quantidade fixa de inimigos simultâneos. Estação e chegada
 não têm ondas nem controle livre e usam `duration` para concluir a apresentação.
 
@@ -10,8 +10,8 @@ não têm ondas nem controle livre e usam `duration` para concluir a apresentaç
 | Estação Krasny Mir | Nenhum | — |
 | Estratosfera | Gaivotas e asteroides | — |
 | Espaço Próximo | Drones e satélite quebrado | Buran |
-| Espaço Profundo | Drones, drones do mal e minas gravitacionais | Alienígena |
-| Órbita de Marte | Drones de escolta | Nave-mãe/boss |
+| Espaço Profundo | Drones, drones do mal e minas gravitacionais | — |
+| Órbita de Marte | Alienígenas e drones de escolta | Nave-mãe/boss |
 | Chegada a Marte | Nenhum | Arte e cena final |
 
 `planned_enemies` em cada `Phase` documenta conteúdo futuro; essas chaves não
@@ -25,6 +25,14 @@ eles não disparam projéteis. Asteroides são perigos de contato. Minas atraem
 o jogador enquanto estão no raio de influência. A regra atual continua sendo
 sobrevivência: contato com inimigos que possuem colisão mata e cada onda acaba
 quando todos completam sua trajetória.
+
+## Rasantes alienígenas
+
+Na Órbita de Marte, 20 alienígenas atravessam a tela em alturas aleatórias.
+Eles aparecem estritamente um de cada vez e alternam a origem
+entre a esquerda e a direita. Cada novo spawn é agendado somente depois que o
+anterior teve tempo de cruzar toda a tela, preservando o ataque sequencial mesmo
+com alterações de velocidade ou resolução feitas pelo builder `alien_flybys()`.
 
 ## Drone do mal e raio giratório
 

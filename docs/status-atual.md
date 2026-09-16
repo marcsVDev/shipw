@@ -20,8 +20,8 @@ verticalmente, transmitindo a subida e o afastamento da Terra.
 | Estação de Lançamento — Estação Krasny Mir | Apresentação e lançamento | Implementada como cena de 5 s, sem ondas e com movimento bloqueado. |
 | Estratosfera | Gaivotas e asteroides | Implementada com fundo rolável, ondas de gaivotas e chuva de asteroides. |
 | Espaço Próximo | Satélite quebrado, Buran e drones | Implementada com drones e satélite quebrado. Buran permanece planejado. |
-| Espaço Profundo | Drones, minas espaciais e alienígena | Implementada com drones, drones do mal com raio giratório e minas gravitacionais. O alienígena permanece planejado. |
-| Órbita de Marte | Nave-mãe e drones; batalha final | Implementada somente com escolta de drones. Nave-mãe/boss ainda não existe. |
+| Espaço Profundo | Drones e minas espaciais | Implementada com drones, drones do mal com raio giratório e minas gravitacionais. |
+| Órbita de Marte | Alienígenas, nave-mãe e drones; batalha final | Implementada com uma onda alienígena e escolta de drones. Nave-mãe/boss ainda não existe. |
 | Chegada a Marte | Desfecho da missão | Implementada como tela provisória de 5 s, sem cenário marciano e com movimento bloqueado. |
 
 As fases são declaradas em `src/initializations/phases.py`. A lista
@@ -39,7 +39,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   duas fases posteriores passam uma sensação de deslocamento vertical.
 - Colisão poligonal entre jogador e inimigos/projéteis. A colisão destrói a
   nave e paralisa a progressão da onda.
-- Gaivotas, drones, drones do mal, asteroides, satélite quebrado e minas espaciais.
+- Gaivotas, drones, drones do mal, asteroides, satélite quebrado, minas espaciais e alienígenas.
 - Formações, investidas, perseguição, passagens rápidas, órbitas, zigue-zague,
   chuva de asteroides e minas que atraem a nave.
 - Retorno ao menu com Esc, limpando a cena e recriando a campanha para uma
@@ -49,7 +49,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 
 - Não há disparo, vida, pontuação, tela de derrota, reinício em jogo ou
   condição visual para fim da campanha.
-- A nave-mãe, o Buran, o alienígena e a arte/cena de Marte não
+- A nave-mãe, o Buran e a arte/cena de Marte não
   foram implementados.
 - A Órbita de Marte não contém boss fight: as ondas de escolta atuais permitem
   avançar diretamente à tela final provisória.

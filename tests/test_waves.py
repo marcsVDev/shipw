@@ -161,7 +161,8 @@ class WavesTest(unittest.TestCase):
         self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone", "broken_satellite"})
         self.assertEqual({spawn.enemy for wave in phases[3].waves for spawn in wave.spawns},
                          {"drone", "mine", "evil_drone"})
-        self.assertEqual({spawn.enemy for wave in phases[4].waves for spawn in wave.spawns}, {"drone"})
+        self.assertEqual({spawn.enemy for wave in phases[4].waves for spawn in wave.spawns},
+                         {"drone", "alien"})
         for phase in (phases[0], phases[-1]):
             self.assertFalse(phase.free_movement)
             self.assertFalse(phase.waves)

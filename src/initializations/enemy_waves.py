@@ -4,12 +4,13 @@ from functools import partial
 from pygame import Vector2
 
 from enemys.attacks import AttractionAttack
+from enemys.alien_enemy import AlienEnemy
 from enemys.asteroid_enemy import AsteroidEnemy
 from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
 from enemys.behaviors import (
-    AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig, OrganizedAttackConfig,
+    AlienFlyByConfig, AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig, OrganizedAttackConfig,
     PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig,
-    asteroid_rain, circular_formation, evil_drone_sweeps, floating_mines,
+    alien_flybys, asteroid_rain, circular_formation, evil_drone_sweeps, floating_mines,
     organized_attack, pursuit_wave, safe_flybys, satellite_flyby, side_attack,
     zigzag_wave,
 )
@@ -28,7 +29,7 @@ def get_enemy_registry():
     for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy),
                              ("asteroid", AsteroidEnemy), ("mine", MineEnemy),
                              ("broken_satellite", BrokenSatelliteEnemy),
-                             ("evil_drone", EvilDroneEnemy)):
+                             ("evil_drone", EvilDroneEnemy), ("alien", AlienEnemy)):
         # As ondas fornecem seus próprios movimentos; não carregar o TMJ legado.
         registry.register(name, partial(enemy_type, patterns=[]))
         load_image(enemy_type.DEFAULT_SPRITESHEET)
@@ -187,8 +188,11 @@ def deep_space_waves():
 
 
 def mars_orbit_waves():
-    # Escolta disponível; nave-mãe será integrada quando seu inimigo existir.
+    # A nave-mãe será integrada quando seu inimigo existir.
     return (
+        alien_flybys(W, H, AlienFlyByConfig(
+            count=20, speed=2600, gap=.2, start_from="left",
+        )),
         pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
         make_wave("Investida da escolta", "charge", ("drone",), 18, 12, 2500),
         make_wave("Ultimo bloqueio", "horizontal", ("drone",), 18, 20, 2500),
