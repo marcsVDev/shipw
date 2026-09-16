@@ -223,7 +223,9 @@ def side_attack(enemy, width, height, config=SideAttackConfig()):
 def safe_flybys(enemy, width, height, player_position=None, config=FlyByConfig()):
     rng, spawns = random.Random(config.seed), []
     player = Vector2(player_position) if player_position is not None else Vector2(width / 2, height * .82)
-    facing_offset = 180 if enemy == "gaivota" else 0
+    # A gaivota, assim como os demais sprites móveis, já aponta para baixo.
+    # Portanto, não precisa da meia-volta que invertia sua orientação/eixo.
+    facing_offset = 0
     for i in range(config.count):
         origin = config.origins[i % len(config.origins)]
         for _ in range(20):
@@ -258,9 +260,14 @@ def alien_flybys(width, height, config=AlienFlyByConfig()):
             width + config.margin, -config.margin
         )
         start, end = Vector2(start_x, y), Vector2(end_x, y)
+        # O alien aponta para a esquerda na arte e deve conservar exatamente
+        # essa orientação nos dois sentidos, sem espelhamento ou meia-volta.
+        facing_offset = 90 if from_left else -90
         spawns.append(EnemySpawn(
             "alien",
-            lambda s=start, e=end: [FlyBy(s, e, config.speed, facing_offset=270)],
+            lambda s=start, e=end, offset=facing_offset: [
+                FlyBy(s, e, config.speed, facing_offset=offset)
+            ],
             delay=index * spawn_interval,
             group=index,
         ))

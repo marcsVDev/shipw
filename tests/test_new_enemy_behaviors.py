@@ -43,6 +43,9 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertEqual([pattern._direction.x > 0 for pattern in patterns],
                          [index % 2 == 0 for index in range(20)])
         self.assertGreater(len({round(pattern.position.y) for pattern in patterns}), 10)
+        for pattern in patterns:
+            pattern.update(.1)
+            self.assertAlmostEqual(pattern.rotation % 360, 0)
         for current, following, pattern in zip(wave.spawns, wave.spawns[1:], patterns):
             self.assertGreaterEqual(following.delay, current.delay + pattern.duration)
 
@@ -290,18 +293,19 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         flyby.update(.1)
         self.assertAlmostEqual(flyby.rotation, -90)
 
-    def test_gaivota_flyby_and_asteroid_face_the_opposite_way(self):
-        gaivota = safe_flybys(
+    def test_gaivota_flyby_follows_its_movement_axis_without_inversion(self):
+        gaivotas = [safe_flybys(
             "gaivota", 1920, 1080,
-            config=FlyByConfig(count=1, origins=("left",), seed=4),
-        ).spawns[0].movement()[0]
+            config=FlyByConfig(count=1, origins=(origin,), seed=4),
+        ).spawns[0].movement()[0] for origin in ("top", "left", "right")]
         asteroid = asteroid_rain(1920, 1080, AsteroidRainConfig(seed=4)).spawns[0].movement()[0]
 
-        self.assertEqual(gaivota.facing_offset, 180)
+        self.assertTrue(all(gaivota.facing_offset == 0 for gaivota in gaivotas))
         self.assertEqual(asteroid.facing_offset, 180)
-        gaivota.update(.1)
+        for gaivota in gaivotas:
+            gaivota.update(.1)
         asteroid.update(.1)
-        self.assertAlmostEqual(gaivota.rotation, 90)
+        self.assertEqual([gaivota.rotation for gaivota in gaivotas], [0, -90, 90])
 
     def test_asteroid_rain_covers_screen_in_random_sequence(self):
         config = AsteroidRainConfig(direction="left", player_width=100,
