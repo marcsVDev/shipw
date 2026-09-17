@@ -58,7 +58,7 @@ antes de limpar as coleções, importante para desconectar eventos e parar sons.
 
 `Entity` define o contrato mínimo de atualização, desenho e destruição.
 `Character` acrescenta sprite animado, escala, rotação e colisor. `Player` lê
-WASD, limita sua posição à tela e aceita acelerações externas via
+WASD ou setas direcionais, limita sua posição à tela e aceita acelerações externas via
 `apply_force`. `Enemy` executa uma sequência de padrões e pode receber um
 ataque independente.
 

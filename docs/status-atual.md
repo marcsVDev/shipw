@@ -79,7 +79,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 | --- | --- |
 | Iniciar no menu | Enter ou botão Play |
 | Lançar em Krasny Mir | Botão Play provisório |
-| Mover a nave | W, A, S, D |
+| Mover a nave | W, A, S, D ou setas direcionais |
 | Voltar ao menu durante a campanha | Esc |
 | Avançar diálogo, quando usado | Espaço ou clique esquerdo |
 | Ativar/desativar God Mode | Ctrl+Shift+O |

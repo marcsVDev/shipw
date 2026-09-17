@@ -90,13 +90,13 @@ class Player(Character):
         keys = pygame.key.get_pressed()
         direction = Vector2(0, 0)
 
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
             direction.x -= 1
-        if keys[pygame.K_d]:
+        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
             direction.x += 1
-        if keys[pygame.K_w]:
+        if keys[pygame.K_w] or keys[pygame.K_UP]:
             direction.y -= 1
-        if keys[pygame.K_s]:
+        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
             direction.y += 1
 
         if direction.length_squared() > 0:
@@ -188,4 +188,3 @@ class Player(Character):
         self.sound.stop()
         EventBus.disconnect(Events.PLAYER_COLLIDE, self.player_collide)
         super().destroy()
-

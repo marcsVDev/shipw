@@ -1,8 +1,10 @@
 import os
 import sys
 import unittest
+from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -245,6 +247,24 @@ class WavesTest(unittest.TestCase):
         self.assertGreater(player.velocity.x, 0)
         mine.destroy()
         player.destroy()
+
+    def test_arrow_keys_move_player_in_each_direction(self):
+        from entities.player import Player
+
+        for key, axis, expected_sign in (
+            (pygame.K_LEFT, "x", -1),
+            (pygame.K_RIGHT, "x", 1),
+            (pygame.K_UP, "y", -1),
+            (pygame.K_DOWN, "y", 1),
+        ):
+            with self.subTest(key=key), patch(
+                "pygame.key.get_pressed",
+                return_value=defaultdict(bool, {key: True}),
+            ):
+                player = Player()
+                player.movement(.1)
+                self.assertTrue(getattr(player.velocity, axis) * expected_sign > 0)
+                player.destroy()
 
     def test_fast_flybys_cross_the_screen_on_both_axes(self):
         patterns = [spawn.movement()[0] for waves in (near_space_waves(), deep_space_waves())
