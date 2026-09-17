@@ -75,6 +75,47 @@ class Float(EnemyPattern):
     def finished(self): return self.elapsed >= self.duration
 
 
+class BoundedPursuit(EnemyPattern):
+    """Segue o alvo continuamente sem permitir que o centro saia da arena."""
+
+    locks_facing = True
+
+    def __init__(self, start, speed=520, duration=4.0,
+                 bounds=(80, 80, 1840, 1000)):
+        left, top, right, bottom = bounds
+        if speed <= 0 or duration <= 0 or left >= right or top >= bottom:
+            raise ValueError("Parâmetros da perseguição limitada são inválidos")
+        super().__init__(Vector2(start), 0, duration)
+        self.speed = speed
+        self.bounds = bounds
+        self.elapsed = 0.0
+        self.target: Callable[[], Vector2 | None] = lambda: None
+
+    def bind_target(self, target):
+        if target is not None:
+            self.target = target
+
+    def update(self, delta):
+        step = min(max(0.0, delta), self.duration - self.elapsed)
+        self.elapsed += step
+        target = self.target()
+        if target is not None:
+            offset = Vector2(target) - self.position
+            if offset.length_squared():
+                direction = offset.normalize()
+                distance = min(self.speed * step, offset.length())
+                self.position += direction * distance
+                self.rotation = -Vector2(0, 1).angle_to(direction)
+
+        left, top, right, bottom = self.bounds
+        self.position.x = max(left, min(right, self.position.x))
+        self.position.y = max(top, min(bottom, self.position.y))
+
+    @property
+    def finished(self):
+        return self.elapsed >= self.duration
+
+
 class Pursuit(EnemyPattern):
     """Investe até alvos sucessivos e prolonga a última investida para fora da tela."""
     # A rotação pertence ao padrão durante toda a perseguição. Isso impede que

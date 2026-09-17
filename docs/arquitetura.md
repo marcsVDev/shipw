@@ -9,9 +9,11 @@ O delta de tempo é convertido para segundos e entregue aos sistemas e entidades
 ```text
 Game
  ├─ Scene(menu): fundo, título e botão Play
+ ├─ RunState: HP e derrota da campanha
  └─ Scene(game)
      ├─ Progression: escolhe e avança fases
      ├─ WaveSystem: agenda e conclui ondas
+     ├─ BossFightSystem: dirige exclusivamente a Órbita de Marte
      ├─ entidades: Player, Enemy, Background, scrollers, projéteis
      └─ UI: título da fase e estado de onda
 ```
@@ -23,10 +25,15 @@ troca para a cena de jogo. `Progression` mantém o índice da campanha. Cada
 fase fornece entidades padrão, ondas opcionais, duração e `free_movement`.
 
 `Game.load_phase()` limpa a cena anterior, adiciona as entidades da nova fase,
-aplica a permissão de movimento ao jogador e entrega a fase ao `WaveSystem`.
-Quando o sistema de ondas emite `PHASE_COMPLETED`, `Progression` carrega a
-próxima. Depois da sexta fase, emite `GAME_COMPLETED`; atualmente esse evento
-não possui uma tela de encerramento conectada.
+aplica a permissão de movimento ao jogador e entrega a fase ao `WaveSystem` ou
+ao `BossFightSystem`. Todas as instâncias de `Player` recebem o mesmo
+`RunState`, portanto a troca de fase não cura Valentina. Na Órbita, somente o
+diretor do boss emite `PHASE_COMPLETED`, após a animação de derrota da
+Nave-Mãe. Depois da sexta fase, `Progression` emite `GAME_COMPLETED`.
+
+Entre duas fases, `Game` pausa a atualização da cena por 1 s e mantém o frame
+preto. A música ambiente é substituída por `musicfinal.mp3` ao entrar na
+Órbita de Marte e restaurada ao sair da luta ou voltar ao menu.
 
 Para cenas sem ondas, `duration` é a contagem até a conclusão. Em fases de
 combate, o sistema inicia a primeira onda após 2 s e troca de onda após o
@@ -56,9 +63,12 @@ WASD, limita sua posição à tela e aceita acelerações externas via
 ataque independente.
 
 Antes do teste SAT, a cena faz uma triagem por alcance. Em seguida,
-`Collidable` usa os vértices poligonais já rotacionados. Inimigos ou projéteis
-que tocam o jogador emitem `PLAYER_COLLIDE`; o jogador se destrói. Uma entidade
-sem vértices de colisor não participa da colisão.
+`Collidable` usa os vértices poligonais já rotacionados. Inimigos, projéteis,
+raios e a Nave-Mãe que tocam o jogador geram uma única ocorrência de
+`PLAYER_COLLIDE` por frame. `Player` consulta o `RunState`, aplica um ponto de
+dano e abre a janela de invulnerabilidade. O míssil teleguiado usa resolução
+especial e contínua, priorizando alvo aberto, blindagem, nave laser, jogador e
+inimigo menor. Uma entidade sem vértices não participa da colisão comum.
 
 ## Ondas, padrões e ataques
 
@@ -79,10 +89,19 @@ catálogo e instruções de extensão.
 
 ## Eventos
 
-O `EventBus` é um canal simples de assinaturas em memória. Os eventos atuais
-são `GAME_STARTED`, `PLAYER_COLLIDE`, `PHASE_CHANGED`, `PHASE_COMPLETED`,
-`WAVE_STARTED`, `WAVE_COMPLETED` e `GAME_COMPLETED`. Inscrições devem ser
-desconectadas na destruição de objetos de vida curta.
+O `EventBus` é um canal simples de assinaturas em memória. Além dos eventos de
+campanha e onda, publica `RUN_RESET`, `PLAYER_DAMAGED`, `PLAYER_DIED`,
+`BOSS_STARTED`, `BOSS_DAMAGED` e `BOSS_DEFEATED`. Eventos terminais possuem
+guardas para serem emitidos uma única vez.
+
+## Sistema da Nave-Mãe
+
+`MotherShipEnemy` mantém a integridade e os cinco alvos lógicos, sem conhecer a
+cena ou o agendamento. `GuidedMissile` contém direção, aceleração, limite de
+giro, armamento, teste do segmento percorrido e resultado único de explosão.
+`BossFightSystem` abre alvos, cria inimigos pelo `EnemyRegistry`, limita ameaças,
+executa as sete ondas e volta da sétima para a segunda. As configurações de
+vida, chefe, míssil, gaivota-robô e laser são dataclasses imutáveis.
 
 ## Recursos e testes
 

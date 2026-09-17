@@ -45,7 +45,10 @@ class Character(Entity, Collidable):
         
         self._original_image = self._image
         self._rotation = 0
-        self._rect: Rect 
+        self.scale(self.SCALE)
+        self.rotate()
+        self.align_rect()
+        self._collider_vertices = self.get_rotated_vertices()
 
         EventBus.connect(Events.GAME_STARTED, self.game_started)
 

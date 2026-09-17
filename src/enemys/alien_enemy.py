@@ -11,8 +11,9 @@ class AlienEnemy(Enemy):
     LOOK_AT_PLAYER = False
     DEFAULT_SPRITESHEET = ENEMYS_PATH + "alien.png"
     DEFAULT_SFX_PATH = None
+    MULTIPLY = 1.2
     FRAME_SIZE = 128
-    SCALE = 256
+    SCALE = 128 * MULTIPLY
     DRAW_COLLIDER = False
 
     _SPRITE_CENTER = Vector2(FRAME_SIZE / 2)

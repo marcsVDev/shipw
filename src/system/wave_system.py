@@ -1,4 +1,3 @@
-from entities.enemy_projectile import EnemyProjectile
 from events.event_bus import EventBus
 from events.events import Events
 from system.system import System
@@ -19,7 +18,7 @@ class WaveSystem(System):
     def load_phase(self, phase):
         self.phase = phase
         self.index = -1
-        self.remaining = phase.duration if not phase.waves else 2.0
+        self.remaining = getattr(phase, "duration", 0) if not phase.waves else 2.0
         self.active = []
         self.pending = []
         self.finished = False
@@ -37,6 +36,8 @@ class WaveSystem(System):
 
     def update(self, delta):
         if self.finished or self.scene.player is None or self.scene.player.to_destroy:
+            return
+        if not self.phase.waves and not getattr(self.phase, "auto_complete", True):
             return
         # Remove referências imediatamente; ataques/timers pertencem à entidade.
         self.active[:] = [enemy for enemy in self.active if not enemy.to_destroy]
@@ -64,7 +65,7 @@ class WaveSystem(System):
                 pending[0] -= delta
             self._spawn_due()
         if not self.waiting and not self.pending and not self.active:
-            if any(isinstance(entity, EnemyProjectile) and not entity.to_destroy
+            if any(getattr(entity, "hazard_active", False) and not entity.to_destroy
                    for entity in self.scene.entities):
                 return
             self.waiting = True

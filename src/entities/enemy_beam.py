@@ -12,13 +12,14 @@ class EnemyBeam(Entity, Collidable):
     """Raio contínuo preso a um ponto local do sprite do inimigo."""
 
     DEFAULT_COLOR = "#ae2334"
+    hazard_active = True
 
     def __init__(self, owner, pattern, source_pixel=(85.5, 115), width=18,
                  color=DEFAULT_COLOR):
         self.owner = owner
         self.pattern = pattern
         self.source_pixel = Vector2(source_pixel)
-        self.width = width
+        self.width = int(round(width))
         self.color = pygame.Color(color)
         self.origin = Vector2()
         self.end = Vector2()

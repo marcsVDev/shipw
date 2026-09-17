@@ -20,14 +20,22 @@ class AnimatedSprite:
         sprite.play("boost")
     """
 
-    def __init__(self, spritesheet: Surface, frame_time: float, size: int, animations: Mapping[str, Iterable[int] | Mapping] | None = None,):
-        if size <= 0:
-            raise ValueError("size deve ser maior que zero")
+    def __init__(self, spritesheet: Surface, frame_time: float, size: int | tuple[int, int], animations: Mapping[str, Iterable[int] | Mapping] | None = None,):
+        if isinstance(size, int):
+            frame_width = frame_height = size
+        else:
+            frame_width, frame_height = size
+        if frame_width <= 0 or frame_height <= 0:
+            raise ValueError("o tamanho do frame deve ser maior que zero")
+        if spritesheet.get_height() < frame_height:
+            raise ValueError("o spritesheet é menor que a altura do frame")
 
         self.spritesheet = spritesheet
         self.frame_time = frame_time
         self.size = size
-        self.frames_count = self.spritesheet.get_width() // self.size
+        self.frame_width = frame_width
+        self.frame_height = frame_height
+        self.frames_count = self.spritesheet.get_width() // self.frame_width
         if self.frames_count == 0:
             raise ValueError("o spritesheet não possui frames do tamanho informado")
 
@@ -125,4 +133,9 @@ class AnimatedSprite:
     def get_frame(self, frame: int) -> Surface:
         if frame < 0 or frame >= self.frames_count:
             raise IndexError(f"frame inválido: {frame}")
-        return self.spritesheet.subsurface(Rect(frame * self.size, 0, self.size, self.size))
+        return self.spritesheet.subsurface(Rect(
+            frame * self.frame_width,
+            0,
+            self.frame_width,
+            self.frame_height,
+        ))

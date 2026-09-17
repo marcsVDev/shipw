@@ -71,6 +71,7 @@ class Scene:
 
         self._remove_destroyed()
         if self.game_scene:
+            self.resolve_special_collisions()
             self.check_collisions()
         self._remove_destroyed()
 
@@ -88,13 +89,15 @@ class Scene:
             item.draw(screen)
 
     def check_collisions(self):
-        if (self.player is None or self.player.to_destroy
-                or getattr(self.player, "god_mode", False)):
+        if self.player is None or self.player.to_destroy:
             return
 
         colliding_enemys: list[Enemy] = []
         for enemy in self.entities:
-            if not isinstance(enemy, (Enemy, EnemyProjectile, EnemyBeam)):
+            if getattr(enemy, "is_guided_missile", False):
+                continue
+            if not (isinstance(enemy, (Enemy, EnemyProjectile, EnemyBeam))
+                    or getattr(enemy, "damages_player", False)):
                 continue
             if not enemy.visible or enemy.to_destroy:
                 continue
@@ -104,7 +107,14 @@ class Scene:
             # Triagem barata antes do SAT. Os limites incluem o polígono inteiro.
             if not isinstance(enemy, EnemyBeam):
                 distance = self.player.position - enemy.position
-                enemy_radius = enemy.SCALE if isinstance(enemy, Enemy) else enemy.RADIUS
+                if isinstance(enemy, Enemy):
+                    enemy_radius = enemy.SCALE
+                elif isinstance(enemy, EnemyProjectile):
+                    enemy_radius = enemy.RADIUS
+                else:
+                    xs = [point.x for point in enemy._collider_vertices]
+                    ys = [point.y for point in enemy._collider_vertices]
+                    enemy_radius = max(max(xs) - min(xs), max(ys) - min(ys)) / 2
                 reach = self.player.SCALE + enemy_radius
                 if abs(distance.x) > reach or abs(distance.y) > reach:
                     continue
@@ -114,6 +124,11 @@ class Scene:
 
         if len(colliding_enemys) > 0:
             EventBus.emit(Events.PLAYER_COLLIDE, self.player, colliding_enemys)
+
+    def resolve_special_collisions(self):
+        for entity in tuple(self.entities):
+            if getattr(entity, "is_guided_missile", False) and not entity.to_destroy:
+                entity.resolve_collisions(self)
 
     def _remove_destroyed(self):
         self.entities[:] = [entity for entity in self.entities if not entity.to_destroy]

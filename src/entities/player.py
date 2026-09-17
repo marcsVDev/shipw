@@ -5,6 +5,7 @@ from entities.character import Character
 from events.events import Events
 from game_consts import PLAYER_IMG_PATH, SCREEN_HEIGHT, SCREEN_WIDTH, SFX_PATH
 from events.event_bus import EventBus
+from util.run_state import RunState
 
 class Player(Character):
     MULTIPLIER = 1.2
@@ -44,19 +45,34 @@ class Player(Character):
     PLAYER_SFX = SFX_PATH + "player.mp3"
     VOLUME = 80
 
-    def __init__(self):
+    def __init__(self, run_state: RunState | None = None):
         EventBus.connect(Events.PLAYER_COLLIDE, self.player_collide)
+        self.run_state = run_state if run_state is not None else RunState()
+        self.health_config = self.run_state.config
         self.velocity = Vector2()
         self._external_acceleration = Vector2()
         self.free_movement = True
         self.god_mode = False
         self._sound_started = False
+        self.invulnerable_remaining = 0.0
+        self._blink_elapsed = 0.0
+        self._death_emitted = False
+        self.time_since_damage = float("inf")
         self.sound = pygame.mixer.Sound(self.PLAYER_SFX)
         self.sound.set_volume(self.VOLUME)
 
         super().__init__()
 
     def update(self, delta):
+        self.time_since_damage += max(0.0, delta)
+        if self.invulnerable_remaining > 0:
+            self.invulnerable_remaining = max(0.0, self.invulnerable_remaining - delta)
+            self._blink_elapsed += max(0.0, delta)
+            self.visible = int(self._blink_elapsed / self.health_config.blink_interval) % 2 == 0
+            if self.invulnerable_remaining == 0:
+                self.visible = True
+        else:
+            self.visible = True
         if self.can_move:
             if not self._sound_started:
                 self.sound.play(-1)
@@ -124,13 +140,46 @@ class Player(Character):
         """Acumula uma aceleração externa para o próximo passo de movimento."""
         self._external_acceleration += Vector2(acceleration)
 
+    @property
+    def is_invulnerable(self):
+        return self.invulnerable_remaining > 0
+
+    def take_damage(self, sources) -> bool:
+        sources = tuple(sources)
+        for source in sources:
+            if getattr(source, "consume_on_player_contact", False):
+                source.destroy()
+        if self.god_mode or self.is_invulnerable or self.run_state.is_game_over:
+            return False
+        if not self.run_state.damage(1):
+            return False
+
+        centers = [Vector2(source.position) for source in sources
+                   if hasattr(source, "position")]
+        center = sum(centers, Vector2()) / len(centers) if centers else self.position - Vector2(0, 1)
+        away = self.position - center
+        if away.length_squared() == 0:
+            away = Vector2(0, 1)
+        self.velocity += away.normalize() * self.health_config.knockback_speed
+        if self.velocity.length() > self.SPEED:
+            self.velocity.scale_to_length(self.SPEED)
+
+        self.invulnerable_remaining = self.health_config.invulnerability_duration
+        self._blink_elapsed = 0.0
+        self.time_since_damage = 0.0
+        EventBus.emit(Events.PLAYER_DAMAGED, self, self.run_state.health,
+                      sources[0] if sources else None)
+        if self.run_state.is_game_over and not self._death_emitted:
+            self._death_emitted = True
+            self.sound.stop()
+            EventBus.emit(Events.PLAYER_DIED, self)
+            self.destroy()
+        return True
+
     def player_collide(self, player, collisions):
-        if player is not self or self.god_mode:
+        if player is not self:
             return
-
-        self.sound.stop()
-
-        self.destroy()
+        self.take_damage(collisions)
 
     def game_started(self):
         super().game_started()

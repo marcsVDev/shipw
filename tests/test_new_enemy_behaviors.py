@@ -30,7 +30,8 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
     def test_registry_contains_every_concrete_type(self):
         registry = get_enemy_registry()
         self.assertEqual(registry.registered, {"drone", "gaivota", "asteroid", "mine",
-                                               "broken_satellite", "evil_drone", "alien"})
+                                               "broken_satellite", "evil_drone", "alien",
+                                               "robot_seagull", "laser_ship", "mother_ship"})
         satellite = registry.create(satellite_flyby(1920, 1080).spawns[0])
         self.assertIsInstance(satellite, BrokenSatelliteEnemy); satellite.destroy()
 
@@ -115,7 +116,8 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         scene.add_entity(beam)
 
         scene.check_collisions()
-        self.assertTrue(player.to_destroy)
+        self.assertFalse(player.to_destroy)
+        self.assertEqual(player.run_state.health, 2)
 
         scene.clear_scene()
         enemy.destroy()
@@ -155,6 +157,31 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertEqual(fine.completed_charges, 3)
         self.assertEqual(coarse.completed_charges, 3)
         self.assertLess(fine.position.distance_to(coarse.position), 1)
+
+    def test_bounded_pursuit_tracks_live_target_without_leaving_arena(self):
+        from enemys.patterns import BoundedPursuit
+
+        target = pygame.Vector2(900, 700)
+        pursuit = BoundedPursuit((100, 100), speed=500, duration=3,
+                                 bounds=(80, 80, 920, 720))
+        pursuit.bind_target(lambda: target)
+        pursuit.update(1)
+        first_position = pursuit.position.copy()
+        self.assertGreater(first_position.x, 100)
+        self.assertGreater(first_position.y, 100)
+
+        target.update(-500, 1500)
+        pursuit.update(10)
+        self.assertEqual(pursuit.position.x, 80)
+        self.assertEqual(pursuit.position.y, 720)
+        self.assertTrue(pursuit.finished)
+
+    def test_boss_pincer_drones_use_bounded_live_pursuit(self):
+        from enemys.patterns import BoundedPursuit
+        from initializations.boss_waves import boss_waves
+
+        patterns = boss_waves()[3].spawns[0].movement()
+        self.assertIsInstance(patterns[-1], BoundedPursuit)
 
     def test_pursuit_waits_at_captured_player_position_before_next_charge(self):
         target = pygame.Vector2(300, 500)

@@ -11,9 +11,10 @@ class Button(UI):
     DRAW_AREA = False
     SFX_BUTTON = SFX_PATH + "click.mp3"
 
-    def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0)):
+    def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0), one_shot: bool = False):
         super().__init__(image, position)
         self.press_callable = press_callable
+        self.one_shot = one_shot
         self.area = Rect(
             position.x + (frame_size - area_size[0]) / 2,
             position.y + (frame_size - area_size[1]) / 2,
@@ -34,6 +35,10 @@ class Button(UI):
                     if self.press_callable is not None:
                         pygame.mixer.Sound(self.SFX_BUTTON).play() 
                         self.press_callable()
+
+                    if self.one_shot:
+                        self.visible = False
+                        self.destroy()
 
                     self.pressed = True
             if self.pressed and event.type == pygame.MOUSEBUTTONUP:

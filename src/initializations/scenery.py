@@ -1,6 +1,7 @@
 import pygame
 
 from entities.background import Background
+from entities.cutscene import Cutscene
 from entities.scrollers.infinite_vertical_scroller import InfiniteVerticalScroller
 from entities.scrollers.moving_object import MovingObject
 from game_consts import SCENERY_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
@@ -12,6 +13,8 @@ EARTH_SPEED = 2.5
 
 S4_SCALE = 4
 S128_FRAME_SIZE = 128
+LAUNCH_FRAME_SIZE = (480, 270)
+LAUNCH_FRAME_TIME = 1 / 12
 
 def darken_image(image: pygame.Surface, amount: int = 100) -> pygame.Surface:
     """Retorna uma copia escurecida da imagem sem alterar a original.
@@ -80,6 +83,27 @@ def get_satellite_scenery():
 def get_krasny_mir_background():
     return Background(pygame.image.load(SCENERY_PATH + "krasny_mir_station.png").convert_alpha(), 4)
 
+def get_krasny_mir_launch_animation(on_complete=None):
+    spritesheet = pygame.image.load(
+        SCENERY_PATH + "Final_Fumaca_Inicio.png"
+    ).convert_alpha()
+    animation = AnimatedSprite(
+        spritesheet,
+        LAUNCH_FRAME_TIME,
+        LAUNCH_FRAME_SIZE,
+        {
+            "default": {
+                "frames": range(spritesheet.get_width() // LAUNCH_FRAME_SIZE[0]),
+                "loop": False,
+            },
+        },
+    )
+    return Cutscene(
+        animation,
+        display_size=(SCREEN_WIDTH, SCREEN_HEIGHT),
+        on_complete=on_complete,
+    )
+
 def get_espaco_proximo_background():
     image = pygame.image.load(SCENERY_PATH + "espaco_proximo.png").convert_alpha()
     image = pygame.transform.scale_by(image, 1.14)
@@ -88,4 +112,4 @@ def get_espaco_proximo_background():
 def get_estratosfera_background():
     image = pygame.image.load(SCENERY_PATH + "ceucomnuvens.png").convert_alpha()
     image = pygame.transform.scale_by(image, 5)
-    return InfiniteVerticalScroller(image, 3000, True)
+    return InfiniteVerticalScroller(image, 2000, True)

@@ -12,11 +12,27 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pygame
 
 from game import Game
+from events.event_bus import EventBus
+from events.events import Events
+from initializations.enemy_waves import get_enemy_registry
 from entities.scrollers.infinite_vertical_scroller import InfiniteVerticalScroller
-from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
+from game_consts import BACKGROUND_MUSIC_PATH, BOSS_MUSIC_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from system.wave_system import WaveSystem
+from util.progresssion import Progression
+from util.run_state import RunState
+from util.scene import Scene
 
 
 class GameNavigationTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        pygame.init()
+        pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    @classmethod
+    def tearDownClass(cls):
+        pygame.quit()
+
     def make_game(self, current_scene):
         game = Game.__new__(Game)
         game.current_scene = current_scene
@@ -79,6 +95,32 @@ class GameNavigationTest(unittest.TestCase):
         music.set_volume.assert_called_once_with(Game.BACKGROUND_MUSIC_VOLUME)
         music.play.assert_called_once_with(-1)
 
+    def test_phase_transition_waits_on_black_frame_before_loading(self):
+        game = Game.__new__(Game)
+        game._pending_phase = None
+        game._phase_transition_remaining = 0
+        game.load_phase = Mock()
+        phase = SimpleNamespace(name="Estratosfera")
+
+        game.begin_phase_transition(phase)
+        game.update_phase_transition(.75)
+        game.load_phase.assert_not_called()
+        self.assertTrue(game.phase_transition_active)
+        game.update_phase_transition(.25)
+        game.load_phase.assert_called_once_with(phase)
+        self.assertFalse(game.phase_transition_active)
+
+    @patch("game.pygame.mixer.music")
+    def test_boss_music_replaces_ambient_and_does_not_restart_needlessly(self, music):
+        game = Game.__new__(Game)
+        game._current_music_path = BACKGROUND_MUSIC_PATH
+
+        game.play_music(BACKGROUND_MUSIC_PATH)
+        music.load.assert_not_called()
+        game.play_music(BOSS_MUSIC_PATH)
+        music.load.assert_called_once_with(BOSS_MUSIC_PATH)
+        music.play.assert_called_once_with(-1)
+
     def test_infinite_scroller_covers_viewport_and_wraps_after_long_frame(self):
         image = pygame.Surface((100, 100))
         image.fill((10, 20, 30))
@@ -93,6 +135,32 @@ class GameNavigationTest(unittest.TestCase):
         scroller.draw(screen)
         self.assertEqual(screen.get_at((SCREEN_WIDTH - 1, 0))[:3], (10, 20, 30))
         self.assertEqual(screen.get_at((SCREEN_WIDTH - 1, SCREEN_HEIGHT - 1))[:3], (10, 20, 30))
+
+    def test_launch_completion_changes_phase_without_uninitialized_player(self):
+        EventBus.events.clear()
+        run_state = RunState()
+        scene = Scene(game_scene=True)
+        progression = Progression(run_state)
+        scene.add_system("progression", progression)
+        scene.add_system("waves", WaveSystem(scene, get_enemy_registry()))
+        scene.add_system("boss", Mock(update=Mock(), reset=Mock()))
+
+        game = Game.__new__(Game)
+        game.scenes = {"game": scene}
+        game.god_mode = False
+        game.run_state = run_state
+        EventBus.connect(Events.PHASE_CHANGED, game.load_phase)
+        progression.game_started()
+        game.load_phase(progression.phases[0])
+
+        scene.get_entity("launch_animation", object).run()
+        scene.run(pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)), 6, [])
+
+        self.assertEqual(progression.phase_index, 1)
+        self.assertIs(scene.player, progression.phases[1].default_entities["player"])
+        self.assertTrue(hasattr(scene.player, "_rect"))
+        scene.clear_scene()
+        EventBus.events.clear()
 
 
 if __name__ == "__main__":

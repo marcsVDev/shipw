@@ -8,6 +8,8 @@ from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
 
 class EnemyProjectile(Entity, Collidable):
     RADIUS = 7
+    consume_on_player_contact = True
+    hazard_active = True
 
     def __init__(self, position, velocity):
         super().__init__()

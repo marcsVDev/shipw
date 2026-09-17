@@ -50,4 +50,7 @@ class EnemyRegistry:
         patterns = spawn.movement()
         for pattern in patterns:
             pattern.bind_target(target)
-        return self._factories[spawn.enemy](**spawn.options).configure(patterns, spawn.attack(), target)
+        entity = self._factories[spawn.enemy](**spawn.options)
+        if not hasattr(entity, "configure"):
+            return entity
+        return entity.configure(patterns, spawn.attack(), target)

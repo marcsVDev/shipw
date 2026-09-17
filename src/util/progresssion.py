@@ -5,10 +5,11 @@ from system.system import System
 
 
 class Progression(System):
-    def __init__(self):
+    def __init__(self, run_state=None):
+        self.run_state = run_state
         self._game_started = False
         self.phase_index = 0
-        self.phases = get_phases()
+        self.phases = get_phases(run_state)
         EventBus.connect(Events.GAME_STARTED, self.game_started)
         EventBus.connect(Events.PHASE_COMPLETED, self.phase_completed)
 
@@ -34,6 +35,6 @@ class Progression(System):
         for phase in self.phases:
             for entity in phase.default_entities.values():
                 entity.destroy()
-        self.phases = get_phases()
+        self.phases = get_phases(self.run_state)
         self.phase_index = 0
         self._game_started = False

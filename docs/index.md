@@ -11,6 +11,8 @@ Tereshkova rumo a Marte, em uma história alternativa da Guerra Fria.
   ondas, eventos, colisão e assets.
 - [Inimigos e ondas](enemy-waves.md): catálogo técnico de ondas, padrões,
   ataques e como estender o combate.
+- [PDR da Nave-Mãe](pdr-nave-mae.md): especificação completa do sistema global
+  de vida, boss fight, inimigos, ataques, ondas e critérios de implementação.
 - [Guia para agentes](../AGENT.md): convenções de contribuição, execução e
   validação.
 

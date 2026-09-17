@@ -1,9 +1,10 @@
 # Inimigos e rodadas
 
-A jornada segue seis fases. As quatro fases de combate têm, respectivamente,
-11, 5, 4 e 4 ondas. A quantidade de inimigos, grupos e atrasos varia por
-builder; não há uma quantidade fixa de inimigos simultâneos. Estação e chegada
-não têm ondas nem controle livre e usam `duration` para concluir a apresentação.
+A jornada segue seis fases. As três travessias de combate usam `WaveSystem`; a
+Órbita de Marte usa uma playlist própria de sete ondas no `BossFightSystem`.
+Estação e chegada não têm ondas nem controle livre. Krasny Mir aguarda o botão
+de lançamento e avança ao final da animação; a chegada ainda usa `duration`
+para concluir a apresentação.
 
 | Fase | Inimigos ativos | Pendentes |
 | --- | --- | --- |
@@ -11,24 +12,23 @@ não têm ondas nem controle livre e usam `duration` para concluir a apresentaç
 | Estratosfera | Gaivotas e asteroides | — |
 | Espaço Próximo | Drones e satélite quebrado | Buran |
 | Espaço Profundo | Drones, drones do mal e minas gravitacionais | — |
-| Órbita de Marte | Alienígenas e drones de escolta | Nave-mãe/boss |
+| Órbita de Marte | Nave-Mãe, gaivotas-robô, drones, naves laser e míssil teleguiado | Ajuste fino por playtest |
 | Chegada a Marte | Nenhum | Arte e cena final |
 
-`planned_enemies` em cada `Phase` documenta conteúdo futuro; essas chaves não
-são registradas nem instanciadas. O espaço profundo e a órbita reutilizam
+`planned_enemies` em cada `Phase` documenta apenas conteúdo futuro. O conteúdo
+do boss está registrado e é instanciado pelo diretor. O espaço profundo e a órbita reutilizam
 provisoriamente o fundo espacial disponível, rolando para baixo. A chegada usa
-uma tela de texto estática. A campanha atual permite passar pela escolta e
-chegar à tela final: isso não representa a implementação da nave-mãe.
+uma tela de texto estática.
 
 Gaivotas e drones atacam somente por contato, investida ou passagem rápida;
 eles não disparam projéteis. Asteroides são perigos de contato. Minas atraem
 o jogador enquanto estão no raio de influência. A regra atual continua sendo
-sobrevivência: contato com inimigos que possuem colisão mata e cada onda acaba
+sobrevivência: contato com inimigos que possuem colisão causa dano e cada onda acaba
 quando todos completam sua trajetória.
 
 ## Rasantes alienígenas
 
-Na Órbita de Marte, 20 alienígenas atravessam a tela em alturas aleatórias.
+O builder legado de rasantes cria 20 alienígenas em alturas aleatórias.
 Eles aparecem estritamente um de cada vez e alternam a origem
 entre a esquerda e a direita. Cada novo spawn é agendado somente depois que o
 anterior teve tempo de cruzar toda a tela, preservando o ataque sequencial mesmo
@@ -39,7 +39,7 @@ com alterações de velocidade ou resolução feitas pelo builder `alien_flybys(
 `EvilDroneEnemy` usa `assets/enemys/navedomal.png`. A origem do raio é o pixel
 local `(85.5, 115)` do frame de 124×124 px; a transformação considera a escala,
 a posição e a rotação atuais do sprite. O raio usa a cor `#ae2334`, possui
-colisor próprio e destrói o jogador ao contato.
+colisor próprio e causa um ponto de dano ao contato.
 
 `evil_drone_sweeps()` agenda um inimigo de cada vez. Cada drone entra por fora
 da tela, para em um canto, reproduz uma preparação de 8 frames uma única vez,
@@ -72,6 +72,11 @@ do jogador e seguem em linha reta, sem perseguição contínua. As velocidades
 são 1900 px/s (gaivotas), 2100 (espaço próximo), 2300 (profundo) e 2500
 (órbita). Sem alvo, seguem para baixo; o padrão sempre termina.
 
+Na onda `Pinça orbital`, os drones usam `BoundedPursuit`: recalculam a direção
+com a posição atual do jogador a cada atualização, param exatamente sobre o
+alvo quando o alcançam e limitam o centro do sprite às margens da arena. Assim,
+uma atualização longa não permite que atravessem a borda da tela.
+
 `FlyBy(start, end, speed=2200)` cria as passagens rápidas. O inimigo nasce um
 pouco além de uma borda, já se move em velocidade constante e é destruído ao
 ultrapassar a borda oposta. `fly_by_path(..., "horizontal")` distribui faixas
@@ -82,7 +87,7 @@ eixos inválidos geram erro imediatamente.
 
 `MineEnemy` importa e herda diretamente de `Enemy`. Ela configura sprite,
 dimensões e um polígono de colisão provisório. Como as demais entidades
-colidíveis, a mina destrói o jogador ao contato; o contorno pode ser refinado
+colidíveis, a mina causa um ponto de dano ao contato; o contorno pode ser refinado
 quando a arte final estiver definida.
 
 `AttractionAttack(strength=2400, minimum_distance=90)` calcula uma aceleração
@@ -119,6 +124,21 @@ atual, continuam sem colisão até receberem seu contorno.
 Nenhuma alteração em `Scene`, `WaveSystem` ou `Progression` é necessária.
 O registro rejeita chaves duplicadas e informa nomes desconhecidos.
 
+## Playlist da Nave-Mãe
+
+A primeira onda, **Aquisição de alvo**, ocorre uma vez. Depois seguem
+**Tesoura americana**, **Corredor de execução**, **Pinça orbital**,
+**Hélice bloqueadora**, **Portão vermelho** e **Funil de comando**. Enquanto a
+Nave-Mãe tiver integridade, a sequência volta do Funil para a Tesoura sem
+aumentar velocidade, dano ou quantidade.
+
+O míssil é criado no máximo uma vez por oportunidade. Ele persegue a posição
+atual do jogador, acelera até 1450 px/s, gira no máximo 105°/s e arma depois de
+1,25 s. Somente um impacto armado no alvo aberto remove um dos cinco pontos da
+Nave-Mãe. A mesma colisão pode destruir uma nave laser, mas não danifica o
+chefe. `robot_seagull`, `laser_ship` e `mother_ship` estão no registro; a
+Nave-Mãe é criada diretamente pelo diretor porque não usa `EnemySpawn`.
+
 ## Criar padrões e ataques
 
 `EnemySpawn(enemy, movement, attack)` recebe factories sem argumentos.
@@ -141,8 +161,10 @@ terceiro campo de `EnemySpawn`, por exemplo
 o ataque. A factory deve construir um objeto novo para cada inimigo.
 
 `Wave(name, spawns, rest=2)` define uma rodada. Passe uma tupla de ondas
-em `Phase(..., waves=...)`. `starts_at` permanece por compatibilidade. `duration` só controla fases sem
-ondas; nas fases de combate, a última onda controla a transição.
+em `Phase(..., waves=...)`. `starts_at` permanece por compatibilidade. `duration`
+controla cenas sem ondas que usam conclusão automática; Krasny Mir define
+`auto_complete=False` e emite a conclusão após a cutscene. Nas fases de combate,
+a última onda controla a transição.
 `free_movement=False` bloqueia o controle do jogador nas cenas de abertura e chegada.
 
 `WaveSystem` gerencia rodadas; `EnemyRegistry` cria inimigos; os padrões
@@ -159,11 +181,10 @@ Na raiz, com Python 3.12+ e pygame-ce instalado:
 python -B -m unittest discover -s tests -v
 ```
 
-A simulação usa vídeo/áudio dummy e percorre as doze ondas com um alvo
-imortal para verificar a progressão completa. Outros testes verificam
-colisão letal, mira, expiração, ausência de spawns sem jogador, isolamento
-dos comportamentos emissão única de conclusão, elenco por fase, bloqueio de movimento e mira
-fixada após o aviso da investida. A dificuldade exige
+A simulação usa vídeo/áudio dummy e percorre as ondas comuns e a playlist do
+boss com um alvo imortal. Outros testes verificam vida persistente,
+invulnerabilidade, dano simultâneo, direção e armamento do míssil, prioridade
+de colisão, quinto impacto, repetição 7→2 e emissão única de conclusão. A dificuldade exige
 playtest humano; a simulação não mede a possibilidade de desviar de tudo.
 
 ## Builders configuráveis
@@ -211,7 +232,7 @@ Principais parâmetros expostos:
 - `MineFloatConfig`: duas minas por padrão, deriva, amplitudes, frequências,
   duração, distância mínima e ativação independente da atração gravitacional.
 
-`Charge` e `Pursuit` controlam explicitamente `locks_facing`: a mira visual é
+`Charge`, `Pursuit` e `BoundedPursuit` controlam explicitamente `locks_facing`: a mira visual é
 fixada no aviso e na investida e volta ao acompanhamento normal nas etapas que
 o permitem. `Orbit`, `ZigZag` e `Float` usam tempo acumulado, tornando o cálculo
 independente da taxa de quadros. `TelegraphedFlyBy` fornece a mesma reta tanto
