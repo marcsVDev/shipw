@@ -2,6 +2,8 @@ import os
 import sys
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
 
 os.environ["SDL_VIDEODRIVER"] = "dummy"
 os.environ["SDL_AUDIODRIVER"] = "dummy"
@@ -10,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pygame
 
 from entities.enemy_projectile import EnemyProjectile
+from entities.enemy_beam import EnemyBeam
 from entities.guided_missile import GuidedMissile
 from entities.player import Player
 from enemys.mother_ship_enemy import MotherShipEnemy
@@ -247,6 +250,46 @@ class BossAndHealthTest(unittest.TestCase):
         boss.open_target("core")
         self.assertFalse(boss.take_missile_hit("core", True))
         self.assertEqual(defeated, [boss])
+
+    def test_missile_waits_for_pending_spawns_enemies_and_beams(self):
+        scene = Scene(True)
+        player = Player(RunState())
+        scene.add_entity(player)
+        self.addCleanup(scene.clear_scene)
+        player.time_since_damage = 10
+        system = BossFightSystem(scene, get_enemy_registry())
+        system.load_phase(SimpleNamespace(boss_fight=True))
+        system.intro_remaining = 0
+        system._begin_next_wave()
+        system.wave_elapsed = 20
+        system.pending = [[100, 0, system.waves[0].spawns[0]]]
+
+        def assert_waiting():
+            system.update(.1)
+            self.assertFalse(system.missile_created)
+            self.assertFalse(system.target_warned)
+            self.assertEqual(system.rest_remaining, 0)
+
+        assert_waiting()
+        for enemy in system.active_enemies:
+            enemy.destroy()
+        assert_waiting()  # Future reinforcements still belong to the attack wave.
+        system.pending.clear()
+        beam = Mock(spec=EnemyBeam, to_destroy=False)
+        scene.entities.append(beam)
+        assert_waiting()
+        beam.to_destroy = True
+        system.update(.1)
+        self.assertTrue(system.missile_created)
+        self.assertTrue(system.target_warned)
+        missile = system.active_missile
+        system.update(10)
+        self.assertIs(system.active_missile, missile)
+        self.assertEqual(system.wave_index, 0)
+        self.assertEqual(system.rest_remaining, 0)
+        missile.destroy()
+        system.update(.1)
+        self.assertGreater(system.rest_remaining, 0)
 
     def test_boss_system_completes_once_after_defeat_animation(self):
         state = RunState()

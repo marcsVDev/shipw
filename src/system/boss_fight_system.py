@@ -97,11 +97,15 @@ class BossFightSystem(System):
         self._spawn_due()
 
         wave = self._current_wave()
-        if (wave.missile_time is not None and not self.target_warned
+        hazards = any((isinstance(entity, EnemyBeam)
+                       or getattr(entity, "is_guided_missile", False))
+                      and not entity.to_destroy for entity in self.scene.entities)
+        attack_wave_done = not self.pending and not self.active_enemies and not hazards
+        if (attack_wave_done and wave.missile_time is not None and not self.target_warned
                 and self.wave_elapsed >= wave.missile_time - .8):
             self.target_warned = True
             self.boss.warn_target(self._target_for(wave), .8)
-        if (wave.missile_time is not None and not self.missile_created
+        if (attack_wave_done and wave.missile_time is not None and not self.missile_created
                 and self.wave_elapsed >= wave.missile_time - GuidedMissileConfig().telegraph_duration
                 and player.time_since_damage >= .75):
             self._launch_missile()
@@ -110,9 +114,6 @@ class BossFightSystem(System):
             self.active_missile = None
             self.boss.close_target()
 
-        hazards = any((isinstance(entity, EnemyBeam)
-                       or getattr(entity, "is_guided_missile", False))
-                      and not entity.to_destroy for entity in self.scene.entities)
         missile_done = wave.missile_time is None or (
             self.missile_created and self.active_missile is None
         )
