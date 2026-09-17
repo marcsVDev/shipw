@@ -60,17 +60,25 @@ class Scene:
         return self.systems.get(sys_name)
 
     def run(self, screen, delta, events):
-        for system in self.systems.values():
-            system.update(delta)
+        modal_ui = next((
+            item for item in reversed(self.ui_items)
+            if getattr(item, "modal", False) and item.visible and not item.to_destroy
+        ), None)
+
+        if modal_ui is None:
+            for system in self.systems.values():
+                system.update(delta)
 
         for et in tuple(self.entities):
             if et.to_destroy:
+                continue
+            if modal_ui is not None and isinstance(et, Player):
                 continue
 
             et.update(delta)
 
         self._remove_destroyed()
-        if self.game_scene:
+        if self.game_scene and modal_ui is None:
             self.resolve_special_collisions()
             self.check_collisions()
         self._remove_destroyed()
@@ -78,6 +86,9 @@ class Scene:
         for item in tuple(self.ui_items):
             if item.to_destroy:
                 self.ui_items.remove(item)
+                continue
+
+            if modal_ui is not None and item is not modal_ui:
                 continue
 
             item.update(delta, events)

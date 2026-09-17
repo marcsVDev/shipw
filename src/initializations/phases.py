@@ -6,7 +6,7 @@ from initializations.scenery import (
     get_krasny_mir_background, get_estratosfera_background,
     get_espaco_proximo_background, get_krasny_mir_launch_animation,
 )
-from initializations.ui_inits import get_launch_button, get_scene_title
+from initializations.ui_inits import get_dialogue_panel, get_launch_button, get_scene_title
 from events.event_bus import EventBus
 from events.events import Events
 from ui.ui import UI
@@ -32,6 +32,7 @@ def get_launch_phase(run_state=None):
         "launch_animation": launch_animation,
         "title": get_scene_title("Estacao Krasny Mir"),
         "launch_button": get_launch_button(launch_animation.run),
+        "dialogue": get_dialogue_panel(1),
     })
     return phase
 
@@ -40,6 +41,7 @@ def get_estratosfera_phase(run_state=None):
     return Phase("Estratosfera", 0, 0, {
         "title": get_scene_title("Estratosfera"),
         "background": get_estratosfera_background(), "player": Player(run_state),
+        "dialogue": get_dialogue_panel(2),
     }, waves=stratosphere_waves())
 
 
@@ -47,6 +49,7 @@ def get_espaco_proximo_phase(run_state=None):
     return Phase("Espaço Próximo", 0, 0, {
         "title": get_scene_title("Espaco Proximo"),
         "background": get_espaco_proximo_background(), "player": Player(run_state),
+        "dialogue": get_dialogue_panel(3),
     }, waves=near_space_waves(), planned_enemies=("buran",))
 
 
@@ -54,6 +57,7 @@ def get_espaco_profundo_phase(run_state=None):
     return Phase("Espaço Profundo", 0, 0, {
         "title": get_scene_title("Espaco Profundo"),
         "background": get_espaco_proximo_background(), "player": Player(run_state),
+        "dialogue": get_dialogue_panel(4),
     }, waves=deep_space_waves())
 
 
@@ -61,6 +65,7 @@ def get_orbita_marte_phase(run_state=None):
     return Phase("Órbita de Marte", 0, 0, {
         "title": get_scene_title("Orbita de Marte"),
         "background": get_espaco_proximo_background(), "player": Player(run_state),
+        "dialogue": get_dialogue_panel(5),
     }, boss_fight=True)
 
 
@@ -70,6 +75,7 @@ def get_mars_arrival_phase(run_state=None):
     return Phase("Chegada a Marte", 0, 5, {
         "title": get_scene_title("Chegada a Marte"),
         "message": UI(message, (550, 400)), "player": Player(run_state),
+        "dialogue": get_dialogue_panel(6),
     }, free_movement=False)
 
 

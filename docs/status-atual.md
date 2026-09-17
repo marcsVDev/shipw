@@ -35,6 +35,10 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Transição preta de 1 s entre fases, com a cena pausada durante a troca.
 - Campanha linear com seis fases; Krasny Mir avança após a animação de
   lançamento e as demais fases avançam por duração, ondas ou chefe.
+- Diálogos narrativos nas seis fases, carregados de
+  `assets/dialogues/campaign.json`, com nome, retrato disponível, efeito de
+  digitação e paginação automática. A ação fica pausada enquanto o painel está
+  aberto; Espaço ou clique esquerdo completa/avança a fala.
 - Movimento da nave com `W`, `A`, `S` e `D`, aceleração, desaceleração,
   inclinação visual e limites da tela.
 - Fundos fixos/roláveis; a Estratosfera, o Espaço Próximo e os placeholders das
@@ -60,8 +64,8 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   somente atraindo mísseis armados para o alvo vulnerável.
 - O Buran e a arte/cena final de Marte ainda não foram implementados.
 - Espaço Profundo e Órbita de Marte reutilizam o cenário de Espaço Próximo.
-- A Estação Krasny Mir possui a cutscene visual de lançamento, mas ainda não
-  integra diálogos, embora exista componente de painel de diálogo.
+- Petrovitch e o Comando ainda não possuem retratos; seus nomes e falas já
+  aparecem no painel, deixando o espaço da imagem vazio.
 - As velocidades e janelas do boss, incluindo o giro ajustado do míssil, ainda
   precisam de playtest humano para ajuste fino de corredores e duração média.
 
@@ -70,7 +74,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 1. Fazer playtest humano das sete ondas do boss e ajustar apenas as dataclasses
    de balanceamento.
 2. Criar os cenários próprios de Espaço Profundo, Órbita e chegada a Marte.
-3. Integrar narrativa de abertura e encerramento usando o painel de diálogo.
+3. Criar os retratos de Petrovitch e do Comando para completar os diálogos.
 4. Implementar o Buran sem alterar o modelo de sobrevivência e sabotagem.
 
 ## Referência de controles
