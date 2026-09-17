@@ -14,7 +14,7 @@ class GuidedMissileConfig:
     initial_speed: float = 550.0
     max_speed: float = 1450.0
     acceleration: float = 1100.0
-    turn_rate: float = 105.0
+    turn_rate: float = 240.0
     arm_time: float = 1.25
     pursuit_duration: float = 8.0
     expiry_warning: float = 0.8
@@ -81,7 +81,7 @@ class GuidedMissile(Entity, Collidable):
                 desired = Vector2(target) - self.position
                 if desired.length_squared():
                     desired = desired.normalize()
-                    signed = self.direction.angle_to(desired)
+                    signed = (self.direction.angle_to(desired) + 180) % 360 - 180
                     change = max(-self.config.turn_rate * step,
                                  min(self.config.turn_rate * step, signed))
                     self.direction = self.direction.rotate(change).normalize()

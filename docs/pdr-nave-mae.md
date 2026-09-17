@@ -435,7 +435,7 @@ Parâmetros iniciais:
 | Velocidade inicial | 550 px/s |
 | Velocidade máxima | 1.450 px/s |
 | Aceleração | 1.100 px/s² |
-| Rotação máxima | 105°/s |
+| Rotação máxima | 240°/s (ajustada após correção da perseguição) |
 | Tempo para armar | 1,25 s |
 | Duração de perseguição | 8,0 s |
 | Aviso de expiração | últimos 0,8 s |

@@ -91,12 +91,66 @@ class BossAndHealthTest(unittest.TestCase):
         missile.elapsed = missile.config.telegraph_duration
         before = missile.direction.copy()
         missile.update(.1)
-        self.assertLessEqual(abs(before.angle_to(missile.direction)), 10.5 + 1e-6)
+        self.assertLessEqual(abs(before.angle_to(missile.direction)), missile.config.turn_rate * .1 + 1e-6)
         missile.update(20)
         self.assertLessEqual(missile.speed, missile.config.max_speed)
         self.assertTrue(missile.exploded)
         missile.update(.2)
         self.assertTrue(missile.to_destroy)
+
+    def test_missile_takes_short_turn_across_angle_wrap(self):
+        boss = MotherShipEnemy()
+        missile = GuidedMissile((960, 600), lambda: (860, 590), boss)
+        self.addCleanup(missile.destroy)
+        missile.state = "seeking"
+        missile.direction = pygame.Vector2(-100, 10).normalize()
+        desired = pygame.Vector2(-100, -10).normalize()
+        before = abs((missile.direction.angle_to(desired) + 180) % 360 - 180)
+        missile.update(1 / 120)
+        after = abs((missile.direction.angle_to(desired) + 180) % 360 - 180)
+        self.assertLess(after, before)
+
+    def test_every_open_target_can_be_hit_from_below_in_flight(self):
+        for name in MotherShipEnemy.TARGETS:
+            for fps in (20, 60, 120):
+                with self.subTest(target=name, fps=fps):
+                    boss = MotherShipEnemy()
+                    boss.update(3)
+                    boss.open_target(name)
+                    point = boss.target_position(name)
+                    missile = GuidedMissile(point + (0, 400), lambda: point, boss)
+                    self.addCleanup(missile.destroy)
+                    missile.state = "seeking"
+                    missile.direction = pygame.Vector2(0, -1)
+                    missile.flight_time = missile.config.arm_time
+                    scene = Scene(True)
+                    scene.add_entity(boss)
+                    for _ in range(fps * 2):
+                        missile.update(1 / fps)
+                        missile.resolve_collisions(scene)
+                        if missile.exploded:
+                            break
+                    self.assertEqual(missile.explosion_reason, "boss_target")
+                    self.assertEqual(boss.health, 4)
+
+    def test_missile_returns_toward_player_after_dodge(self):
+        boss = MotherShipEnemy()
+        boss.update(3)
+        target = pygame.Vector2(960, 500)
+        missile = GuidedMissile((960, 800), lambda: target, boss)
+        self.addCleanup(missile.destroy)
+        missile.state = "seeking"
+        missile.speed = missile.config.max_speed
+        scene = Scene(True)
+        scene.add_entity(boss)
+        for _ in range(120):
+            missile.update(1 / 120)
+            missile.resolve_collisions(scene)
+            if missile.exploded:
+                break
+        self.assertFalse(missile.exploded)
+        self.assertLess(missile.direction.y, 0)
+        self.assertLess(missile.position.y, 800)
 
     def test_missile_motion_is_stable_across_frame_rates(self):
         boss = MotherShipEnemy()

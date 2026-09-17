@@ -49,6 +49,8 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   chuva de asteroides e minas que atraem a nave.
 - Os drones da pinça orbital perseguem a posição atual do jogador dentro de
   margens visíveis, sem atravessar os limites da tela.
+- Mísseis do chefe perseguem pelo menor ângulo, com giro limitado a 240°/s;
+  os cinco alvos vulneráveis ficam acessíveis na borda inferior do casco.
 - Retorno ao menu com Esc, limpando a cena e recriando a campanha para uma
   nova partida.
 
@@ -60,7 +62,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Espaço Profundo e Órbita de Marte reutilizam o cenário de Espaço Próximo.
 - A Estação Krasny Mir possui a cutscene visual de lançamento, mas ainda não
   integra diálogos, embora exista componente de painel de diálogo.
-- As velocidades e janelas do boss usam os valores iniciais do PDR e ainda
+- As velocidades e janelas do boss, incluindo o giro ajustado do míssil, ainda
   precisam de playtest humano para ajuste fino de corredores e duração média.
 
 ## Prioridades sugeridas

@@ -133,9 +133,10 @@ Nave-Mãe tiver integridade, a sequência volta do Funil para a Tesoura sem
 aumentar velocidade, dano ou quantidade.
 
 O míssil é criado no máximo uma vez por oportunidade. Ele persegue a posição
-atual do jogador, acelera até 1450 px/s, gira no máximo 105°/s e arma depois de
+atual do jogador, acelera até 1450 px/s, gira pelo menor ângulo no máximo 240°/s e arma depois de
 1,25 s. Somente um impacto armado no alvo aberto remove um dos cinco pontos da
-Nave-Mãe. A mesma colisão pode destruir uma nave laser, mas não danifica o
+Nave-Mãe. Os pontos vulneráveis acompanham a borda inferior do casco, para
+que a blindagem não intercepte o míssil antes do alvo. A mesma colisão pode destruir uma nave laser, mas não danifica o
 chefe. `robot_seagull`, `laser_ship` e `mother_ship` estão no registro; a
 Nave-Mãe é criada diretamente pelo diretor porque não usa `EnemySpawn`.
 

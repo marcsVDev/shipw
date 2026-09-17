@@ -105,8 +105,11 @@ class MotherShipEnemy(Entity, Collidable):
         return Vector2(rect.centerx, rect.bottom + 24)
 
     def target_position(self, name):
-        ratio_x, ratio_y = self.TARGETS[name]
-        return Vector2(SCREEN_WIDTH * ratio_x, SCREEN_HEIGHT * ratio_y)
+        ratio_x, _ = self.TARGETS[name]
+        # Expose each weak point on the hull edge so returning missiles can
+        # reach it before touching armor. Follow the ship during movement.
+        return Vector2(self.position.x + SCREEN_WIDTH * (ratio_x - .5),
+                       self.body_rect.bottom)
 
     def warn_target(self, name, duration=0.8):
         self.close_target()
