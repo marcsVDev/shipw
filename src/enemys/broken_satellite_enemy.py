@@ -11,13 +11,10 @@ class BrokenSatelliteEnemy(Enemy):
     MULTIPLIER = 18.0
     SCALE = FRAME_SIZE * MULTIPLIER
     MIDDLE_SCALE = SCALE / 2
-    MIDDLE_VERTICES = [
-        Vector2(-MIDDLE_SCALE * .72, -MIDDLE_SCALE * .35),
-        Vector2(MIDDLE_SCALE * .72, -MIDDLE_SCALE * .35),
-        Vector2(MIDDLE_SCALE * .72, MIDDLE_SCALE * .35),
-        Vector2(-MIDDLE_SCALE * .72, MIDDLE_SCALE * .35),
-    ]
-    DRAW_COLLIDER = False
+    SPRITE_VERTICES = (
+        (22, 6), (86,10), (83, 50), (22, 88), (0, 65)
+    )
+    DRAW_COLLIDER = True
 
     def __init__(self, patterns=None, scale=2.0, collider_scale=1.0):
         if scale <= 0 or collider_scale <= 0:

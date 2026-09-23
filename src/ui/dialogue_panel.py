@@ -63,6 +63,7 @@ class DialoguePanel(UI):
         self.modal = True
         self.dialogues = dialogues
         self.on_complete = on_complete
+        self._skip_requested = False
         self.pressed = False
         self.current_dialogue = 0
         self.visible_characters = 0.0
@@ -85,6 +86,9 @@ class DialoguePanel(UI):
 
     def update(self, delta, events):
         if not self.visible:
+            return
+        if self._skip_requested:
+            self.skip_all()
             return
         self.animate_text(delta)
 
@@ -218,9 +222,20 @@ class DialoguePanel(UI):
             self.visible_characters = 0.0
             self.render_visible_text()
         else:
-            self.visible = False
-            if self.on_complete is not None:
-                self.on_complete()
+            self._complete()
+
+    def skip_all(self):
+        """Pula todas as falas; painéis futuros concluem quando forem exibidos."""
+        self._skip_requested = True
+        self._complete()
+
+    def _complete(self):
+        if not self.visible:
+            return
+        self.visible = False
+        self.pressed = False
+        if self.on_complete is not None:
+            self.on_complete()
 
     def _get_scaled_portrait(self, portrait: Surface | None) -> Surface | None:
         if portrait is None:

@@ -103,6 +103,7 @@ def get_krasny_mir_launch_animation(on_complete=None):
         animation,
         display_size=(SCREEN_WIDTH, SCREEN_HEIGHT),
         on_complete=on_complete,
+        show_first_frame=True,
     )
 
 

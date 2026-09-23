@@ -20,10 +20,10 @@ class AlienEnemy(Enemy):
     _SPRITE_SCALE = SCALE / FRAME_SIZE
     # Aproximação convexa da silhueta completa (nave e piloto).
     MIDDLE_VERTICES = [
-        (Vector2(2, 18) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(124, 18) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(124, 105) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(2, 105) - _SPRITE_CENTER) * _SPRITE_SCALE,
+        (Vector2(83, 17) - _SPRITE_CENTER) * _SPRITE_SCALE,
+        (Vector2(121, 17) - _SPRITE_CENTER) * _SPRITE_SCALE,
+        (Vector2(125, 100) - _SPRITE_CENTER) * _SPRITE_SCALE,
+        (Vector2(0, 74) - _SPRITE_CENTER) * _SPRITE_SCALE,
     ]
 
     def __init__(self, patterns=None, flip_x: bool = False):

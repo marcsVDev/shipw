@@ -11,7 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pygame
 
 from entities.cutscene import Cutscene
-from initializations.scenery import get_mars_arrival_animation, get_stratosphere_exit_animation
+from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH
+from initializations.scenery import (get_krasny_mir_launch_animation,
+                                     get_mars_arrival_animation, get_stratosphere_exit_animation)
+from initializations.ui_inits import get_launch_button
 from ui.button import Button
 from util.animatedSprite import AnimatedSprite
 
@@ -49,6 +52,43 @@ class CutsceneTest(unittest.TestCase):
         self.assertFalse(animation.is_playing)
         self.assertEqual(animation.frame_index, 2)
         self.assertEqual(completed, [True])
+
+    def test_launch_preview_stays_on_first_frame_until_run(self):
+        sheet = pygame.Surface((64, 18))
+        sheet.fill((255, 0, 0), (0, 0, 32, 18))
+        sheet.fill((0, 255, 0), (32, 0, 32, 18))
+        animation = AnimatedSprite(sheet, .1, (32, 18), {
+            "default": {"frames": range(2), "loop": False},
+        })
+        completed = []
+        cutscene = Cutscene(animation, display_size=(64, 36),
+                            on_complete=lambda: completed.append(True),
+                            show_first_frame=True)
+        screen = pygame.Surface((64, 36))
+
+        cutscene.update(1)
+        cutscene.draw(screen)
+        self.assertEqual(screen.get_at((32, 18)), (255, 0, 0, 255))
+        self.assertEqual(animation.frame_index, 0)
+        self.assertFalse(animation.is_playing)
+        self.assertEqual(completed, [])
+
+        cutscene.run()
+        cutscene.update(.1)
+        cutscene.draw(screen)
+        self.assertEqual(screen.get_at((32, 18)), (0, 255, 0, 255))
+
+    def test_krasny_mir_preview_and_button_fit_screen_corner(self):
+        cutscene = get_krasny_mir_launch_animation()
+        button = get_launch_button(lambda: None)
+
+        self.assertTrue(cutscene.show_first_frame)
+        self.assertFalse(cutscene.animation.is_playing)
+        self.assertEqual(cutscene.animation.frame_index, 0)
+        self.assertEqual(button.position, pygame.Vector2(1632, 792))
+        self.assertLessEqual(button.area.right, SCREEN_WIDTH)
+        self.assertLessEqual(button.area.bottom, SCREEN_HEIGHT)
+        self.assertEqual(button._image.get_size(), (256, 256))
 
     def test_campaign_cutscenes_use_all_asset_frames(self):
         for factory, count in ((get_stratosphere_exit_animation, 71),

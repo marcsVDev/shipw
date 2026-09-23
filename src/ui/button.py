@@ -8,7 +8,7 @@ from util.animatedSprite import AnimatedSprite
 from ui.ui import UI
 
 class Button(UI):
-    DRAW_AREA = False
+    DRAW_AREA = True
     SFX_BUTTON = SFX_PATH + "click.mp3"
 
     def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0), one_shot: bool = False):

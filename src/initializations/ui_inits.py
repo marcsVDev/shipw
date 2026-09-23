@@ -32,17 +32,20 @@ def get_launch_button(callable: Callable) -> Button:
     """Cria o controle temporário de lançamento da Estação Krasny Mir."""
     M = 4
     SCALE = 64 * M
+    MARGIN = 32
     image = pygame.image.load(PLAY_BUTTON_PATH).convert_alpha()
     image = pygame.transform.scale_by(image, M)
 
-    return Button(
+    button = Button(
         image,
-        pygame.Vector2(SCREEN_WIDTH // 2 - SCALE // 2, SCREEN_HEIGHT // 1.7 - SCALE // 2),
+        pygame.Vector2(SCREEN_WIDTH - SCALE - MARGIN, SCREEN_HEIGHT - SCALE - MARGIN),
         SCALE,
         callable,
         (58 * 5, 21 * 5),
         one_shot=True,
     )
+    button._image = button.button_animation.get_frame(0)
+    return button
 
 def get_initial_menu_background() -> Background:
     return Background(pygame.image.load(UI_PATH+"init_background.png"), 1.2)

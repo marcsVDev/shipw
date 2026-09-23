@@ -160,6 +160,8 @@ def launch_waves():
 
 def stratosphere_waves():
     return (
+        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1000, gap=.4, margin=320, seed=213),
+                             enemy="buran"),
         organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
         organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
         organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
@@ -181,7 +183,7 @@ def stratosphere_waves():
 def near_space_waves():
     return (
         organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
-        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1800, gap=.4, seed=213),
+        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1000, gap=.4, margin=320, seed=213),
                      enemy="buran"),
         satellite_flyby(W, H, SatelliteConfig(seed=131)),
         satellite_flyby(W, H, SatelliteConfig(seed=332)),

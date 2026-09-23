@@ -12,10 +12,12 @@ class Cutscene(Entity):
             animation: AnimatedSprite,
             display_size: tuple[int, int] | None = None,
             on_complete: Callable[[], None] | None = None,
+            show_first_frame: bool = False,
     ):
         self.animation = animation
         self.display_size = display_size
         self.on_complete = on_complete
+        self.show_first_frame = show_first_frame
         self._started = False
         self._completion_emitted = False
         self._rendered_frame = None
@@ -37,7 +39,7 @@ class Cutscene(Entity):
         return super().update(delta)
 
     def draw(self, screen):
-        if not self._started:
+        if not self._started and not self.show_first_frame:
             return
         frame = self.animation.get_current_frame()
         if self.display_size is not None:

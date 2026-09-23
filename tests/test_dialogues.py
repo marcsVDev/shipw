@@ -96,3 +96,45 @@ class DialoguesTest(unittest.TestCase):
         system.update.assert_called_once_with(.1)
         player.update.assert_called_once_with(.1)
         scene.clear_scene()
+
+    def test_skip_all_finishes_typing_and_all_pages_once(self):
+        completed = Mock()
+        panel = get_dialogue_panel(1, completed)
+        self.assertGreater(len(panel._pages), 1)
+        self.assertEqual(panel.visible_characters, 0)
+
+        panel.skip_all()
+        panel.skip_all()
+        panel.next_dialogue()
+        panel.update(.1, [])
+
+        self.assertFalse(panel.visible)
+        completed.assert_called_once_with()
+
+    def test_scene_skip_defers_hidden_dialogue_completion_and_resets_on_clear(self):
+        scene = Scene(game_scene=True)
+        panel = get_dialogue_panel(6)
+        completed = Mock()
+        landing = get_dialogue_panel("6_landing", completed)
+        landing.visible = False
+        scene.add_ui(panel)
+        scene.add_ui(landing)
+
+        scene.skip_dialogues()
+        self.assertFalse(panel.visible)
+        landing.update(.1, [])
+        completed.assert_not_called()
+
+        landing.visible = True
+        landing.update(.1, [])
+        self.assertFalse(landing.visible)
+        completed.assert_called_once_with()
+
+        scene.clear_scene()
+        next_panel = get_dialogue_panel(2)
+        scene.add_ui(next_panel)
+        with patch("ui.dialogue_panel.pygame.key.get_just_pressed",
+                   return_value=defaultdict(bool)):
+            next_panel.update(0, [])
+        self.assertTrue(next_panel.visible)
+        scene.clear_scene()

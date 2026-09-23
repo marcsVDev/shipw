@@ -9,6 +9,7 @@ from events.event_bus import EventBus
 from events.events import Events
 from system.system import System
 from ui.ui import UI
+from ui.dialogue_panel import DialoguePanel
 
 
 class Scene:
@@ -147,6 +148,11 @@ class Scene:
         self.blackboard = {key: value for key, value in self.blackboard.items() if not value.to_destroy}
         if self.player is not None and self.player.to_destroy:
             self.player = None
+
+    def skip_dialogues(self):
+        for item in tuple(self.ui_items):
+            if isinstance(item, DialoguePanel) and not item.to_destroy:
+                item.skip_all()
 
     def clear_scene(self):
         # Permite que cada entidade libere seus recursos (como sons em loop)

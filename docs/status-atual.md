@@ -33,12 +33,16 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Música ambiente na campanha, trilha própria durante a boss fight, efeitos de
   motor e efeitos de inimigos existentes.
 - Transição preta de 1 s entre fases, com a cena pausada durante a troca; a saída da Estratosfera e o pouso em Marte exibem seus spritesheets antes da progressão. O pouso termina com novas falas e "Obrigado por jogar".
-- Campanha linear com seis fases; Krasny Mir avança após a animação de
-  lançamento e as demais fases avançam por duração, ondas ou chefe.
+- Campanha linear com seis fases; Krasny Mir mostra o primeiro quadro da
+  animação de lançamento parado e o botão no canto inferior direito até o
+  clique, então reproduz a animação e avança. As demais fases avançam por
+  duração, ondas ou chefe.
 - Diálogos narrativos nas seis fases, carregados de
   `assets/dialogues/campaign.json`, com nome, retrato disponível, efeito de
   digitação e paginação automática. A ação fica pausada enquanto o painel está
-  aberto; Espaço ou clique esquerdo completa/avança a fala.
+  aberto; Espaço ou clique esquerdo completa/avança a fala. Alt+Esc pula todas
+  as falas da cena atual, inclusive as que aparecem após uma cutscene, mantendo
+  a animação e os eventos de conclusão.
 - Movimento da nave com `W`, `A`, `S` e `D`, aceleração, desaceleração,
   inclinação visual e limites da tela.
 - Fundos fixos/roláveis; a Estratosfera, o Espaço Próximo e os placeholders das
@@ -51,6 +55,8 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   satélite quebrado, minas espaciais, alienígenas e Nave-Mãe.
 - Formações, investidas, perseguição, passagens rápidas, órbitas, zigue-zague,
   chuva de asteroides e minas que atraem a nave.
+- Avisos de perigo usam o sprite animado de alerta a 12 fps; rasantes de alien e
+  Buran sinalizam na borda e na altura exata da entrada antes de cruzarem a tela.
 - Os drones da pinça orbital perseguem a posição atual do jogador dentro de
   margens visíveis, sem atravessar os limites da tela.
 - Mísseis do chefe perseguem pelo menor ângulo, com giro limitado a 240°/s;
@@ -86,6 +92,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 | Voltar ao menu durante a campanha | Esc |
 | Voltar ao menu na tela final | Enter ou Esc |
 | Avançar diálogo, quando usado | Espaço ou clique esquerdo |
+| Pular todos os diálogos da cena atual | Alt+Esc |
 | Ativar/desativar God Mode | Ctrl+Shift+O |
 
 O God Mode é uma ferramenta de teste: permanece ativo durante as trocas de

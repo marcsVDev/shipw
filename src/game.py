@@ -155,7 +155,11 @@ class Game:
               and key in (pygame.K_RETURN, pygame.K_KP_ENTER)):
             self.return_to_menu()
         elif self.current_scene == "game" and key == pygame.K_ESCAPE:
-            self.return_to_menu()
+            if modifiers & pygame.KMOD_ALT:
+                if not self.phase_transition_active:
+                    self.scenes["game"].skip_dialogues()
+            else:
+                self.return_to_menu()
 
     def toggle_god_mode(self):
         """Alterna invencibilidade e a detecção de colisões do jogador."""
