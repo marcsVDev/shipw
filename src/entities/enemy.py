@@ -6,6 +6,7 @@ from enemys.enemy_pattern import EnemyPattern
 from enemys.patterns.move_to import MoveTo
 from entities.character import Character
 from game_consts import ENEMYS_PATH, SCREEN_WIDTH
+from ui.alert_indicator import AlertIndicator
 from util.resources import load_sound
 
 class Enemy(Character):    
@@ -54,6 +55,7 @@ class Enemy(Character):
         self._sound = load_sound(self.DEFAULT_SFX_PATH) if self.DEFAULT_SFX_PATH is not None else None
         self._channel = None
         self.playing_sound = False
+        self._alert_indicator = AlertIndicator()
 
         super().__init__()
 
@@ -69,8 +71,12 @@ class Enemy(Character):
             
             self._current_pattern += 1
 
+        pattern = self._patterns[self._current_pattern]
+        if getattr(pattern, "telegraphing", False):
+            self._alert_indicator.update(delta)
+
         if self.can_move:
-            self._patterns[self._current_pattern].update(delta)
+            pattern.update(delta)
 
             if (not self.playing_sound and self._sound is not None):
                 self._channel = self._sound.play(-1)
@@ -78,7 +84,7 @@ class Enemy(Character):
         elif self.playing_sound:
             self.stop_sound()
             
-        super().update(delta)        
+        super().update(delta)
 
     def configure(self, patterns, attack=None, target=None):
         """Recebe comportamentos novos por instância, sem compartilhar timers."""
@@ -113,10 +119,11 @@ class Enemy(Character):
         super().draw(screen)
         pattern = self._patterns[self._current_pattern] if self._patterns else None
         if self.visible and pattern and getattr(pattern, "telegraphing", False):
-            pygame.draw.circle(screen, (255, 90, 60), self.position, int(self.SCALE * .55), 3)
             danger_line = getattr(pattern, "danger_line", None)
             if danger_line:
                 pygame.draw.line(screen, (255, 90, 60), *danger_line, 5)
+            warning_position = getattr(pattern, "warning_position", self.position)
+            self._alert_indicator.draw(screen, warning_position)
 
     def destroy(self):
         self.stop_sound()

@@ -47,7 +47,11 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
                          [index % 2 == 0 for index in range(20)])
         self.assertGreater(len({round(pattern.position.y) for pattern in patterns}), 10)
         for pattern in patterns:
+            self.assertIsInstance(pattern, TelegraphedFlyBy)
+            start = pattern.position.copy()
             pattern.update(.1)
+            self.assertEqual(pattern.position, start)
+            self.assertEqual(pattern.warning_position, start)
             self.assertAlmostEqual(pattern.rotation % 360, 0)
         for current, following, pattern in zip(wave.spawns, wave.spawns[1:], patterns):
             self.assertGreaterEqual(following.delay, current.delay + pattern.duration)

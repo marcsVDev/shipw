@@ -9,6 +9,7 @@ from entities.entity import Entity
 from events.event_bus import EventBus
 from events.events import Events
 from game_consts import ENEMYS_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from ui.alert_indicator import AlertIndicator
 from util.resources import load_image
 
 
@@ -46,6 +47,7 @@ class MotherShipEnemy(Entity, Collidable):
         self.defeated = False
         self.defeat_elapsed = 0.0
         self._defeat_emitted = False
+        self.alert_indicator = AlertIndicator()
         super().__init__()
         self._refresh_collider()
 
@@ -53,6 +55,7 @@ class MotherShipEnemy(Entity, Collidable):
         delta = max(0.0, delta)
         self.damage_flash = max(0.0, self.damage_flash - delta)
         if not self.active:
+            previous_entry_elapsed = self.entry_elapsed
             self.entry_elapsed = min(self.config.entry_duration, self.entry_elapsed + delta)
             progress = self.entry_elapsed / self.config.entry_duration
             smooth = progress * progress * (3 - 2 * progress)
@@ -60,6 +63,11 @@ class MotherShipEnemy(Entity, Collidable):
             if progress >= 1:
                 self.active = True
                 self.health_bar_visible = True
+            alert_delta = max(
+                0.0,
+                min(self.entry_elapsed, 1.6) - max(previous_entry_elapsed, 0.4),
+            )
+            self.alert_indicator.update(alert_delta)
             self._refresh_collider()
         if self.defeated:
             self.defeat_elapsed += delta
@@ -109,9 +117,9 @@ class MotherShipEnemy(Entity, Collidable):
             screen.blit(shade, (0, 0))
         screen.blit(self.image, self.image.get_rect(center=self.position))
         if 0.4 <= self.entry_elapsed <= 1.6:
-            font = pygame.font.Font(None, 72)
-            alert = font.render("ALERTA", True, "#ff3344")
-            screen.blit(alert, alert.get_rect(center=(SCREEN_WIDTH / 2, SCREEN_HEIGHT * .45)))
+            self.alert_indicator.draw(
+                screen, (SCREEN_WIDTH / 2, SCREEN_HEIGHT * .45)
+            )
         if self.defeated:
             for index in range(min(5, int(self.defeat_elapsed / .18) + 1)):
                 angle = index * 137.5

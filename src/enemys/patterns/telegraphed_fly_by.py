@@ -15,6 +15,8 @@ class TelegraphedFlyBy(EnemyPattern):
             raise ValueError("Trajetória avisada inválida")
         self.start, self.end = start, end
         self.direction = (end - start).normalize()
+        # Compatibilidade com consumidores que inspecionam a direção do FlyBy.
+        self._direction = self.direction
         self.speed, self.warning, self.spin_speed = speed, warning, spin_speed
         self.elapsed = 0.0
         path_rotation = -Vector2(0, 1).angle_to(self.direction)
@@ -26,6 +28,9 @@ class TelegraphedFlyBy(EnemyPattern):
 
     @property
     def danger_line(self): return self.start, self.end
+
+    @property
+    def warning_position(self): return self.start
 
     def update(self, delta):
         old = self.elapsed

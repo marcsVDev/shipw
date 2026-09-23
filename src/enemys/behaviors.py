@@ -8,7 +8,7 @@ from pygame import Vector2
 
 from enemys.attacks import AttractionAttack, RotatingBeamAttack
 from enemys.patterns import Charge, Float, FlyBy, LaserSweep, MoveTo, Orbit, PrepareLaser, Pursuit, Wait, Yell, ZigZag
-from enemys.patterns.telegraphed_fly_by import TargetedSatelliteFlyBy
+from enemys.patterns.telegraphed_fly_by import TargetedSatelliteFlyBy, TelegraphedFlyBy
 from enemys.waves import EnemySpawn, Wave
 from game_consts import SFX_PATH
 
@@ -57,6 +57,7 @@ class AlienFlyByConfig:
     count: int = 20
     speed: float = 2600
     gap: float = .2
+    warning: float = .75
     margin: float = 180
     vertical_margin: float = 150
     seed: int | None = None
@@ -66,7 +67,7 @@ class AlienFlyByConfig:
         _positive("quantidade", self.count)
         _positive("velocidade", self.speed)
         _positive("margem", self.margin)
-        if self.gap < 0 or self.vertical_margin < 0:
+        if self.gap < 0 or self.warning < 0 or self.vertical_margin < 0:
             raise ValueError("Intervalos e margens não podem ser negativos")
         if self.start_from not in ("left", "right"):
             raise ValueError("O ataque alienígena deve começar pela esquerda ou direita")
@@ -251,7 +252,7 @@ def alien_flybys(width, height, config=AlienFlyByConfig(), enemy="alien"):
 
     rng = random.Random(config.seed)
     traversal_time = (width + config.margin * 2) / config.speed
-    spawn_interval = traversal_time + config.gap
+    spawn_interval = config.warning + traversal_time + config.gap
     starts_from_left = config.start_from == "left"
     spawns = []
     for index in range(config.count):
@@ -263,11 +264,12 @@ def alien_flybys(width, height, config=AlienFlyByConfig(), enemy="alien"):
         start, end = Vector2(start_x, y), Vector2(end_x, y)
         # A rotação permanece zerada. A arte original olha para a esquerda;
         # espelhar quem entra pela esquerda faz todos olharem para onde vão.
-        facing_offset = 90 if from_left else -90
         spawns.append(EnemySpawn(
             enemy,
-            lambda s=start, e=end, offset=facing_offset: [
-                FlyBy(s, e, config.speed, facing_offset=offset)
+            lambda s=start, e=end: [
+                TelegraphedFlyBy(
+                    s, e, config.speed, warning=config.warning, initial_rotation=0
+                )
             ],
             delay=index * spawn_interval,
             group=index,
