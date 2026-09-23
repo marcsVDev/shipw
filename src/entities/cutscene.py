@@ -37,6 +37,8 @@ class Cutscene(Entity):
         return super().update(delta)
 
     def draw(self, screen):
+        if not self._started:
+            return
         frame = self.animation.get_current_frame()
         if self.display_size is not None:
             if self._rendered_frame_index != self.animation.frame_index:

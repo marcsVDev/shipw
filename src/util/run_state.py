@@ -33,4 +33,3 @@ class RunState:
         self.health = max(0, self.health - amount)
         self.is_game_over = self.health == 0
         return self.health != previous
-

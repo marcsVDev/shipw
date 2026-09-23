@@ -7,6 +7,7 @@ from enemys.attacks import AttractionAttack
 from enemys.alien_enemy import AlienEnemy
 from enemys.asteroid_enemy import AsteroidEnemy
 from enemys.broken_satellite_enemy import BrokenSatelliteEnemy
+from enemys.buran_enemy import BuranEnemy
 from enemys.behaviors import (
     AlienFlyByConfig, AsteroidRainConfig, CircularFormationConfig, FlyByConfig, MineFloatConfig, OrganizedAttackConfig,
     PursuitConfig, SatelliteConfig, SideAttackConfig, ZigZagConfig,
@@ -15,6 +16,7 @@ from enemys.behaviors import (
     zigzag_wave,
 )
 from enemys.drone_enemy import DroneEnemy
+from enemys.boss_drone_enemy import BossDroneEnemy
 from enemys.evil_drone_enemy import EvilDroneEnemy
 from enemys.gaivota_enemy import GaivotaEnemy
 from enemys.robot_seagull_enemy import RobotSeagullEnemy
@@ -29,9 +31,10 @@ from util.resources import load_image, load_sound
 
 def get_enemy_registry():
     registry = EnemyRegistry()
-    for name, enemy_type in (("drone", DroneEnemy), ("gaivota", GaivotaEnemy),
+    for name, enemy_type in (("drone", DroneEnemy), ("boss_drone", BossDroneEnemy), ("gaivota", GaivotaEnemy),
                              ("asteroid", AsteroidEnemy), ("mine", MineEnemy),
                              ("broken_satellite", BrokenSatelliteEnemy),
+                             ("buran", BuranEnemy),
                              ("evil_drone", EvilDroneEnemy), ("alien", AlienEnemy),
                              ("robot_seagull", RobotSeagullEnemy),
                              ("laser_ship", LaserShipEnemy)):
@@ -157,51 +160,56 @@ def launch_waves():
 
 def stratosphere_waves():
     return (
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22,  groups=5, simultaneous=False)),
-        # organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22, groups=3, simultaneous=True)),
-        # side_attack("gaivota", W, H, SideAttackConfig(per_side=4)),
-        # pursuit_wave("gaivota", W, H, PursuitConfig(count=3, speed=1900)),
-        # safe_flybys("gaivota", W, H, config=FlyByConfig(count=10, speed=800, seed=11)),
-        # asteroid_rain(W, H, AsteroidRainConfig(
-        #     direction="left", speed=1550, interval=.14, interval_jitter=.05, seed=17,
-        # )),
-        # asteroid_rain(W, H, AsteroidRainConfig(
-        #     direction="right", speed=1550, interval=.14, interval_jitter=.05, seed=17,
-        # )),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22,  groups=5, simultaneous=False)),
+        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22, groups=3, simultaneous=True)),
+        side_attack("gaivota", W, H, SideAttackConfig(per_side=4)),
+        pursuit_wave("gaivota", W, H, PursuitConfig(count=3, speed=1900)),
+        safe_flybys("gaivota", W, H, config=FlyByConfig(count=10, speed=800, seed=11)),
+        asteroid_rain(W, H, AsteroidRainConfig(
+            direction="left", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+        )),
+        asteroid_rain(W, H, AsteroidRainConfig(
+            direction="right", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+        )),
     )
 
 
 def near_space_waves():
     return (
-         # organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
-         # satellite_flyby(W, H, SatelliteConfig(seed=131)),
-         # satellite_flyby(W, H, SatelliteConfig(seed=332)),
-         # circular_formation("drone", W, H, CircularFormationConfig(count=14)),
-         # satellite_flyby(W, H, SatelliteConfig(seed=232)),
+        organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
+        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1800, gap=.4, seed=213),
+                     enemy="buran"),
+        satellite_flyby(W, H, SatelliteConfig(seed=131)),
+        satellite_flyby(W, H, SatelliteConfig(seed=332)),
+        # circular_formation("drone", W, H, CircularFormationConfig(count=14)),
+        satellite_flyby(W, H, SatelliteConfig(seed=232)),
     )
 
 
 def deep_space_waves():
     return (
-        # floating_mines(W, H, MineFloatConfig(count=6)),
-        # floating_mines(W, H, MineFloatConfig(count=8)),
-        # evil_drone_sweeps(W, H),
-        # safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
-        # zigzag_wave("drone", W, H, ZigZagConfig()),
+        floating_mines(W, H, MineFloatConfig(count=6)),
+        floating_mines(W, H, MineFloatConfig(count=8)),
+        evil_drone_sweeps(W, H),
+        safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
+        zigzag_wave("drone", W, H, ZigZagConfig()),
+        alien_flybys(W, H, AlienFlyByConfig(
+            count=20, speed=2600, gap=.2, start_from="left",
+        )),
+        pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
     )
 
 
 def mars_orbit_waves():
     # A nave-mãe será integrada quando seu inimigo existir.
     return (
-        alien_flybys(W, H, AlienFlyByConfig(
-            count=20, speed=2600, gap=.2, start_from="left",
-        )),
-        pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
+        
         make_wave("Investida da escolta", "charge", ("drone",), 18, 12, 2500),
         make_wave("Ultimo bloqueio", "horizontal", ("drone",), 18, 20, 2500),
     )
+
+# sprite nave mae

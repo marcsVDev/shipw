@@ -67,7 +67,7 @@ Antes do teste SAT, a cena faz uma triagem por alcance. Em seguida,
 raios e a Nave-Mãe que tocam o jogador geram uma única ocorrência de
 `PLAYER_COLLIDE` por frame. `Player` consulta o `RunState`, aplica um ponto de
 dano e abre a janela de invulnerabilidade. O míssil teleguiado usa resolução
-especial e contínua, priorizando alvo aberto, blindagem, nave laser, jogador e
+especial e contínua, priorizando casco da Nave-Mãe, nave laser, jogador e
 inimigo menor. Uma entidade sem vértices não participa da colisão comum.
 
 ## Ondas, padrões e ataques

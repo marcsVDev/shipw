@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 import pygame
 
 from entities.cutscene import Cutscene
+from initializations.scenery import get_mars_arrival_animation, get_stratosphere_exit_animation
 from ui.button import Button
 from util.animatedSprite import AnimatedSprite
 
@@ -48,6 +49,30 @@ class CutsceneTest(unittest.TestCase):
         self.assertFalse(animation.is_playing)
         self.assertEqual(animation.frame_index, 2)
         self.assertEqual(completed, [True])
+
+    def test_campaign_cutscenes_use_all_asset_frames(self):
+        for factory, count in ((get_stratosphere_exit_animation, 71),
+                               (get_mars_arrival_animation, 16)):
+            cutscene = factory()
+            self.assertEqual(cutscene.animation.frames_count, count)
+            self.assertFalse(cutscene.animation.is_playing)
+            cutscene.run()
+            cutscene.update(13)
+            self.assertEqual(cutscene.animation.frame_index, count - 1)
+
+    def test_mars_landing_takes_time_before_final_dialogue(self):
+        from initializations.phases import get_mars_arrival_phase
+
+        phase = get_mars_arrival_phase()
+        landing = phase.default_entities["landing_dialogue"]
+        self.assertFalse(landing.visible)
+
+        phase.exit_cutscene.run()
+        phase.exit_cutscene.update(2)
+        self.assertFalse(landing.visible)
+        phase.exit_cutscene.update(11)
+        self.assertTrue(landing.visible)
+        self.assertIn("Pousei em Marte", landing.dialogues[0].text)
 
     @patch("ui.button.pygame.mixer.Sound")
     @patch("ui.button.pygame.mouse.get_pos", return_value=(32, 32))

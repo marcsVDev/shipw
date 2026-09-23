@@ -7,7 +7,8 @@ from typing import Literal
 from pygame import Vector2
 
 from enemys.attacks import AttractionAttack, RotatingBeamAttack
-from enemys.patterns import Charge, Float, FlyBy, LaserSweep, MoveTo, Orbit, PrepareLaser, Pursuit, TelegraphedFlyBy, Wait, Yell, ZigZag
+from enemys.patterns import Charge, Float, FlyBy, LaserSweep, MoveTo, Orbit, PrepareLaser, Pursuit, Wait, Yell, ZigZag
+from enemys.patterns.telegraphed_fly_by import TargetedSatelliteFlyBy
 from enemys.waves import EnemySpawn, Wave
 from game_consts import SFX_PATH
 
@@ -243,7 +244,7 @@ def safe_flybys(enemy, width, height, player_position=None, config=FlyByConfig()
     return Wave(f"Rasgando os céus ({enemy})", tuple(spawns))
 
 
-def alien_flybys(width, height, config=AlienFlyByConfig()):
+def alien_flybys(width, height, config=AlienFlyByConfig(), enemy="alien"):
     """Cria rasantes rápidos, alternados e estritamente sequenciais."""
     if height <= config.vertical_margin * 2:
         raise ValueError("A margem vertical não deixa espaço para o ataque alienígena")
@@ -264,7 +265,7 @@ def alien_flybys(width, height, config=AlienFlyByConfig()):
         # espelhar quem entra pela esquerda faz todos olharem para onde vão.
         facing_offset = 90 if from_left else -90
         spawns.append(EnemySpawn(
-            "alien",
+            enemy,
             lambda s=start, e=end, offset=facing_offset: [
                 FlyBy(s, e, config.speed, facing_offset=offset)
             ],
@@ -272,7 +273,8 @@ def alien_flybys(width, height, config=AlienFlyByConfig()):
             group=index,
             options={"flip_x": from_left},
         ))
-    return Wave("Rasantes alienígenas", tuple(spawns))
+    return Wave("Rasantes do Buran" if enemy == "buran" else "Rasantes alienígenas",
+                tuple(spawns))
 
 
 def asteroid_rain(width: float, height: float,
@@ -366,7 +368,7 @@ def satellite_flyby(width, height, config=SatelliteConfig()):
             direction.y *= -1
         distance = (width + 2 * config.margin) / abs(direction.x)
     end = start + direction.normalize() * distance
-    movement = lambda: [TelegraphedFlyBy(start, end, config.speed, config.warning,
+    movement = lambda: [TargetedSatelliteFlyBy(start, end, config.speed, config.warning,
                                          config.spin_speed, config.rotation)]
     return Wave("Satélite quebrado", (EnemySpawn("broken_satellite", movement,
                 options={"scale": config.scale, "collider_scale": config.collider_scale}),))

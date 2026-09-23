@@ -12,8 +12,8 @@ from util.resources import load_image
 
 DIALOGUEPANEL_PATH = UI_PATH + "dialogue_panel.png"
 
-def get_dialogue_panel(phase_id: str | int) -> DialoguePanel:
-    return DialoguePanel(load_image(DIALOGUEPANEL_PATH), get_phase_dialogues(phase_id))
+def get_dialogue_panel(phase_id: str | int, on_complete: Callable[[], None] | None = None) -> DialoguePanel:
+    return DialoguePanel(load_image(DIALOGUEPANEL_PATH), get_phase_dialogues(phase_id), on_complete)
 
 def get_scene_title(title: str) -> SceneTitle:
     return SceneTitle(title)

@@ -1,5 +1,11 @@
 # PDR de implementação — Sistema de vida e Nave-Mãe
 
+> Nota de implementação (setembro de 2026): este PDR registra a proposta
+> original. O jogo atual usa 10 HP para Valentina e removeu as zonas
+> vulneráveis da Nave-Mãe: qualquer contato de míssil armado com o casco causa
+> um ponto de dano. Consulte `status-atual.md` e `enemy-waves.md` para as regras
+> em vigor.
+
 ## 1. Identificação
 
 **Projeto:** Shipw  

@@ -41,16 +41,16 @@ class BossAndHealthTest(unittest.TestCase):
 
     def test_run_state_clamps_resets_and_is_shared_by_every_phase(self):
         state = RunState()
-        self.assertEqual(state.health, 3)
-        for _ in range(5):
+        self.assertEqual(state.health, 10)
+        for _ in range(10):
             state.damage()
         self.assertEqual(state.health, 0)
         self.assertTrue(state.is_game_over)
         state.reset()
-        self.assertEqual(state.health, 3)
+        self.assertEqual(state.health, 10)
         phases = get_phases(state)
         self.assertTrue(all(phase.default_entities["player"].run_state is state
-                            for phase in phases))
+                            for phase in phases if "player" in phase.default_entities))
         for phase in phases:
             for entity in phase.default_entities.values():
                 entity.destroy()
@@ -61,13 +61,13 @@ class BossAndHealthTest(unittest.TestCase):
         player.update(0)
         sources = [EnemyProjectile(player.position, (0, 0)) for _ in range(3)]
         self.assertTrue(player.take_damage(sources))
-        self.assertEqual(state.health, 2)
+        self.assertEqual(state.health, 9)
         self.assertTrue(all(source.to_destroy for source in sources))
         self.assertFalse(player.take_damage((EnemyProjectile(player.position, (0, 0)),)))
-        self.assertEqual(state.health, 2)
+        self.assertEqual(state.health, 9)
         player.update(1.51)
         self.assertTrue(player.take_damage((EnemyProjectile(player.position, (0, 0)),)))
-        self.assertEqual(state.health, 1)
+        self.assertEqual(state.health, 8)
         player.destroy()
 
     def test_death_is_emitted_once_and_god_mode_preserves_health(self):
@@ -77,9 +77,9 @@ class BossAndHealthTest(unittest.TestCase):
         EventBus.connect(Events.PLAYER_DIED, deaths.append)
         player.god_mode = True
         player.take_damage((object(),))
-        self.assertEqual(state.health, 3)
+        self.assertEqual(state.health, 10)
         player.god_mode = False
-        for expected in (2, 1, 0):
+        for expected in range(9, -1, -1):
             player.invulnerable_remaining = 0
             player.take_damage(())
             self.assertEqual(state.health, expected)
@@ -113,14 +113,25 @@ class BossAndHealthTest(unittest.TestCase):
         after = abs((missile.direction.angle_to(desired) + 180) % 360 - 180)
         self.assertLess(after, before)
 
-    def test_every_open_target_can_be_hit_from_below_in_flight(self):
-        for name in MotherShipEnemy.TARGETS:
+    def test_center_missile_clears_hull_before_it_can_hit_boss(self):
+        boss = MotherShipEnemy()
+        boss.update(3)
+        missile = GuidedMissile(boss.launch_position, lambda: (960, 900), boss)
+        self.addCleanup(missile.destroy)
+        scene = Scene(True)
+        scene.add_entity(boss)
+        missile.update(missile.config.telegraph_duration + 1 / 60)
+        missile.resolve_collisions(scene)
+        self.assertFalse(missile.exploded)
+        self.assertEqual(boss.health, boss.max_health)
+
+    def test_armed_missile_can_hit_any_part_of_boss_hull_from_below(self):
+        for offset in (-500, -250, 0, 250, 500):
             for fps in (20, 60, 120):
-                with self.subTest(target=name, fps=fps):
+                with self.subTest(offset=offset, fps=fps):
                     boss = MotherShipEnemy()
                     boss.update(3)
-                    boss.open_target(name)
-                    point = boss.target_position(name)
+                    point = pygame.Vector2(boss.position.x + offset, boss.body_rect.bottom)
                     missile = GuidedMissile(point + (0, 400), lambda: point, boss)
                     self.addCleanup(missile.destroy)
                     missile.state = "seeking"
@@ -133,7 +144,7 @@ class BossAndHealthTest(unittest.TestCase):
                         missile.resolve_collisions(scene)
                         if missile.exploded:
                             break
-                    self.assertEqual(missile.explosion_reason, "boss_target")
+                    self.assertEqual(missile.explosion_reason, "boss")
                     self.assertEqual(boss.health, 4)
 
     def test_missile_returns_toward_player_after_dodge(self):
@@ -176,36 +187,33 @@ class BossAndHealthTest(unittest.TestCase):
         self.assertLess(fine_position.distance_to(coarse_position), 1)
         self.assertLess(abs(fine_direction.angle_to(coarse_direction)), .1)
 
-    def test_only_armed_missile_on_open_target_damages_boss(self):
+    def test_only_armed_missile_on_hull_damages_boss(self):
         boss = MotherShipEnemy()
         boss.update(3)
-        boss.open_target("core")
-        point = boss.target_position("core")
+        point = pygame.Vector2(boss.position.x, boss.body_rect.bottom)
         missile = GuidedMissile(point, lambda: point, boss)
         missile.state = "seeking"
         scene = Scene(True)
         scene.add_entity(boss)
         missile.resolve_collisions(scene)
         self.assertEqual(boss.health, 5)
-        self.assertEqual(missile.explosion_reason, "unarmed_target")
+        self.assertEqual(missile.explosion_reason, "armor")
 
-        boss.open_target("core")
         armed = GuidedMissile(point, lambda: point, boss)
         armed.state = "seeking"
         armed.flight_time = armed.config.arm_time
         armed.resolve_collisions(scene)
         self.assertEqual(boss.health, 4)
-        self.assertEqual(armed.explosion_reason, "boss_target")
+        self.assertEqual(armed.explosion_reason, "boss")
 
-    def test_closed_target_is_armor_and_missile_can_destroy_laser_ship(self):
+    def test_unarmed_hull_is_armor_and_missile_can_destroy_laser_ship(self):
         boss = MotherShipEnemy()
         boss.update(3)
-        point = boss.target_position("core")
+        point = pygame.Vector2(boss.position.x, boss.body_rect.bottom)
         scene = Scene(True)
         scene.add_entity(boss)
         closed = GuidedMissile(point, lambda: point, boss)
         closed.state = "seeking"
-        closed.flight_time = closed.config.arm_time
         closed.resolve_collisions(scene)
         self.assertEqual(boss.health, 5)
         self.assertEqual(closed.explosion_reason, "armor")
@@ -241,14 +249,14 @@ class BossAndHealthTest(unittest.TestCase):
 
     def test_fifth_valid_hit_defeats_boss_once(self):
         boss = MotherShipEnemy()
+        original_image = boss.image
         defeated = []
         EventBus.connect(Events.BOSS_DEFEATED, defeated.append)
         for index in range(5):
-            boss.open_target("core")
-            self.assertTrue(boss.take_missile_hit("core", True))
+            self.assertTrue(boss.take_missile_hit(True))
             self.assertEqual(boss.health, 4 - index)
-        boss.open_target("core")
-        self.assertFalse(boss.take_missile_hit("core", True))
+            self.assertIs(boss.image, boss.damaged_image if boss.health <= 2 else original_image)
+        self.assertFalse(boss.take_missile_hit(True))
         self.assertEqual(defeated, [boss])
 
     def test_missile_waits_for_pending_spawns_enemies_and_beams(self):
@@ -267,7 +275,6 @@ class BossAndHealthTest(unittest.TestCase):
         def assert_waiting():
             system.update(.1)
             self.assertFalse(system.missile_created)
-            self.assertFalse(system.target_warned)
             self.assertEqual(system.rest_remaining, 0)
 
         assert_waiting()
@@ -281,7 +288,6 @@ class BossAndHealthTest(unittest.TestCase):
         beam.to_destroy = True
         system.update(.1)
         self.assertTrue(system.missile_created)
-        self.assertTrue(system.target_warned)
         missile = system.active_missile
         system.update(10)
         self.assertIs(system.active_missile, missile)
@@ -303,8 +309,7 @@ class BossAndHealthTest(unittest.TestCase):
         EventBus.connect(Events.PHASE_COMPLETED, completed.append)
         system.load_phase(phase)
         for _ in range(5):
-            system.boss.open_target("core")
-            system.boss.take_missile_hit("core", True)
+            system.boss.take_missile_hit(True)
         system.update(4.1)
         system.update(4.1)
         self.assertEqual(completed, [phase])

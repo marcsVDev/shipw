@@ -15,6 +15,7 @@ from util.scene import Scene
 from util.run_state import RunState
 from ui.health_bar import HealthBar
 from ui.defeat_overlay import DefeatOverlay
+from ui.victory_overlay import VictoryOverlay
 from entities.enemy import Enemy
 from entities.enemy_projectile import EnemyProjectile
 from entities.enemy_beam import EnemyBeam
@@ -33,6 +34,7 @@ class Game:
 
         EventBus.connect(Events.PHASE_CHANGED, self.begin_phase_transition)
         EventBus.connect(Events.PLAYER_DIED, self.player_died)
+        EventBus.connect(Events.GAME_COMPLETED, self.game_completed)
 
         # propriedades
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -40,6 +42,7 @@ class Game:
         self.current_scene: str = "menu"
         self.running = True
         self.god_mode = False
+        self.campaign_completed = False
         self.run_state = RunState()
         self._pending_phase = None
         self._phase_transition_remaining = 0.0
@@ -130,6 +133,7 @@ class Game:
         if self.current_scene != "menu":
             return
         self.run_state.reset()
+        self.campaign_completed = False
         EventBus.emit(Events.GAME_STARTED)
 
         self.load_phase(self.scenes["game"].get_system("progression", Progression).phases[0])
@@ -147,6 +151,9 @@ class Game:
         elif (self.current_scene == "game" and getattr(getattr(self, "run_state", None), "is_game_over", False)
               and key in (pygame.K_RETURN, pygame.K_KP_ENTER)):
             self.restart_campaign()
+        elif (self.current_scene == "game" and getattr(self, "campaign_completed", False)
+              and key in (pygame.K_RETURN, pygame.K_KP_ENTER)):
+            self.return_to_menu()
         elif self.current_scene == "game" and key == pygame.K_ESCAPE:
             self.return_to_menu()
 
@@ -169,6 +176,7 @@ class Game:
         if boss is not None:
             boss.reset()
         game_scene.get_system("progression", Progression).reset()
+        self.campaign_completed = False
         self._pending_phase = None
         self._phase_transition_remaining = 0.0
         self.play_music(BACKGROUND_MUSIC_PATH)
@@ -184,6 +192,7 @@ class Game:
         progression = game_scene.get_system("progression", Progression)
         progression.reset()
         self.run_state.reset()
+        self.campaign_completed = False
         EventBus.emit(Events.GAME_STARTED)
         self.load_phase(progression.phases[0])
 
@@ -197,6 +206,12 @@ class Game:
                 entity.destroy()
         game_scene.add_ui(DefeatOverlay(), "defeat")
 
+    def game_completed(self):
+        if self.current_scene != "game" or self.campaign_completed:
+            return
+        self.campaign_completed = True
+        self.scenes["game"].add_ui(VictoryOverlay(), "victory")
+
     def load_phase(self, phase: Phase):
         self.play_music(BOSS_MUSIC_PATH if phase.boss_fight else BACKGROUND_MUSIC_PATH)
         game_scene = self.scenes["game"]
@@ -209,9 +224,10 @@ class Game:
                 case _:
                     game_scene.add_entity(phase.default_entities[key], key)
 
-        game_scene.player.free_movement = phase.free_movement
-        game_scene.player.god_mode = self.god_mode
-        if phase.free_movement:
+        if game_scene.player is not None:
+            game_scene.player.free_movement = phase.free_movement
+            game_scene.player.god_mode = self.god_mode
+        if phase.free_movement and game_scene.player is not None:
             game_scene.add_ui(HealthBar(self.run_state), "health")
         waves = game_scene.get_system("waves", WaveSystem)
         boss = game_scene.get_system("boss", BossFightSystem)

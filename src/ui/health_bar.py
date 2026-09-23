@@ -29,14 +29,14 @@ class HealthBar(UI):
             f"{self.run_state.health}/{self.run_state.max_health}", True, "white"
         )
         ratio = self.run_state.health / self.run_state.max_health
-        colors = {3: "#5ac54f", 2: "#f9c22b", 1: "#ae2334"}
+        color = "#5ac54f" if ratio > .5 else "#f9c22b" if ratio > .2 else "#ae2334"
         self.fill = None
         if ratio > 0:
             self.fill = pygame.Surface(
                 (max(1, int((self.WIDTH - 6) * ratio)), self.HEIGHT - 6),
                 pygame.SRCALPHA,
             )
-            self.fill.fill(colors[self.run_state.health])
+            self.fill.fill(color)
 
     def update(self, delta, events):
         self.elapsed += max(0.0, delta)

@@ -4,17 +4,18 @@ from entities.background import Background
 from entities.cutscene import Cutscene
 from entities.scrollers.infinite_vertical_scroller import InfiniteVerticalScroller
 from entities.scrollers.moving_object import MovingObject
-from game_consts import SCENERY_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
+from game_consts import ASSETS_PATH, SCENERY_PATH, SCREEN_HEIGHT, SCREEN_WIDTH
 from util.animatedSprite import AnimatedSprite
 
 EARTH_FRAME_SIZE = 128
 EARTH_SCALE = 8
-EARTH_SPEED = 2.5
+EARTH_SPEED = 3
 
 S4_SCALE = 4
 S128_FRAME_SIZE = 128
 LAUNCH_FRAME_SIZE = (480, 270)
 LAUNCH_FRAME_TIME = 1 / 12
+CUTSCENE_PATH = ASSETS_PATH + "cutscenes/"
 
 def darken_image(image: pygame.Surface, amount: int = 100) -> pygame.Surface:
     """Retorna uma copia escurecida da imagem sem alterar a original.
@@ -39,7 +40,7 @@ def get_earth_scenery():
 
     earth = MovingObject(
         AnimatedSprite(earth_img, 1, earth_size),
-        pygame.Vector2(SCREEN_WIDTH - earth_size, SCREEN_HEIGHT - earth_size),
+        pygame.Vector2(SCREEN_WIDTH - earth_size + 40, SCREEN_HEIGHT - earth_size + 40),
         pygame.Vector2(0, 1),
         EARTH_SPEED
     )
@@ -103,6 +104,23 @@ def get_krasny_mir_launch_animation(on_complete=None):
         display_size=(SCREEN_WIDTH, SCREEN_HEIGHT),
         on_complete=on_complete,
     )
+
+
+def get_stratosphere_exit_animation(on_complete=None):
+    return _get_cutscene("estratosferasaida.png", (480, 270), 1 / 18, on_complete)
+
+
+def get_mars_arrival_animation(on_complete=None):
+    return _get_cutscene("chegada_marte.png", (418, 235), 0.75, on_complete)
+
+
+def _get_cutscene(filename, frame_size, frame_time, on_complete):
+    sheet = pygame.image.load(CUTSCENE_PATH + filename).convert_alpha()
+    animation = AnimatedSprite(sheet, frame_time, frame_size, {
+        "default": {"frames": range(sheet.get_width() // frame_size[0]), "loop": False},
+    })
+    return Cutscene(animation, display_size=(SCREEN_WIDTH, SCREEN_HEIGHT),
+                    on_complete=on_complete)
 
 def get_espaco_proximo_background():
     image = pygame.image.load(SCENERY_PATH + "espaco_proximo.png").convert_alpha()

@@ -4,8 +4,8 @@ from pygame import Vector2
 
 from collision.collidable import Collidable
 from entities.entity import Entity
-from game_consts import SCREEN_HEIGHT, SCREEN_WIDTH, SFX_PATH
-from util.resources import load_sound
+from game_consts import ENEMYS_PATH, SCREEN_HEIGHT, SCREEN_WIDTH, SFX_PATH
+from util.resources import load_image, load_sound
 
 
 @dataclass(frozen=True)
@@ -43,6 +43,7 @@ class GuidedMissile(Entity, Collidable):
         self.explosion_reason = None
         self.explosion_remaining = 0.0
         self.sound = load_sound(SFX_PATH + "laser.mp3")
+        self.image = pygame.transform.scale(load_image(ENEMYS_PATH + "missilbossfinal.png"), (64, 64))
         self.channel = None
         super().__init__()
         self._refresh_collider()
@@ -115,24 +116,12 @@ class GuidedMissile(Entity, Collidable):
     def resolve_collisions(self, scene):
         if self.exploded or self.state == "telegraph":
             return
-        target = self.boss.open_target_at(self.position)
-        if target is None:
-            target = next((name for name in self.boss.TARGETS
-                           if self.boss.active_target == name
-                           and self.boss.target_states[name] == "open"
-                           and self._segment_near(self.boss.target_position(name),
-                                                  self.config.radius + self.boss.config.target_radius)), None)
-        if target is not None:
-            if self.boss.take_missile_hit(target, self.armed):
-                self.explode("boss_target")
-            else:
-                self.explode("unarmed_target")
-            return
-
         body = self.boss.body_rect.inflate(self.config.radius * 2, self.config.radius * 2)
         if body.collidepoint(self.position) or body.clipline(self.previous_position, self.position):
-            self.explode("armor")
-            self.boss.close_target()
+            if self.boss.take_missile_hit(armed=self.armed):
+                self.explode("boss")
+            else:
+                self.explode("armor")
             return
 
         for entity in tuple(scene.entities):
@@ -185,23 +174,11 @@ class GuidedMissile(Entity, Collidable):
             pygame.draw.circle(screen, "#f9c22b", self.position, max(8, radius), 5)
             pygame.draw.circle(screen, "white", self.position, max(4, radius // 2), 3)
             return
-        target = self.target_provider()
         if self.state == "telegraph":
-            if target is not None:
-                pygame.draw.circle(screen, "#ff3344", target, 42, 4)
-                pygame.draw.line(screen, "#ff3344", Vector2(target) - (55, 0),
-                                 Vector2(target) + (55, 0), 2)
-                pygame.draw.line(screen, "#ff3344", Vector2(target) - (0, 55),
-                                 Vector2(target) + (0, 55), 2)
             return
         angle = -Vector2(0, -1).angle_to(self.direction)
-        body = pygame.Surface((30, 58), pygame.SRCALPHA)
-        pygame.draw.polygon(body, "white", ((15, 0), (27, 17), (24, 48), (6, 48), (3, 17)))
-        pygame.draw.polygon(body, "#ae2334", ((15, 0), (27, 17), (3, 17)))
-        trail_color = "#ae2334" if self.armed else "#f9c22b"
-        pygame.draw.polygon(body, trail_color, ((8, 48), (15, 58), (22, 48)))
         if self.state != "expiring" or int(self.flight_time * 12) % 2 == 0:
-            image = pygame.transform.rotate(body, angle)
+            image = pygame.transform.rotate(self.image, angle)
             screen.blit(image, image.get_rect(center=self.position))
 
     def destroy(self):

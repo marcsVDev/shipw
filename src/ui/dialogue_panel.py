@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from collections.abc import Callable
 
 import pygame
 from pygame import Rect, Surface, Vector2
@@ -53,13 +54,15 @@ class DialoguePanel(UI):
         11 * MULTIPLIER,
     )
 
-    def __init__(self, image: Surface, dialogues: list[DialogueEntry]):
+    def __init__(self, image: Surface, dialogues: list[DialogueEntry],
+                 on_complete: Callable[[], None] | None = None):
         if not dialogues:
             raise ValueError("DialoguePanel precisa de pelo menos uma fala")
 
         super().__init__(image, self.POSITION)
         self.modal = True
         self.dialogues = dialogues
+        self.on_complete = on_complete
         self.pressed = False
         self.current_dialogue = 0
         self.visible_characters = 0.0
@@ -203,6 +206,8 @@ class DialoguePanel(UI):
             remaining_characters -= len(line)
 
     def next_dialogue(self):
+        if not self.visible:
+            return
         if self.visible_characters < self._dialogue_characters_count[self.current_dialogue]:
             self.visible_characters = self._dialogue_characters_count[self.current_dialogue]
             self.render_visible_text()
@@ -214,6 +219,8 @@ class DialoguePanel(UI):
             self.render_visible_text()
         else:
             self.visible = False
+            if self.on_complete is not None:
+                self.on_complete()
 
     def _get_scaled_portrait(self, portrait: Surface | None) -> Surface | None:
         if portrait is None:

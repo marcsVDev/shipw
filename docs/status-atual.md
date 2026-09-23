@@ -17,12 +17,12 @@ verticalmente, transmitindo a subida e o afastamento da Terra.
 
 | Fase | Papel na proposta | Estado no código |
 | --- | --- | --- |
-| Estação de Lançamento — Estação Krasny Mir | Apresentação e lançamento | Implementada com botão de lançamento, animação de fumaça e movimento bloqueado. |
-| Estratosfera | Gaivotas e asteroides | Implementada com fundo rolável, ondas de gaivotas e chuva de asteroides. |
-| Espaço Próximo | Satélite quebrado, Buran e drones | Implementada com drones e satélite quebrado. Buran permanece planejado. |
+| Estação de Lançamento — Estação Krasny Mir | Apresentação e lançamento | Implementada com botão de lançamento e animação de fumaça, sem nave jogável na cena. |
+| Estratosfera | Gaivotas e asteroides | Implementada com fundo rolável, ondas de gaivotas, chuva de asteroides e cutscene de saída. |
+| Espaço Próximo | Satélite quebrado, Buran e drones | Implementada com drones, satélite direcionado ao jogador, rasantes do Buran, Terra e fundo rolável. |
 | Espaço Profundo | Drones e minas espaciais | Implementada com drones, drones do mal com raio giratório e minas gravitacionais. |
 | Órbita de Marte | Nave-mãe, gaivotas-robô, escoltas, lasers e mísseis | Boss fight implementada com sete ondas temporais e repetição das ondas 2–7. |
-| Chegada a Marte | Desfecho da missão | Implementada como tela provisória de 5 s, sem cenário marciano e com movimento bloqueado. |
+| Chegada a Marte | Desfecho da missão | Diálogo de aproximação, pouso de cerca de 12 s, falas após o pouso e tela de agradecimento; movimento bloqueado. |
 
 As fases são declaradas em `src/initializations/phases.py`. A lista
 `planned_enemies` registra o conteúdo previsto, mas não o instancia.
@@ -32,7 +32,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Menu inicial com botão Play e atalho Enter.
 - Música ambiente na campanha, trilha própria durante a boss fight, efeitos de
   motor e efeitos de inimigos existentes.
-- Transição preta de 1 s entre fases, com a cena pausada durante a troca.
+- Transição preta de 1 s entre fases, com a cena pausada durante a troca; a saída da Estratosfera e o pouso em Marte exibem seus spritesheets antes da progressão. O pouso termina com novas falas e "Obrigado por jogar".
 - Campanha linear com seis fases; Krasny Mir avança após a animação de
   lançamento e as demais fases avançam por duração, ondas ou chefe.
 - Diálogos narrativos nas seis fases, carregados de
@@ -43,7 +43,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   inclinação visual e limites da tela.
 - Fundos fixos/roláveis; a Estratosfera, o Espaço Próximo e os placeholders das
   duas fases posteriores passam uma sensação de deslocamento vertical.
-- Vida global de 3 HP, preservada entre fases, com 1,5 s de invulnerabilidade,
+- Vida global de 10 HP, preservada entre fases, com 1,5 s de invulnerabilidade,
   pisca, knockback, barra por cores e no máximo um dano por frame.
 - Tela de derrota com reinício da campanha por Enter e retorno ao menu por Esc.
 - Colisão poligonal entre jogador, inimigos, projéteis, raios e a Nave-Mãe.
@@ -54,7 +54,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Os drones da pinça orbital perseguem a posição atual do jogador dentro de
   margens visíveis, sem atravessar os limites da tela.
 - Mísseis do chefe perseguem pelo menor ângulo, com giro limitado a 240°/s;
-  os cinco alvos vulneráveis ficam acessíveis na borda inferior do casco.
+  quando armados, causam dano ao colidir com qualquer ponto do casco.
 - Retorno ao menu com Esc, limpando a cena e recriando a campanha para uma
   nova partida.
 
@@ -62,10 +62,9 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 
 - Não há disparo, pontuação ou itens coletáveis; Valentina derrota a Nave-Mãe
   somente atraindo mísseis armados para o alvo vulnerável.
-- O Buran e a arte/cena final de Marte ainda não foram implementados.
+- A cutscene e o encerramento de chegada a Marte estão implementados; não há exploração após o pouso.
 - Espaço Profundo e Órbita de Marte reutilizam o cenário de Espaço Próximo.
-- Petrovitch e o Comando ainda não possuem retratos; seus nomes e falas já
-  aparecem no painel, deixando o espaço da imagem vazio.
+- Petrovitch e o Comando usam retratos no painel de diálogo.
 - As velocidades e janelas do boss, incluindo o giro ajustado do míssil, ainda
   precisam de playtest humano para ajuste fino de corredores e duração média.
 
@@ -75,7 +74,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
    de balanceamento.
 2. Criar os cenários próprios de Espaço Profundo, Órbita e chegada a Marte.
 3. Criar os retratos de Petrovitch e do Comando para completar os diálogos.
-4. Implementar o Buran sem alterar o modelo de sobrevivência e sabotagem.
+4. Fazer playtest dos rasantes do Buran e da trajetória do satélite contra a posição do jogador.
 
 ## Referência de controles
 
@@ -85,6 +84,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 | Lançar em Krasny Mir | Botão Play provisório |
 | Mover a nave | W, A, S, D ou setas direcionais |
 | Voltar ao menu durante a campanha | Esc |
+| Voltar ao menu na tela final | Enter ou Esc |
 | Avançar diálogo, quando usado | Espaço ou clique esquerdo |
 | Ativar/desativar God Mode | Ctrl+Shift+O |
 

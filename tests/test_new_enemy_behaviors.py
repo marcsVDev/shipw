@@ -29,8 +29,8 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
 
     def test_registry_contains_every_concrete_type(self):
         registry = get_enemy_registry()
-        self.assertEqual(registry.registered, {"drone", "gaivota", "asteroid", "mine",
-                                               "broken_satellite", "evil_drone", "alien",
+        self.assertEqual(registry.registered, {"drone", "boss_drone", "gaivota", "asteroid", "mine",
+                                           "broken_satellite", "buran", "evil_drone", "alien",
                                                "robot_seagull", "laser_ship", "mother_ship"})
         satellite = registry.create(satellite_flyby(1920, 1080).spawns[0])
         self.assertIsInstance(satellite, BrokenSatelliteEnemy); satellite.destroy()
@@ -117,7 +117,7 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
 
         scene.check_collisions()
         self.assertFalse(player.to_destroy)
-        self.assertEqual(player.run_state.health, 2)
+        self.assertEqual(player.run_state.health, 9)
 
         scene.clear_scene()
         enemy.destroy()
@@ -284,6 +284,31 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertEqual(first.start, second.start)
         self.assertEqual(first.end, second.end)
         self.assertIn(first.start.x, (-220, 1920 + 220))
+
+    def test_satellite_aims_at_player_when_warning_ends(self):
+        pattern = satellite_flyby(1920, 1080, SatelliteConfig(warning=.5)).spawns[0].movement()[0]
+        target = pygame.Vector2(300, 800)
+        pattern.bind_target(lambda: target)
+        target.update(1500, 700)
+        warning_end = pattern.danger_line[1]
+        self.assertLess(abs((warning_end - pattern.start).angle_to(
+            target - pattern.start)), .001)
+        pattern.update(.5)
+        self.assertEqual(pattern.end, warning_end)
+        target.update(300, 900)
+        self.assertEqual(pattern.end, warning_end)
+
+    def test_buran_wave_uses_alien_style_alternating_rasantes(self):
+        from initializations.enemy_waves import near_space_waves
+        from enemys.buran_enemy import BuranEnemy
+
+        wave = next(wave for wave in near_space_waves() if wave.name == "Rasantes do Buran")
+        self.assertEqual(len(wave.spawns), 8)
+        self.assertEqual([spawn.options["flip_x"] for spawn in wave.spawns],
+                         [index % 2 == 0 for index in range(8)])
+        enemy = get_enemy_registry().create(wave.spawns[0])
+        self.assertIsInstance(enemy, BuranEnemy)
+        enemy.destroy()
 
     def test_mine_float_is_separate_from_attraction(self):
         active = floating_mines(1920, 1080, MineFloatConfig(attraction=True)).spawns[0]

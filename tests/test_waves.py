@@ -101,7 +101,7 @@ class WavesTest(unittest.TestCase):
         scene.check_collisions()
         scene._remove_destroyed()
         self.assertIs(scene.player, player)
-        self.assertEqual(player.run_state.health, 2)
+        self.assertEqual(player.run_state.health, 9)
         self.assertIn(player.player_collide, EventBus.events[Events.PLAYER_COLLIDE])
         scene.clear_scene()
 
@@ -129,7 +129,15 @@ class WavesTest(unittest.TestCase):
         EventBus.connect(Events.GAME_COMPLETED, lambda: completed.append(True))
         for phase in progression.phases:
             EventBus.emit(Events.PHASE_COMPLETED, phase)
-        EventBus.emit(Events.PHASE_COMPLETED, progression.phases[-1])
+            if hasattr(phase, "exit_cutscene"):
+                self.assertTrue(phase.exit_cutscene.animation.is_playing)
+                phase.exit_cutscene.update(13)
+        landing_dialogue = progression.phases[-1].default_entities["landing_dialogue"]
+        self.assertTrue(landing_dialogue.visible)
+        self.assertEqual(completed, [])
+        while landing_dialogue.visible:
+            landing_dialogue.next_dialogue()
+        self.assertEqual(completed, [True])
         self.assertEqual(completed, [True])
         for phase in progression.phases:
             for entity in phase.default_entities.values():
@@ -161,7 +169,7 @@ class WavesTest(unittest.TestCase):
                          {"gaivota", "asteroid"})
         for phase in phases[2:5]:
             self.assertTrue(phase.free_movement)
-        self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone", "broken_satellite"})
+        self.assertEqual({spawn.enemy for wave in phases[2].waves for spawn in wave.spawns}, {"drone", "buran", "broken_satellite"})
         self.assertEqual({spawn.enemy for wave in phases[3].waves for spawn in wave.spawns},
                          {"drone", "mine", "evil_drone"})
         self.assertFalse(phases[4].waves)
@@ -169,18 +177,18 @@ class WavesTest(unittest.TestCase):
         for phase in (phases[0], phases[-1]):
             self.assertFalse(phase.free_movement)
             self.assertFalse(phase.waves)
-            player = phase.default_entities["player"]
-            player.free_movement = phase.free_movement
-            original = player.position.copy()
-            with patch("pygame.key.get_pressed", side_effect=AssertionError("Input should be locked")):
-                player.movement(1)
-            self.assertEqual(player.position, original)
+        self.assertNotIn("player", phases[0].default_entities)
+        player = phases[-1].default_entities["player"]
+        player.free_movement = phases[-1].free_movement
+        original = player.position.copy()
+        with patch("pygame.key.get_pressed", side_effect=AssertionError("Input should be locked")):
+            player.movement(1)
+        self.assertEqual(player.position, original)
 
         launch_phase = phases[0]
         self.assertFalse(launch_phase.auto_complete)
         self.assertTrue(launch_phase.default_entities["launch_button"].one_shot)
         scene = Scene(True)
-        scene.add_entity(launch_phase.default_entities["player"])
         system = WaveSystem(scene, get_enemy_registry())
         system.load_phase(launch_phase)
         system.update(100)
@@ -190,7 +198,9 @@ class WavesTest(unittest.TestCase):
         on_complete = lambda phase: completed.append(phase)
         EventBus.connect(Events.PHASE_COMPLETED, on_complete)
         launch_animation = launch_phase.default_entities["launch_animation"]
-        launch_animation.run()
+        launch_phase.default_entities["launch_button"].press_callable()
+        self.assertFalse(launch_phase.default_entities["title"].visible)
+        self.assertTrue(launch_animation.animation.is_playing)
         launch_animation.update(6)
         self.assertEqual(completed, [launch_phase])
         EventBus.disconnect(Events.PHASE_COMPLETED, on_complete)

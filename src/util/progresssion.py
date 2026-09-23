@@ -9,6 +9,7 @@ class Progression(System):
         self.run_state = run_state
         self._game_started = False
         self.phase_index = 0
+        self._cutscene_playing = False
         self.phases = get_phases(run_state)
         EventBus.connect(Events.GAME_STARTED, self.game_started)
         EventBus.connect(Events.PHASE_COMPLETED, self.phase_completed)
@@ -19,6 +20,12 @@ class Progression(System):
     def phase_completed(self, phase):
         if not self._game_started or phase is not self.phases[self.phase_index]:
             return
+        cutscene = getattr(phase, "exit_cutscene", None)
+        if cutscene is not None and not self._cutscene_playing:
+            self._cutscene_playing = True
+            cutscene.run()
+            return
+        self._cutscene_playing = False
         if self.phase_index + 1 == len(self.phases):
             self._game_started = False
             EventBus.emit(Events.GAME_COMPLETED)
@@ -28,6 +35,7 @@ class Progression(System):
 
     def game_started(self):
         self.phase_index = 0
+        self._cutscene_playing = False
         self._game_started = True
 
     def reset(self):
@@ -37,4 +45,5 @@ class Progression(System):
                 entity.destroy()
         self.phases = get_phases(self.run_state)
         self.phase_index = 0
+        self._cutscene_playing = False
         self._game_started = False

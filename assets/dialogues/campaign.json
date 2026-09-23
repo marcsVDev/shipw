@@ -1,8 +1,8 @@
 {
   "characters": {
     "valentina": {"name": "VALENTINA", "portrait": "assets/player/valentinafinalizada.png"},
-    "petrovitch": {"name": "PETROVITCH", "portrait": null},
-    "comando": {"name": "COMANDO", "portrait": null}
+    "petrovitch": {"name": "PETROVITCH", "portrait": "assets/player/petrovitch.png"},
+    "comando": {"name": "COMANDO", "portrait": "assets/player/yurigagarin.png"}
   },
   "phases": {
     "1": [
@@ -34,9 +34,9 @@
       {"character": "valentina", "text": "Vocês poderiam ter mencionado isso no treinamento."},
       {"character": "comando", "text": "Não temos tempo para isso, Valentina."},
       {"character": "valentina", "text": "Certo.\n\nEntão vou aprender durante a missão."},
-      {"character": "valentina", "text": "A atmosfera está ficando para trás.\n\nEstou começando a perceber como essa missão realmente será.\n\nSe esses foram apenas os primeiros obstáculos...\n\neu não quero imaginar o que existe lá fora."},
-      {"character": "comando", "text": "Continue seguindo para o espaço."},
-      {"character": "valentina", "text": "Estou indo."}
+      {"character": "valentina", "text": "A camada de nuvens está ficando para trás. Vejo estrelas acima de nós."},
+      {"character": "comando", "text": "Mantenha o rumo. Em instantes você deixará a estratosfera."},
+      {"character": "valentina", "text": "Entendido. Seguindo para o espaço."}
     ],
     "3": [
       {"character": "valentina", "text": "Krasny Mir, estou entrando em uma área cheia de objetos."},
@@ -50,8 +50,8 @@
       {"character": "valentina", "text": "Espere...\n\nEstou vendo drones."},
       {"character": "comando", "text": "Evite-os."},
       {"character": "valentina", "text": "Eles estão vindo na minha direção."},
-      {"character": "comando", "text": "Então destrua-os se for necessário."},
-      {"character": "valentina", "text": "Desde quando uma missão espacial precisa destruir drones?"},
+      {"character": "comando", "text": "Então desvie e preserve a nave."},
+      {"character": "valentina", "text": "Desde quando uma missão espacial inclui drones hostis?"},
       {"character": "valentina", "text": "O que é aquilo?"},
       {"character": "comando", "text": "..."},
       {"character": "valentina", "text": "Controle?"},
@@ -106,7 +106,7 @@
       {"character": "valentina", "text": "Uma nave-mãe.\n\nE vários drones."},
       {"character": "comando", "text": "Continue avançando."},
       {"character": "valentina", "text": "Eles estão bloqueando minha rota."},
-      {"character": "comando", "text": "Então elimine a ameaça."},
+      {"character": "comando", "text": "Então desvie da ameaça."},
       {"character": "valentina", "text": "Vocês sabiam que ela estaria aqui."},
       {"character": "comando", "text": "Isso não importa agora."},
       {"character": "valentina", "text": "Claro que importa.\n\nVocês esconderam os satélites.\n\nEsconderam os drones.\n\nEsconderam tudo o que encontrei pelo caminho.\n\nE agora existe uma nave-mãe esperando por mim em Marte."},
@@ -120,19 +120,20 @@
       {"character": "valentina", "text": "Marte está logo ali.\n\nEu não vou deixar ninguém me impedir agora."}
     ],
     "6": [
-      {"character": "valentina", "text": "A atmosfera está ficando mais densa.\n\nSistemas funcionando.\n\nControle de temperatura estável.\n\nEstou descendo."},
-      {"character": "comando", "text": "Prepare-se para o pouso."},
-      {"character": "valentina", "text": "Depois de tudo...\n\nfinalmente estou chegando."},
-      {"character": "valentina", "text": "Pouso confirmado."},
-      {"character": "valentina", "text": "Controle?"},
-      {"character": "valentina", "text": "Krasny Mir, respondam."},
-      {"character": "valentina", "text": "Então é isso.\n\nEles realmente não esperavam que eu chegasse."},
-      {"character": "valentina", "text": "Durante toda a viagem, eu achei que estava lutando apenas contra os obstáculos.\n\nMas agora percebo que estava lutando contra algo muito maior.\n\nContra pessoas que decidiram que minha vida era um preço aceitável pela vitória.\n\nPetrovitch queria uma conquista.\n\nQueria uma bandeira soviética em Marte.\n\nQueria entrar para a história como o homem que levou a União Soviética além da Lua.\n\nMas ele não contava comigo."},
-      {"character": "valentina", "text": "Eles me mandaram para cá acreditando que eu era descartável.\n\nEsperavam que eu desaparecesse no caminho.\n\nMas eu sobrevivi aos obstáculos.\n\nSobrevivi às máquinas.\n\nSobrevivi ao desconhecido.\n\nE cheguei até Marte."},
-      {"character": "valentina", "text": "Agora eles terão que decidir o que fazer com uma cosmonauta que deveria estar morta...\n\nmas acabou de conquistar outro mundo."},
-      {"character": "valentina", "text": "Eu não sei o que acontecerá depois disso.\n\nNão sei se alguém na Terra vai acreditar em mim.\n\nNão sei se Petrovitch vai aceitar o que aconteceu.\n\nMas existe uma coisa que ninguém poderá apagar."},
-      {"character": "valentina", "text": "Eu cheguei."},
-      {"character": "valentina", "text": "O comando traçou a rota.\n\nEles escolheram o meu destino.\n\nMas o final...\n\nesse fui eu quem escreveu."}
+      {"character": "valentina", "text": "Marte preenche o visor. O caminho está livre depois da nave-mãe."},
+      {"character": "comando", "text": "Confirme a aproximação para pouso."},
+      {"character": "valentina", "text": "Aproximação confirmada. Iniciando a descida."},
+      {"character": "valentina", "text": "Petrovitch me enviou para uma missão da qual talvez nunca esperasse meu retorno. Mas cheguei até aqui por minha própria escolha."},
+      {"character": "comando", "text": "Valentina, mantenha o canal aberto."},
+      {"character": "valentina", "text": "Vou pousar. Depois, decidiremos juntos o que contar à Terra."}
+    ],
+    "6_landing": [
+      {"character": "valentina", "text": "Contato com a superfície confirmado. Pousei em Marte."},
+      {"character": "comando", "text": "Recebemos seu sinal, Valentina. Você conseguiu."},
+      {"character": "valentina", "text": "Consegui chegar. Mesmo depois de tudo o que esconderam de mim."},
+      {"character": "comando", "text": "A Terra inteira vai querer ouvir sua história."},
+      {"character": "valentina", "text": "Então vão ouvir a história completa. Esta conquista pertence a quem resistiu até aqui."},
+      {"character": "valentina", "text": "Daqui de Marte, começo um novo caminho."}
     ]
   }
 }

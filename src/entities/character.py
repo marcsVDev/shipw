@@ -28,6 +28,8 @@ class Character(Entity, Collidable):
     DEFAULT_SPRITESHEET = None    
     ANIMATIONS = None
     DEFAULT_ANIMATION = "default"
+    FLIP_X = False
+    FLIP_Y = False
 
     def __init__(self):
         self.position: Vector2 = self.INITIAL_POSITION.copy()
@@ -46,6 +48,7 @@ class Character(Entity, Collidable):
         self._original_image = self._image
         self._rotation = 0
         self.scale(self.SCALE)
+        self.flip_sprite()
         self.rotate()
         self.align_rect()
         self._collider_vertices = self.get_rotated_vertices()
@@ -62,6 +65,7 @@ class Character(Entity, Collidable):
             self.movement(delta) 
 
         self.scale(self.SCALE)
+        self.flip_sprite()
         self.rotate()        
         self.align_rect()  
 
@@ -79,6 +83,10 @@ class Character(Entity, Collidable):
 
     def scale(self, by):
         self._image = scaled_frame(self._spritesheet, self.FRAME_SIZE, self._animation.frame_index, by)
+
+    def flip_sprite(self):
+        if self.FLIP_X or self.FLIP_Y:
+            self._image = pygame.transform.flip(self._image, self.FLIP_X, self.FLIP_Y)
     
     def rotate(self):
         if self._rotation % 360:
@@ -88,7 +96,9 @@ class Character(Entity, Collidable):
         self._rect = self._image.get_rect(center=self.position)
 
     def get_rotated_vertices(self) -> list[Vector2]:
-        return [self.position + vertex.rotate(-self._rotation) for vertex in self.MIDDLE_VERTICES] 
+        return [self.position + Vector2(-vertex.x if self.FLIP_X else vertex.x,
+                                        -vertex.y if self.FLIP_Y else vertex.y).rotate(-self._rotation)
+                for vertex in self.MIDDLE_VERTICES]
 
     def game_started(self):
         self.can_move = True

@@ -57,6 +57,20 @@ class GameNavigationTest(unittest.TestCase):
         game.handle_keydown(pygame.K_ESCAPE)
         game.return_to_menu.assert_called_once_with()
 
+    def test_completed_game_shows_thanks_and_enter_returns_to_menu(self):
+        game = self.make_game("game")
+        game.campaign_completed = False
+        scene = Mock()
+        game.scenes = {"game": scene}
+
+        game.game_completed()
+        self.assertTrue(game.campaign_completed)
+        self.assertEqual(scene.add_ui.call_args.args[1], "victory")
+        game.game_completed()
+        scene.add_ui.assert_called_once()
+        game.handle_keydown(pygame.K_RETURN)
+        game.return_to_menu.assert_called_once_with()
+
     def test_ctrl_shift_o_toggles_god_mode_and_updates_player(self):
         game = self.make_game("game")
         game.god_mode = False
@@ -152,6 +166,8 @@ class GameNavigationTest(unittest.TestCase):
         EventBus.connect(Events.PHASE_CHANGED, game.load_phase)
         progression.game_started()
         game.load_phase(progression.phases[0])
+        self.assertIsNone(scene.player)
+        self.assertNotIn("player", scene.blackboard)
 
         scene.get_entity("launch_animation", object).run()
         scene.run(pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT)), 6, [])

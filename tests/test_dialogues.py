@@ -31,11 +31,11 @@ class DialoguesTest(unittest.TestCase):
     def test_json_has_dialogues_for_every_phase_and_optional_portraits(self):
         data = load_dialogue_data()
 
-        self.assertEqual(set(data["phases"]), {"1", "2", "3", "4", "5", "6"})
+        self.assertEqual(set(data["phases"]), {"1", "2", "3", "4", "5", "6", "6_landing"})
         self.assertTrue(all(data["phases"][phase] for phase in data["phases"]))
         self.assertIsNotNone(data["characters"]["valentina"]["portrait"])
-        self.assertIsNone(data["characters"]["petrovitch"]["portrait"])
-        self.assertIsNone(data["characters"]["comando"]["portrait"])
+        self.assertIsNotNone(data["characters"]["petrovitch"]["portrait"])
+        self.assertIsNotNone(data["characters"]["comando"]["portrait"])
 
     def test_loader_resolves_names_and_available_portraits(self):
         dialogues = get_phase_dialogues(1)
@@ -44,7 +44,7 @@ class DialoguesTest(unittest.TestCase):
                          if dialogue.speaker == "VALENTINA")
 
         self.assertEqual(petrovitch.speaker, "PETROVITCH")
-        self.assertIsNone(petrovitch.portrait)
+        self.assertIsInstance(petrovitch.portrait, pygame.Surface)
         self.assertIsInstance(valentina.portrait, pygame.Surface)
 
     def test_long_dialogues_are_paginated_inside_the_text_area(self):

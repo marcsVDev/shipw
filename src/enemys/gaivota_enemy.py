@@ -5,6 +5,7 @@ from entities.enemy import Enemy
 from game_consts import ENEMYS_PATH, PATTERNS_PATH, SFX_PATH
 
 class GaivotaEnemy(Enemy):
+    FLIP_X = True
     LOOK_AT_PLAYER = True
     MULTIPLIER = 1.1
     SCALE = 128 * MULTIPLIER

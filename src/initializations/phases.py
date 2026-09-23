@@ -4,13 +4,12 @@ from initializations.enemy_waves import (
 )
 from initializations.scenery import (
     get_krasny_mir_background, get_estratosfera_background,
-    get_espaco_proximo_background, get_krasny_mir_launch_animation,
+    get_espaco_proximo_background, get_earth_scenery, get_krasny_mir_launch_animation,
+    get_stratosphere_exit_animation, get_mars_arrival_animation,
 )
 from initializations.ui_inits import get_dialogue_panel, get_launch_button, get_scene_title
 from events.event_bus import EventBus
 from events.events import Events
-from ui.ui import UI
-from initializations.misc import get_font
 from util.phase import Phase
 
 
@@ -26,31 +25,41 @@ def get_launch_phase(run_state=None):
     launch_animation = get_krasny_mir_launch_animation(
         lambda: EventBus.emit(Events.PHASE_COMPLETED, phase)
     )
+    title = get_scene_title("Estacao Krasny Mir")
+
+    def start_launch():
+        title.visible = False
+        launch_animation.run()
+
     phase.default_entities.update({
         "background": get_krasny_mir_background(),
-        "player": Player(run_state),
         "launch_animation": launch_animation,
-        "title": get_scene_title("Estacao Krasny Mir"),
-        "launch_button": get_launch_button(launch_animation.run),
+        "title": title,
+        "launch_button": get_launch_button(start_launch),
         "dialogue": get_dialogue_panel(1),
     })
     return phase
 
 
 def get_estratosfera_phase(run_state=None):
-    return Phase("Estratosfera", 0, 0, {
+    phase = Phase("Estratosfera", 0, 0, {
         "title": get_scene_title("Estratosfera"),
         "background": get_estratosfera_background(), "player": Player(run_state),
         "dialogue": get_dialogue_panel(2),
     }, waves=stratosphere_waves())
+    phase.exit_cutscene = get_stratosphere_exit_animation(
+        lambda: EventBus.emit(Events.PHASE_COMPLETED, phase))
+    phase.default_entities["exit_cutscene"] = phase.exit_cutscene
+    return phase
 
 
 def get_espaco_proximo_phase(run_state=None):
     return Phase("Espaço Próximo", 0, 0, {
         "title": get_scene_title("Espaco Proximo"),
-        "background": get_espaco_proximo_background(), "player": Player(run_state),
+        "background": get_espaco_proximo_background(), "earth": get_earth_scenery(),
+        "player": Player(run_state),
         "dialogue": get_dialogue_panel(3),
-    }, waves=near_space_waves(), planned_enemies=("buran",))
+    }, waves=near_space_waves())
 
 
 def get_espaco_profundo_phase(run_state=None):
@@ -70,13 +79,18 @@ def get_orbita_marte_phase(run_state=None):
 
 
 def get_mars_arrival_phase(run_state=None):
-    # Tela final provisória: não inventa um cenário de Marte sem arte disponível.
-    message = get_font(32).render("Valentina sobreviveu. Destino: Marte.", True, (255, 220, 170))
-    return Phase("Chegada a Marte", 0, 5, {
+    landing_dialogue = get_dialogue_panel("6_landing", lambda: EventBus.emit(Events.PHASE_COMPLETED, phase))
+    landing_dialogue.visible = False
+    phase = Phase("Chegada a Marte", 0, 1, {
         "title": get_scene_title("Chegada a Marte"),
-        "message": UI(message, (550, 400)), "player": Player(run_state),
+        "player": Player(run_state),
         "dialogue": get_dialogue_panel(6),
+        "landing_dialogue": landing_dialogue,
     }, free_movement=False)
+    phase.exit_cutscene = get_mars_arrival_animation(
+        lambda: setattr(landing_dialogue, "visible", True))
+    phase.default_entities["exit_cutscene"] = phase.exit_cutscene
+    return phase
 
 
 def get_phases(run_state=None) -> list[Phase]:

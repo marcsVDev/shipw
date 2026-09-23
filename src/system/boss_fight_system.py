@@ -24,7 +24,6 @@ class BossFightSystem(System):
         self.active_enemies = []
         self.active_missile = None
         self.missile_created = False
-        self.target_warned = False
         self.rest_remaining = 0.0
         self.intro_remaining = 0.0
         self.active = False
@@ -56,7 +55,6 @@ class BossFightSystem(System):
         self.active_enemies = []
         self.active_missile = None
         self.missile_created = False
-        self.target_warned = False
         self.rest_remaining = 0.0
         self.intro_remaining = 0.0
         self.active = False
@@ -101,10 +99,6 @@ class BossFightSystem(System):
                        or getattr(entity, "is_guided_missile", False))
                       and not entity.to_destroy for entity in self.scene.entities)
         attack_wave_done = not self.pending and not self.active_enemies and not hazards
-        if (attack_wave_done and wave.missile_time is not None and not self.target_warned
-                and self.wave_elapsed >= wave.missile_time - .8):
-            self.target_warned = True
-            self.boss.warn_target(self._target_for(wave), .8)
         if (attack_wave_done and wave.missile_time is not None and not self.missile_created
                 and self.wave_elapsed >= wave.missile_time - GuidedMissileConfig().telegraph_duration
                 and player.time_since_damage >= .75):
@@ -112,7 +106,6 @@ class BossFightSystem(System):
 
         if self.active_missile is not None and self.active_missile.to_destroy:
             self.active_missile = None
-            self.boss.close_target()
 
         missile_done = wave.missile_time is None or (
             self.missile_created and self.active_missile is None
@@ -123,11 +116,6 @@ class BossFightSystem(System):
 
     def _current_wave(self):
         return self.waves[self.wave_index]
-
-    def _target_for(self, wave):
-        if self.wave_index != 6:
-            return wave.target
-        return ("left_hangar", "core", "right_hangar")[self.loop_count % 3]
 
     def _begin_next_wave(self):
         if self.wave_index < 6:
@@ -142,7 +130,6 @@ class BossFightSystem(System):
         self.active_enemies = []
         self.active_missile = None
         self.missile_created = False
-        self.target_warned = False
         self.rest_remaining = 0.0
         EventBus.emit(Events.WAVE_STARTED, self.phase, self.wave_index, wave)
         self._spawn_due()

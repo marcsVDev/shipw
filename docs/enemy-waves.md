@@ -10,7 +10,7 @@ para concluir a apresentação.
 | --- | --- | --- |
 | Estação Krasny Mir | Nenhum | — |
 | Estratosfera | Gaivotas e asteroides | — |
-| Espaço Próximo | Drones e satélite quebrado | Buran |
+| Espaço Próximo | Drones, satélite quebrado e Buran em rasantes alternados | Ajuste fino por playtest |
 | Espaço Profundo | Drones, drones do mal e minas gravitacionais | — |
 | Órbita de Marte | Nave-Mãe, gaivotas-robô, drones, naves laser e míssil teleguiado | Ajuste fino por playtest |
 | Chegada a Marte | Nenhum | Arte e cena final |
@@ -134,9 +134,8 @@ aumentar velocidade, dano ou quantidade.
 
 O míssil é criado no máximo uma vez por oportunidade. Ele persegue a posição
 atual do jogador, acelera até 1450 px/s, gira pelo menor ângulo no máximo 240°/s e arma depois de
-1,25 s. Somente um impacto armado no alvo aberto remove um dos cinco pontos da
-Nave-Mãe. Os pontos vulneráveis acompanham a borda inferior do casco, para
-que a blindagem não intercepte o míssil antes do alvo. A mesma colisão pode destruir uma nave laser, mas não danifica o
+1,25 s. Um impacto armado em qualquer parte do casco remove um dos cinco pontos da
+Nave-Mãe. O míssil sai abaixo do casco e só pode atingir o chefe após retornar. A mesma colisão pode destruir uma nave laser, mas não danifica o
 chefe. `robot_seagull`, `laser_ship` e `mother_ship` estão no registro; a
 Nave-Mãe é criada diretamente pelo diretor porque não usa `EnemySpawn`.
 

@@ -34,7 +34,6 @@ class BossWaveSpec:
     name: str
     spawns: tuple[EnemySpawn, ...]
     missile_time: float | None
-    target: str | None
     rest: float
 
 
@@ -138,7 +137,7 @@ def _pincer_drones():
         for side in (-1, 1):
             anchor = Vector2(W * (.18 if side < 0 else .82), H * .38 + pair * 70)
             start = Vector2(-160 if side < 0 else W + 160, anchor.y)
-            result.append(_spawn("drone", lambda s=start, a=anchor, p=pair: [
+            result.append(_spawn("boss_drone", lambda s=start, a=anchor, p=pair: [
                 MoveTo(s, a, .8), Wait(a, .5 + p * .65),
                 BoundedPursuit(a, speed=520, duration=4.2, bounds=arena),
             ]))
@@ -171,7 +170,7 @@ def _funnel():
         x = W * (.30 if index < 2 else .70)
         start_y = -160 if index % 2 == 0 else H + 160
         end_y = H + 160 if start_y < 0 else -160
-        result.append(_spawn("drone", lambda x=x, sy=start_y, ey=end_y: [
+        result.append(_spawn("boss_drone", lambda x=x, sy=start_y, ey=end_y: [
             FlyBy((x, sy), (x, ey), 420)
         ]))
     return result
@@ -180,27 +179,23 @@ def _funnel():
 def boss_waves():
     laser = LaserShipConfig()
     return (
-        BossWaveSpec("Aquisicao de alvo", tuple(_v_formation()), 4.2,
-                     "left_hangar", 1.8),
-        BossWaveSpec("Tesoura americana", tuple(_scissor()), 2.2,
-                     "right_hangar", 1.3),
+        BossWaveSpec("Aquisicao de alvo", tuple(_v_formation()), 4.2, 1.8),
+        BossWaveSpec("Tesoura americana", tuple(_scissor()), 2.2, 1.3),
         BossWaveSpec("Corredor de execucao", (
             _laser(Vector2(W / 2 - 179, 390), Vector2(W / 2 - 179, -180), 90),
             _laser(Vector2(W / 2 + 179, 390), Vector2(W / 2 + 179, -180), 90),
-        ), 2.6, "core", 1.5),
-        BossWaveSpec("Pinca orbital", tuple(_pincer_drones()), 2.6,
-                     "left_cannon", 1.4),
+        ), 2.6, 1.5),
+        BossWaveSpec("Pinca orbital", tuple(_pincer_drones()), 2.6, 1.4),
         BossWaveSpec("Helice bloqueadora", tuple(_helix()) + (
             _laser(Vector2(180, 390), Vector2(-200, 390), 28, 70, True,
                    config=LaserShipConfig(fire_duration=2.2, charge_duration=1.0)),
-        ), None, None, 2.2),
+        ), None, 2.2),
         BossWaveSpec("Portao vermelho", (
             _laser(Vector2(180, 520), Vector2(-200, 520), 345, 24, True,
                    config=LaserShipConfig(fire_duration=3.2)),
             _laser(Vector2(W - 180, 520), Vector2(W + 200, 520), 195, 24, False,
                    config=LaserShipConfig(fire_duration=3.2)),
             *_v_formation(4, 3.6),
-        ), 3.4, "right_cannon", 1.5),
-        BossWaveSpec("Funil de comando", tuple(_funnel()), 2.5,
-                     "left_hangar", 2.0),
+        ), 3.4, 1.5),
+        BossWaveSpec("Funil de comando", tuple(_funnel()), 2.5, 2.0),
     )

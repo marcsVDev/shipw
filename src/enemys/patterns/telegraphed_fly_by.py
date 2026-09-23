@@ -37,3 +37,38 @@ class TelegraphedFlyBy(EnemyPattern):
 
     @property
     def finished(self): return self.elapsed >= self.duration
+
+
+class TargetedSatelliteFlyBy(TelegraphedFlyBy):
+    """Mira no jogador durante o aviso e fixa a trajetória ao partir."""
+
+    def __init__(self, start, fallback_end, speed=1800, warning=.8,
+                 spin_speed=0, initial_rotation=None):
+        super().__init__(start, fallback_end, speed, warning, spin_speed,
+                         initial_rotation)
+        self.target_provider = lambda: None
+        self.travel_distance = max(3000, self.start.distance_to(self.end))
+        self.duration = warning + self.travel_distance / speed
+        self.launched = False
+
+    def bind_target(self, target):
+        self.target_provider = target if target is not None else lambda: None
+
+    @property
+    def danger_line(self):
+        if self.launched:
+            return self.start, self.end
+        target = self.target_provider()
+        if target is None:
+            return self.start, self.end
+        direction = Vector2(target) - self.start
+        if direction.length_squared() == 0:
+            return self.start, self.end
+        return self.start, self.start + direction.normalize() * self.travel_distance
+
+    def update(self, delta):
+        if not self.launched and self.elapsed + max(0, delta) >= self.warning:
+            _, self.end = self.danger_line
+            self.direction = (self.end - self.start).normalize()
+            self.launched = True
+        super().update(delta)
