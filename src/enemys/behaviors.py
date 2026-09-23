@@ -257,7 +257,12 @@ def alien_flybys(width, height, config=AlienFlyByConfig(), enemy="alien"):
     spawns = []
     for index in range(config.count):
         from_left = starts_from_left if index % 2 == 0 else not starts_from_left
-        y = rng.uniform(config.vertical_margin, height - config.vertical_margin)
+        # Dois rasantes da onda do Buran cobrem a borda inferior, um por lado.
+        # A faixa aleatória anterior deixava o jogador parado ali fora de risco.
+        if enemy == "buran" and index % 3 == 2:
+            y = height - config.vertical_margin / 2
+        else:
+            y = rng.uniform(config.vertical_margin, height - config.vertical_margin)
         start_x, end_x = (-config.margin, width + config.margin) if from_left else (
             width + config.margin, -config.margin
         )

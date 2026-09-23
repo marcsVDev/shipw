@@ -79,11 +79,8 @@ class MotherShipEnemy(Entity, Collidable):
             self._collider_vertices = []
             return
         rect = self.image.get_rect(center=self.position)
-        inset = 45
-        self._collider_vertices = [Vector2(rect.left + inset, rect.top + 25),
-                                   Vector2(rect.right - inset, rect.top + 25),
-                                   Vector2(rect.right - inset, rect.bottom - 30),
-                                   Vector2(rect.left + inset, rect.bottom - 30)]
+        self._collider_vertices = [Vector2(rect.topleft), Vector2(rect.topright),
+                                   Vector2(rect.bottomright), Vector2(rect.bottomleft)]
 
     @property
     def body_rect(self):
@@ -116,6 +113,12 @@ class MotherShipEnemy(Entity, Collidable):
             shade.fill((0, 0, 0, int(95 * (1 - self.entry_elapsed / .4))))
             screen.blit(shade, (0, 0))
         screen.blit(self.image, self.image.get_rect(center=self.position))
+        if self.damage_flash > 0 and not self.defeated:
+            flash = self.image.copy()
+            brightness = int(160 * self.damage_flash / .15)
+            flash.fill((brightness, brightness, brightness),
+                       special_flags=pygame.BLEND_RGB_ADD)
+            screen.blit(flash, flash.get_rect(center=self.position))
         if 0.4 <= self.entry_elapsed <= 1.6:
             self.alert_indicator.draw(
                 screen, (SCREEN_WIDTH / 2, SCREEN_HEIGHT * .45)

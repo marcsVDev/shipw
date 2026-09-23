@@ -40,7 +40,7 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 - Diálogos narrativos nas seis fases, carregados de
   `assets/dialogues/campaign.json`, com nome, retrato disponível, efeito de
   digitação e paginação automática. A ação fica pausada enquanto o painel está
-  aberto; Espaço ou clique esquerdo completa/avança a fala. Alt+Esc pula todas
+  aberto; Espaço ou clique esquerdo completa/avança a fala. Ctrl+Shift+P pula todas
   as falas da cena atual, inclusive as que aparecem após uma cutscene, mantendo
   a animação e os eventos de conclusão.
 - Movimento da nave com `W`, `A`, `S` e `D`, aceleração, desaceleração,
@@ -57,10 +57,13 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
   chuva de asteroides e minas que atraem a nave.
 - Avisos de perigo usam o sprite animado de alerta a 12 fps; rasantes de alien e
   Buran sinalizam na borda e na altura exata da entrada antes de cruzarem a tela.
+- O Buran também faz rasantes pela borda inferior, alternando os lados; ficar
+  parado embaixo não evita o contato com a nave.
 - Os drones da pinça orbital perseguem a posição atual do jogador dentro de
   margens visíveis, sem atravessar os limites da tela.
 - Mísseis do chefe perseguem pelo menor ângulo, com giro limitado a 240°/s;
-  quando armados, causam dano ao colidir com qualquer ponto do casco.
+  quando armados, causam dano ao colidir com qualquer ponto do casco, inclusive
+  nas bordas. A Nave-Mãe pisca ao receber o impacto.
 - Retorno ao menu com Esc, limpando a cena e recriando a campanha para uma
   nova partida.
 
@@ -87,12 +90,12 @@ As fases são declaradas em `src/initializations/phases.py`. A lista
 | Ação | Tecla |
 | --- | --- |
 | Iniciar no menu | Enter ou botão Play |
-| Lançar em Krasny Mir | Botão Play provisório |
+| Lançar em Krasny Mir | Botão de lançamento |
 | Mover a nave | W, A, S, D ou setas direcionais |
 | Voltar ao menu durante a campanha | Esc |
 | Voltar ao menu na tela final | Enter ou Esc |
 | Avançar diálogo, quando usado | Espaço ou clique esquerdo |
-| Pular todos os diálogos da cena atual | Alt+Esc |
+| Pular todos os diálogos da cena atual | Ctrl+Shift+P |
 | Ativar/desativar God Mode | Ctrl+Shift+O |
 
 O God Mode é uma ferramenta de teste: permanece ativo durante as trocas de

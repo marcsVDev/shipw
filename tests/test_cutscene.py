@@ -85,10 +85,12 @@ class CutsceneTest(unittest.TestCase):
         self.assertTrue(cutscene.show_first_frame)
         self.assertFalse(cutscene.animation.is_playing)
         self.assertEqual(cutscene.animation.frame_index, 0)
-        self.assertEqual(button.position, pygame.Vector2(1632, 792))
+        self.assertEqual(button.position, pygame.Vector2(1632, 784))
+        self.assertEqual(button.area.size, (256, 264))
         self.assertLessEqual(button.area.right, SCREEN_WIDTH)
         self.assertLessEqual(button.area.bottom, SCREEN_HEIGHT)
-        self.assertEqual(button._image.get_size(), (256, 256))
+        self.assertEqual(button._image.get_size(), (256, 264))
+        self.assertEqual(button.button_animation.frames_count, 3)
 
     def test_campaign_cutscenes_use_all_asset_frames(self):
         for factory, count in ((get_stratosphere_exit_animation, 71),

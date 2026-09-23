@@ -314,6 +314,29 @@ class NewEnemyBehaviorsTest(unittest.TestCase):
         self.assertIsInstance(enemy, BuranEnemy)
         enemy.destroy()
 
+    def test_buran_bottom_flybys_hit_stationary_player_from_both_sides(self):
+        from entities.player import Player
+        from initializations.enemy_waves import near_space_waves
+
+        wave = next(wave for wave in near_space_waves() if wave.name == "Rasantes do Buran")
+        for index in (2, 5):
+            player = Player()
+            player.position.update(960, 1080 - player.MIDDLE_SCALE)
+            player.update(0)
+            spawn = wave.spawns[index]
+            pattern = spawn.movement()[0]
+            self.assertEqual(pattern.start.y, 1080 - 150 / 2)
+            enemy = get_enemy_registry().create(spawn)
+            enemy.update(pattern.warning + abs(player.position.x - pattern.start.x) / pattern.speed)
+            scene = Scene(True)
+            scene.add_entity(player)
+            scene.add_entity(enemy)
+            health_before = player.run_state.health
+            scene.check_collisions()
+            self.assertEqual(player.run_state.health, health_before - 1,
+                             f"Rasante {index} não atingiu o jogador parado embaixo")
+            scene.clear_scene()
+
     def test_mine_float_is_separate_from_attraction(self):
         active = floating_mines(1920, 1080, MineFloatConfig(attraction=True)).spawns[0]
         passive = floating_mines(1920, 1080, MineFloatConfig(attraction=False)).spawns[0]

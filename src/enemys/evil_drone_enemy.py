@@ -26,12 +26,11 @@ class EvilDroneEnemy(Enemy):
 
     _SPRITE_CENTER = Vector2(FRAME_SIZE / 2)
     _SPRITE_SCALE = SCALE / FRAME_SIZE
-    MIDDLE_VERTICES = [
-        (Vector2(12, 39) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(110, 39) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(110, 89) - _SPRITE_CENTER) * _SPRITE_SCALE,
-        (Vector2(12, 89) - _SPRITE_CENTER) * _SPRITE_SCALE,
-    ]
+    
+
+    SPRITE_VERTICES = (
+        (5, 0), (112, 0), (112, 121), (58, 121), (58, 80), (5, 80)
+    )
 
     def __init__(self, patterns=None):
         self._animation_pattern = None

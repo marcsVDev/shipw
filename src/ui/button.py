@@ -8,16 +8,17 @@ from util.animatedSprite import AnimatedSprite
 from ui.ui import UI
 
 class Button(UI):
-    DRAW_AREA = True
+    DRAW_AREA = False
     SFX_BUTTON = SFX_PATH + "click.mp3"
 
-    def __init__(self, image: Surface, position: Vector2, frame_size: int, press_callable: Callable, area_size: tuple[int, int] = (0, 0), one_shot: bool = False):
+    def __init__(self, image: Surface, position: Vector2, frame_size: int | tuple[int, int], press_callable: Callable, area_size: tuple[int, int] = (0, 0), one_shot: bool = False):
         super().__init__(image, position)
         self.press_callable = press_callable
         self.one_shot = one_shot
+        frame_width, frame_height = (frame_size, frame_size) if isinstance(frame_size, int) else frame_size
         self.area = Rect(
-            position.x + (frame_size - area_size[0]) / 2,
-            position.y + (frame_size - area_size[1]) / 2,
+            position.x + (frame_width - area_size[0]) / 2,
+            position.y + (frame_height - area_size[1]) / 2,
             area_size[0],
             area_size[1]
         )
@@ -46,9 +47,9 @@ class Button(UI):
                     self.pressed = False
 
         if self.pressed:
-            self._image = self.button_animation.get_frame(1)
-        elif self.hovered:
             self._image = self.button_animation.get_frame(2)
+        elif self.hovered:
+            self._image = self.button_animation.get_frame(1)
         else:
             self._image = self.button_animation.get_frame(0)
                     

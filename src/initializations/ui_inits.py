@@ -19,6 +19,7 @@ def get_scene_title(title: str) -> SceneTitle:
     return SceneTitle(title)
 
 PLAY_BUTTON_PATH = UI_PATH + "play.png"
+LAUNCH_BUTTON_PATH = UI_PATH + "botao-lancamento.png"
 
 def get_play_button(callable: Callable) -> Button:
     M = 4
@@ -29,19 +30,19 @@ def get_play_button(callable: Callable) -> Button:
     return Button(image, pygame.Vector2(SCREEN_WIDTH//2-SCALE//2, SCREEN_HEIGHT//1.7-SCALE//2), SCALE, callable, (58*5, 21*5))
 
 def get_launch_button(callable: Callable) -> Button:
-    """Cria o controle temporário de lançamento da Estação Krasny Mir."""
+    """Cria o botão de lançamento da Estação Krasny Mir."""
     M = 4
-    SCALE = 64 * M
+    FRAME_SIZE = (64 * M, 66 * M)
     MARGIN = 32
-    image = pygame.image.load(PLAY_BUTTON_PATH).convert_alpha()
+    image = pygame.image.load(LAUNCH_BUTTON_PATH).convert_alpha()
     image = pygame.transform.scale_by(image, M)
 
     button = Button(
         image,
-        pygame.Vector2(SCREEN_WIDTH - SCALE - MARGIN, SCREEN_HEIGHT - SCALE - MARGIN),
-        SCALE,
+        pygame.Vector2(SCREEN_WIDTH - FRAME_SIZE[0] - MARGIN, SCREEN_HEIGHT - FRAME_SIZE[1] - MARGIN),
+        FRAME_SIZE,
         callable,
-        (58 * 5, 21 * 5),
+        FRAME_SIZE,
         one_shot=True,
     )
     button._image = button.button_animation.get_frame(0)

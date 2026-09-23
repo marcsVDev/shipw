@@ -15,6 +15,7 @@ class AlienEnemy(Enemy):
     FRAME_SIZE = 128
     SCALE = 128 * MULTIPLY
     DRAW_COLLIDER = False
+    DRAW_DANGER_LINE = False
 
     _SPRITE_CENTER = Vector2(FRAME_SIZE / 2)
     _SPRITE_SCALE = SCALE / FRAME_SIZE

@@ -116,8 +116,11 @@ class GuidedMissile(Entity, Collidable):
     def resolve_collisions(self, scene):
         if self.exploded or self.state == "telegraph":
             return
-        body = self.boss.body_rect.inflate(self.config.radius * 2, self.config.radius * 2)
-        if body.collidepoint(self.position) or body.clipline(self.previous_position, self.position):
+        body = self.boss.body_rect.inflate(self.config.radius * 2,
+                                           self.config.radius * 2)
+        if (self.boss._collider_vertices and
+                (body.collidepoint(self.position)
+                 or body.clipline(self.previous_position, self.position))):
             if self.boss.take_missile_hit(armed=self.armed):
                 self.explode("boss")
             else:

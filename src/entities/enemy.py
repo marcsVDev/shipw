@@ -46,6 +46,7 @@ class Enemy(Character):
 
     DEFAULT_SFX_PATH = None
     DRAW_COLLIDER = True
+    DRAW_DANGER_LINE = True
 
     def __init__(self, patterns=None):
         self._current_pattern: int = 0
@@ -120,7 +121,7 @@ class Enemy(Character):
         pattern = self._patterns[self._current_pattern] if self._patterns else None
         if self.visible and pattern and getattr(pattern, "telegraphing", False):
             danger_line = getattr(pattern, "danger_line", None)
-            if danger_line:
+            if self.DRAW_DANGER_LINE and danger_line:
                 pygame.draw.line(screen, (255, 90, 60), *danger_line, 5)
             warning_position = getattr(pattern, "warning_position", self.position)
             self._alert_indicator.draw(screen, warning_position)

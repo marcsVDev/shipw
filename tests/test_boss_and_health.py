@@ -14,6 +14,7 @@ import pygame
 from entities.enemy_projectile import EnemyProjectile
 from entities.enemy_beam import EnemyBeam
 from entities.guided_missile import GuidedMissile
+from collision.collidable import Collidable
 from entities.player import Player
 from enemys.mother_ship_enemy import MotherShipEnemy
 from events.event_bus import EventBus
@@ -126,7 +127,7 @@ class BossAndHealthTest(unittest.TestCase):
         self.assertEqual(boss.health, boss.max_health)
 
     def test_armed_missile_can_hit_any_part_of_boss_hull_from_below(self):
-        for offset in (-500, -250, 0, 250, 500):
+        for offset in (-950, -500, -250, 0, 250, 500, 950):
             for fps in (20, 60, 120):
                 with self.subTest(offset=offset, fps=fps):
                     boss = MotherShipEnemy()
@@ -146,6 +147,30 @@ class BossAndHealthTest(unittest.TestCase):
                             break
                     self.assertEqual(missile.explosion_reason, "boss")
                     self.assertEqual(boss.health, 4)
+
+    def test_boss_collider_reaches_both_sprite_corners(self):
+        boss = MotherShipEnemy()
+        boss.update(3)
+        for x in (boss.body_rect.left + 2, boss.body_rect.right - 2):
+            with self.subTest(x=x):
+                probe = Collidable()
+                y = boss.body_rect.bottom - 5
+                probe._collider_vertices = [
+                    pygame.Vector2(x - 2, y - 2), pygame.Vector2(x + 2, y - 2),
+                    pygame.Vector2(x + 2, y + 2), pygame.Vector2(x - 2, y + 2),
+                ]
+                self.assertTrue(boss.collide_with(probe))
+
+    def test_missile_cannot_damage_boss_before_entry(self):
+        boss = MotherShipEnemy()
+        point = boss.body_rect.center
+        missile = GuidedMissile(point, lambda: point, boss)
+        self.addCleanup(missile.destroy)
+        missile.state = "seeking"
+        missile.flight_time = missile.config.arm_time
+        missile.resolve_collisions(Scene(True))
+        self.assertEqual(boss.health, boss.max_health)
+        self.assertFalse(missile.exploded)
 
     def test_missile_returns_toward_player_after_dodge(self):
         boss = MotherShipEnemy()

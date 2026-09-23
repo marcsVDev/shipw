@@ -71,20 +71,25 @@ class GameNavigationTest(unittest.TestCase):
         game.handle_keydown(pygame.K_RETURN)
         game.return_to_menu.assert_called_once_with()
 
-    def test_alt_escape_skips_dialogues_without_returning_to_menu(self):
+    def test_ctrl_shift_p_skips_dialogues_without_returning_to_menu(self):
         game = self.make_game("game")
         scene = Mock()
         game.scenes = {"game": scene}
-        for modifier in (pygame.KMOD_LALT, pygame.KMOD_RALT):
-            game.handle_keydown(pygame.K_ESCAPE, modifier)
+        for modifier in (0, pygame.KMOD_CTRL, pygame.KMOD_SHIFT):
+            game.handle_keydown(pygame.K_p, modifier)
+        scene.skip_dialogues.assert_not_called()
+        for modifier in (pygame.KMOD_LCTRL | pygame.KMOD_LSHIFT,
+                         pygame.KMOD_RCTRL | pygame.KMOD_RSHIFT):
+            game.handle_keydown(pygame.K_p, modifier)
         self.assertEqual(scene.skip_dialogues.call_count, 2)
         game.return_to_menu.assert_not_called()
 
         scene.skip_dialogues.reset_mock()
         game._pending_phase = object()
-        game.handle_keydown(pygame.K_ESCAPE, pygame.KMOD_ALT)
+        game.handle_keydown(pygame.K_p, pygame.KMOD_CTRL | pygame.KMOD_SHIFT)
         game.current_scene = "menu"
-        game.handle_keydown(pygame.K_ESCAPE, pygame.KMOD_ALT)
+        game._pending_phase = None
+        game.handle_keydown(pygame.K_p, pygame.KMOD_CTRL | pygame.KMOD_SHIFT)
         scene.skip_dialogues.assert_not_called()
         game.return_to_menu.assert_not_called()
 

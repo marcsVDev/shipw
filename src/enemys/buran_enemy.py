@@ -13,6 +13,7 @@ class BuranEnemy(Enemy):
     SCALE = 1200
     LOOK_AT_PLAYER = False
     DRAW_COLLIDER = True
+    DRAW_DANGER_LINE = False
     # Contorno convexo em pixels do frame original (exigido pelo SAT).
     SPRITE_VERTICES = (
         (35, 229), (118,183), (312, 183), (386, 118), (403, 118),
