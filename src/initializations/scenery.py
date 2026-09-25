@@ -112,7 +112,7 @@ def get_stratosphere_exit_animation(on_complete=None):
 
 
 def get_mars_arrival_animation(on_complete=None):
-    return _get_cutscene("chegada_marte.png", (418, 235), 0.75, on_complete)
+    return _get_cutscene("chegada_marte.png", (480, 270), 1/12, on_complete)
 
 
 def _get_cutscene(filename, frame_size, frame_time, on_complete):

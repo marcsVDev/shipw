@@ -160,28 +160,28 @@ def launch_waves():
 
 def stratosphere_waves():
     return (
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22,  groups=5, simultaneous=False)),
-        organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22, groups=3, simultaneous=True)),
-        side_attack("gaivota", W, H, SideAttackConfig(per_side=4)),
-        pursuit_wave("gaivota", W, H, PursuitConfig(count=3, speed=1900)),
-        safe_flybys("gaivota", W, H, config=FlyByConfig(count=10, speed=800, seed=11)),
-        asteroid_rain(W, H, AsteroidRainConfig(
-            direction="left", speed=1550, interval=.14, interval_jitter=.05, seed=17,
-        )),
-        asteroid_rain(W, H, AsteroidRainConfig(
-            direction="right", speed=1550, interval=.14, interval_jitter=.05, seed=17,
-        )),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=8, simultaneous=False)),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=8, groups=2, simultaneous=True)),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22,  groups=5, simultaneous=False)),
+       #organized_attack("gaivota", W, H, OrganizedAttackConfig(count=22, groups=3, simultaneous=True)),
+       #side_attack("gaivota", W, H, SideAttackConfig(per_side=4)),
+       #pursuit_wave("gaivota", W, H, PursuitConfig(count=3, speed=1900)),
+       #safe_flybys("gaivota", W, H, config=FlyByConfig(count=10, speed=800, seed=11)),
+       #asteroid_rain(W, H, AsteroidRainConfig(
+       #    direction="left", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+       #)),
+       #asteroid_rain(W, H, AsteroidRainConfig(
+       #    direction="right", speed=1550, interval=.14, interval_jitter=.05, seed=17,
+       #)),
     )
 
 
 def near_space_waves():
     return (
         organized_attack("drone", W, H, OrganizedAttackConfig(count=9, attack_speed=2100)),
-        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1000, gap=.4, margin=320, seed=213),
+        alien_flybys(W, H, AlienFlyByConfig(count=8, speed=1800, gap=.4, seed=213),
                      enemy="buran"),
         satellite_flyby(W, H, SatelliteConfig(seed=131)),
         satellite_flyby(W, H, SatelliteConfig(seed=332)),
@@ -192,15 +192,15 @@ def near_space_waves():
 
 def deep_space_waves():
     return (
-        floating_mines(W, H, MineFloatConfig(count=6)),
-        floating_mines(W, H, MineFloatConfig(count=8)),
-        evil_drone_sweeps(W, H),
-        safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
-        zigzag_wave("drone", W, H, ZigZagConfig()),
-        alien_flybys(W, H, AlienFlyByConfig(
-            count=20, speed=2600, gap=.2, start_from="left",
-        )),
-        pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
+        #floating_mines(W, H, MineFloatConfig(count=6)),
+        #floating_mines(W, H, MineFloatConfig(count=8)),
+        #evil_drone_sweeps(W, H),
+        #safe_flybys("drone", W, H, config=FlyByConfig(count=9, speed=1000, seed=23)),
+        #zigzag_wave("drone", W, H, ZigZagConfig()),
+        #alien_flybys(W, H, AlienFlyByConfig(
+        #    count=20, speed=2600, gap=.2, start_from="left",
+        #)),
+        #pursuit_wave("drone", W, H, PursuitConfig(count=4, speed=2500)),
     )
 
 
